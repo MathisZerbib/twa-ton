@@ -1,5 +1,6 @@
 /* Product Image Styling */
 .product-image {
+  border-radius: 10px;
   width: 100%;
   height: auto; /* Height set to auto to maintain aspect ratio */
 }
@@ -30,9 +31,4 @@
 /* Hover State for Buy Button */
 .buy-button:hover {
   background-color: var(--tg-theme-hover-button-color, #0056b3); /* Fallback to darker blue */
-}
-
-/* Star Icon Styling */
-.star {
-  color: #f8d64e; /* Yellow color for stars */
 }

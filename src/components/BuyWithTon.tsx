@@ -2,6 +2,7 @@ import { Address, toNano } from "ton";
 import { useTonConnect } from "../hooks/useTonConnect";
 import { Button } from "./styled/styled";
 import styled from "styled-components";
+import { CenterDiv, ButtonBuyTonStyled } from "./styled/styled";
 
 type BuyWithTonProps = {
   amount: number;
@@ -14,41 +15,21 @@ export function BuyWithTon({ amount }: BuyWithTonProps) {
   // Hardcoded image source
   const tonLogoUrl = "ton.svg";
 
-  const CenterDiv = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  `;
-
-  const ButtonBuyTon = styled(Button)`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 10px 20px;
-    background-color: #000;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 16px;
-    /// animation and hover effect
-    transition: all 0.3s;
-    &:hover {
-      background-color: #333;
-    }
-
-    &:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    animation: fadeIn 0.5s;
-  `;
-
   return (
     <CenterDiv>
-      <ButtonBuyTon
-        disabled={!connected}
+      <ButtonBuyTonStyled
+        disabled={
+          !connected ||
+          !sender ||
+          amount <= 0 ||
+          amount == null ||
+          isNaN(amount) ||
+          !isFinite(amount) ||
+          amount === Infinity ||
+          amount === -Infinity ||
+          amount === undefined ||
+          amount === null
+        }
         onClick={async () => {
           sender.send({
             to: Address.parse(tonRecipient),
@@ -64,8 +45,8 @@ export function BuyWithTon({ amount }: BuyWithTonProps) {
             height: "20px",
           }}
         />
-        {amount} TON
-      </ButtonBuyTon>
+        Pay {amount} TON
+      </ButtonBuyTonStyled>
     </CenterDiv>
   );
 }

@@ -1,64 +1,92 @@
 import "./App.css";
 import { TonConnectButton } from "@tonconnect/ui-react";
-import { Counter } from "./components/Counter";
-import { Jetton } from "./components/Jetton";
-import { TransferTon } from "./components/TransferTon";
 import styled from "styled-components";
-import { Button, FlexBoxCol, FlexBoxRow } from "./components/styled/styled";
+import { Fab } from "@mui/material";
+
+import {
+  Button,
+  FlexBoxCol,
+  FlexBoxRowSpaceBetween,
+} from "./components/styled/styled";
 import { useTonConnect } from "./hooks/useTonConnect";
 import { CHAIN } from "@tonconnect/protocol";
 import "@twa-dev/sdk";
-import { ProductProps } from "./components/types";
 import ProductsList from "./components/ProductsList";
 import WelcomeStore from "./components/WelcomeStore";
 import products from "./shop/Products";
-// import ChainSelector from "./components/ChainSelector";
-const StyledApp = styled.div`
-  background-color: #e8e8e8;
-  color: black;
-
-  @media (prefers-color-scheme: dark) {
-    background-color: #222;
-    color: white;
-  }
-  min-height: 100vh;
-  padding: 20px 20px;
-`;
-
-const AppContainer = styled.div`
-  max-width: 900px;
-  margin: 0 auto;
-`;
-
-const StoreLogo = styled.img`
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  border-radius: 50%;
-`;
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useCart } from "./providers/CartProvider";
+import {
+  StyledApp,
+  AppContainer,
+  NetworkBadge,
+  StoreLogo,
+} from "./components/styled/styled";
+/// use react dom router to navigate to cart
+import { useNavigate } from "react-router-dom";
 
 function App() {
   const { network } = useTonConnect();
+  const { cartItems } = useCart();
+  const navigate = useNavigate();
+
+  function navigateToCheckout() {
+    console.log("Navigating to cart");
+    navigate("/checkout");
+  }
 
   return (
     <StyledApp>
+      <ToastContainer /> {/* Place ToastContainer at the root level */}
       <AppContainer>
         <FlexBoxCol>
-          <FlexBoxRow>
+          <FlexBoxRowSpaceBetween>
             <StoreLogo src="logo.png" alt="Store Logo" />
-            <Button>
-              {network
-                ? network === CHAIN.MAINNET
-                  ? "mainnet"
-                  : "testnet"
-                : "N/A"}
-            </Button>
-            <TonConnectButton />
-            {/* <ChainSelector /> */}
-          </FlexBoxRow>
-          {/* <Counter />
-          <TransferTon />*/}
-          {/* <Jetton /> */}
+            <Fab
+              color="primary"
+              aria-label="shopping-cart"
+              style={{
+                position: "fixed",
+                bottom: 20,
+                right: 20,
+                display: "flex",
+                flexDirection: "row",
+                gap: "10px",
+                alignItems: "center",
+              }}
+              size="large"
+              onClick={() => {
+                navigateToCheckout();
+              }}
+            >
+              <FontAwesomeIcon icon={faShoppingCart} />{" "}
+              {/* Shopping cart icon */}
+              <span>{cartItems.length}</span> {/* Counter */}
+            </Fab>{" "}
+            {/* Updated FAB */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                gap: "10px",
+                alignItems: "center",
+              }}
+            >
+              <TonConnectButton />
+              <NetworkBadge
+                network={
+                  network === CHAIN.MAINNET
+                    ? "mainnet"
+                    : network === CHAIN.TESTNET
+                    ? "testnet"
+                    : ""
+                }
+              ></NetworkBadge>
+            </div>
+          </FlexBoxRowSpaceBetween>
           <WelcomeStore />
           <br />
           <ProductsList products={products} />
