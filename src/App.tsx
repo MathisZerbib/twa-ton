@@ -45,7 +45,7 @@ function App() {
       <AppContainer>
         <FlexBoxCol>
           <FlexBoxRow>
-            <StoreLogo src="logo.png" alt="Store Logo" /> <TonConnectButton />
+            <StoreLogo src="logo.png" alt="Store Logo" />
             <Button>
               {network
                 ? network === CHAIN.MAINNET
@@ -53,6 +53,7 @@ function App() {
                   : "testnet"
                 : "N/A"}
             </Button>
+            <TonConnectButton />
             {/* <ChainSelector /> */}
           </FlexBoxRow>
           {/* <Counter />
