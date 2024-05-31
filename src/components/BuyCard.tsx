@@ -69,21 +69,23 @@ const BuyCard: React.FC<ProductProps> = ({
       : "❓"; // Default emoji if no match found
   }
 
-  const TonLogoImage = styled.img`
-    width: 20px;
-    height: 20px;
-  `;
-
   const ButtonCenterDiv = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
   `;
 
+  const ProductName = styled.h2`
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--tg-theme-text-color, #333); /* Fallback to dark gray */
+  `;
+
   return (
     <BuyCardStyled>
       <img src={imageUrl} alt={name} className="product-image" />
-      <h2 className="product-name">{name}</h2>
+      <ProductName>{name}</ProductName>
       <div className="rating">
         {/* the rating should be always counted on 5 scale and must include the partial star */}
         {[...Array(intPart)].map((_, index) => (

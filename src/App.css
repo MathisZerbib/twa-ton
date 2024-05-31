@@ -4,3 +4,29 @@
   --tg-theme-button-text-color: #fff;
   --tg-theme-text-color: #333;
 }
+
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  .tg-container {
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tg-container {
+    padding: 0 10px;
+  }
+}
+
+
+/* General */
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--tg-theme-bg-color);
+  color: var(--tg-theme-text-color);
+  margin: 0;
+  padding: 0;
+}
