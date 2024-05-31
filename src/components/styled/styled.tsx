@@ -167,7 +167,7 @@ export const CenterDiv = styled.div`
 export const ButtonBuyTonStyled = styled(Button)`
 position: relative; // Enable absolute positioning inside this container
 display: flex;
-width: 150px;
+width: 200px;
 align-items: center;
 justify-content: center;
 gap: 10px;
@@ -271,6 +271,8 @@ export const CheckoutContainer = styled.div`
   align-items: center;
   padding: 20px;
   background-color: #f5f5f5;
+  margin-top: 20px;
+  margin-bottom: 20px;
 `;
 
 export const CartItem = styled.div`

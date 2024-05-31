@@ -10,6 +10,8 @@ import {
   Route,
   Link,
   BrowserRouter,
+  HashRouter,
+  Routes,
 } from "react-router-dom";
 import CheckoutPage from "./pages/CheckoutPage";
 
@@ -36,7 +38,12 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <TonConnectUIProvider manifestUrl={manifestUrl}>
     <QueryClientProvider client={queryClient}>
       <CartProvider>
-        <RouterProvider router={router} />
+        <HashRouter>
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="checkout" element={<CheckoutPage />} />
+          </Routes>{" "}
+        </HashRouter>
       </CartProvider>
     </QueryClientProvider>
   </TonConnectUIProvider>

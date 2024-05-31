@@ -7,6 +7,7 @@ export interface ProductProps {
     rating: number;
     strains: string[];
     price: number;
+    description: string;
 }
 
 
