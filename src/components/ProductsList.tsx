@@ -12,7 +12,7 @@ interface ProductsListProps {
 const StyledProductsList = styled.div`
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: center;
   gap: 20px;
 `;
 

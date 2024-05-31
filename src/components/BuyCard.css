@@ -1,40 +1,45 @@
+/* Product Image Styling */
+.product-image {
+  width: 100%;
+  height: auto; /* Height set to auto to maintain aspect ratio */
+}
 
-  
-  .product-image {
-    width: 100%;
-    height: auto;
-  }
-  .product-name {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--tg-theme-text-color);
-  }
-  .strain {
-    font-size: 1.2rem;
-    color: var(--tg-theme-text-color);
-    list-style-type: none;
-  }
+/* Product Name Styling */
+.product-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--tg-theme-text-color, #333); /* Fallback to dark gray */
+}
 
-  .price {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--tg-theme-text-color);
-  }
+/* Strain List Item Styling */
+.strain {
+  font-size: 1.2rem;
+  color: var(--tg-theme-text-color, #666); /* Fallback to medium gray */
+}
 
-  .buy-button {
-    background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .buy-button:hover {
-    background-color: #0056b3;
-  }
-  
-  .star {
-    color: #f8d64e;
-  }
+/* Price Styling */
+.price {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--tg-theme-text-color, #333); /* Fallback to dark gray */
+}
 
+/* Buy Button Styling */
+.buy-button {
+  background-color: var(--tg-theme-button-color, #007bff); /* Fallback to blue */
+  color: var(--tg-theme-button-text-color, white); /* Fallback to white */
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Hover State for Buy Button */
+.buy-button:hover {
+  background-color: var(--tg-theme-hover-button-color, #0056b3); /* Fallback to darker blue */
+}
+
+/* Star Icon Styling */
+.star {
+  color: #f8d64e; /* Yellow color for stars */
+}

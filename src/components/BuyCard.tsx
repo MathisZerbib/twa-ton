@@ -62,14 +62,14 @@ const BuyCard: React.FC<ProductProps> = ({
           />
         ))}
       </div>
-      <ul>
-        {strains.map((strain, index) => (
-          /// make a UI representation of the strains percentage
-          <li key={index} className="strain">
-            {strain}
-          </li>
-        ))}
-      </ul>
+
+      {strains.map((strain, index) => (
+        /// make a UI representation of the strains percentage
+        <p key={index} className="strain">
+          {strain}
+        </p>
+      ))}
+  
       <p className="price">{price.toFixed(2)} €</p>
       <button className="buy-button">Buy Now</button>
     </BuyCardStyled>
