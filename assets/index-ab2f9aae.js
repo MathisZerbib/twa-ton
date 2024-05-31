@@ -1138,6 +1138,7 @@ PERFORMANCE OF THIS SOFTWARE.
   flex-direction: row;
   gap: 10px;
   align-items: center;
+  justify-content: space-around;
 `,xQ=Hr.div`
   display: flex;
   flex-direction: column;
@@ -2044,4 +2045,4 @@ Values:
   height: 50px;
   object-fit: cover;
   border-radius: 50%;
-`;function Fde(){const{network:e}=hI();return tr(Ude,{children:tr(Dde,{children:zs(xQ,{children:[zs(wQ,{children:[tr(jde,{src:"logo.png",alt:"Store Logo"})," ",tr(mY,{}),tr(cI,{children:e?e===Zc.MAINNET?"mainnet":"testnet":"N/A"})]}),tr(Lde,{}),tr("br",{}),tr(Tde,{products:Nde})]})})})}const qde="https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json",zde=new jU({defaultOptions:{queries:{refetchOnWindowFocus:!1}}});ib.createRoot(document.getElementById("root")).render(tr(dY,{manifestUrl:qde,children:tr(Vj,{client:zde,children:tr(Fde,{})})}));
+`;function Fde(){const{network:e}=hI();return tr(Ude,{children:tr(Dde,{children:zs(xQ,{children:[zs(wQ,{children:[tr(jde,{src:"logo.png",alt:"Store Logo"}),tr(cI,{children:e?e===Zc.MAINNET?"mainnet":"testnet":"N/A"}),tr(mY,{})]}),tr(Lde,{}),tr("br",{}),tr(Tde,{products:Nde})]})})})}const qde="https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json",zde=new jU({defaultOptions:{queries:{refetchOnWindowFocus:!1}}});ib.createRoot(document.getElementById("root")).render(tr(dY,{manifestUrl:qde,children:tr(Vj,{client:zde,children:tr(Fde,{})})}));
