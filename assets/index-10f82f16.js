@@ -1997,14 +1997,16 @@ Values:
     margin: 10px;
     width: 200px;
     min-height: 300px;
-  `;Hr.img`
-    width: 20px;
-    height: 20px;
-  `;const g=Hr.div`
+  `,g=Hr.div`
     display: flex;
     align-items: center;
     justify-content: center;
-  `;return zs(d,{children:[tr("img",{src:t,alt:r,className:"product-image"}),tr("h2",{className:"product-name",children:r}),zs("div",{className:"rating",children:[[...Array(f)].map((m,M)=>tr(Bc,{icon:BC,className:"star"},M)),c>0&&tr(Bc,{icon:bJ,className:"star"}),[...Array(5-Math.ceil(n))].map((m,M)=>tr(Bc,{icon:BC,style:{stroke:"#FFD700",strokeWidth:"25px",color:"transparent"}},M))]}),tr("br",{}),tr(Bde,{strains:o}),tr("br",{}),tr("br",{}),tr(g,{children:tr(Ede,{amount:i})})]})},Ide=Hr.div`
+  `,m=Hr.h2`
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--tg-theme-text-color, #333); /* Fallback to dark gray */
+  `;return zs(d,{children:[tr("img",{src:t,alt:r,className:"product-image"}),tr(m,{children:r}),zs("div",{className:"rating",children:[[...Array(f)].map((M,x)=>tr(Bc,{icon:BC,className:"star"},x)),c>0&&tr(Bc,{icon:bJ,className:"star"}),[...Array(5-Math.ceil(n))].map((M,x)=>tr(Bc,{icon:BC,style:{stroke:"#FFD700",strokeWidth:"25px",color:"transparent"}},x))]}),tr("br",{}),tr(Bde,{strains:o}),tr("br",{}),tr("br",{}),tr(g,{children:tr(Ede,{amount:i})})]})},Ide=Hr.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
