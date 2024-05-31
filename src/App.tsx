@@ -12,7 +12,7 @@ import { ProductProps } from "./components/types";
 import ProductsList from "./components/ProductsList";
 import WelcomeStore from "./components/WelcomeStore";
 import products from "./shop/Products";
-
+// import ChainSelector from "./components/ChainSelector";
 const StyledApp = styled.div`
   background-color: #e8e8e8;
   color: black;
@@ -53,6 +53,7 @@ function App() {
                   : "testnet"
                 : "N/A"}
             </Button>
+            {/* <ChainSelector /> */}
           </FlexBoxRow>
           {/* <Counter />
           <TransferTon />*/}
