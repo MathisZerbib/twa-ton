@@ -41,7 +41,7 @@ function App() {
   const products: ProductProps[] = [
     {
       id: "1",
-      imageUrl: "public/product_1.png",
+      imageUrl: "product_1.png",
       name: "Blue Dream",
       rating: 4.5,
       strains: ["Sativa 60%", "Indica 40%"],
@@ -49,7 +49,7 @@ function App() {
     },
     {
       id: "2",
-      imageUrl: "public/product_2.png",
+      imageUrl: "product_2.png",
       name: "Girl Scout Cookies",
       rating: 4.0,
       strains: ["Indica 60%", "Sativa 40%"],
@@ -57,7 +57,7 @@ function App() {
     },
     {
       id: "3",
-      imageUrl: "public/product_3.png",
+      imageUrl: "product_3.png",
       name: "OG Kush",
       rating: 5.0,
       strains: ["Indica 75%", "Sativa 25%"],
@@ -65,7 +65,7 @@ function App() {
     },
     {
       id: "4",
-      imageUrl: "public/product_4.png",
+      imageUrl: "product_4.png",
       name: "Sour Diesel",
       rating: 3,
       strains: ["Sativa 90%", "Indica 10%"],
@@ -73,7 +73,7 @@ function App() {
     },
     {
       id: "5",
-      imageUrl: "public/product_5.png",
+      imageUrl: "product_5.png",
       name: "Granddaddy Purple",
       rating: 5,
       strains: ["Indica 80%", "Sativa 20%"],
@@ -81,7 +81,7 @@ function App() {
     },
     {
       id: "6",
-      imageUrl: "public/product_6.png",
+      imageUrl: "product_6.png",
       name: "Pineapple Express",
       rating: 3.5,
       strains: ["Sativa 60%", "Indica 40%"],
@@ -95,8 +95,7 @@ function App() {
       <AppContainer>
         <FlexBoxCol>
           <FlexBoxRow>
-            <StoreLogo src="public/logo.png" alt="Store Logo" />{" "}
-            <TonConnectButton />
+            <StoreLogo src="logo.png" alt="Store Logo" /> <TonConnectButton />
             <Button>
               {network
                 ? network === CHAIN.MAINNET
