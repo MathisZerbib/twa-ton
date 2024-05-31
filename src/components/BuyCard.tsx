@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar, faStarHalfStroke } from "@fortawesome/free-solid-svg-icons";
 import "./BuyCard.css";
 import styled from "styled-components";
+import { BuyWithTon } from "./BuyWithTon";
 
 interface ProductProps {
   id: string;
@@ -69,9 +70,10 @@ const BuyCard: React.FC<ProductProps> = ({
           {strain}
         </p>
       ))}
-  
+
       <p className="price">{price.toFixed(2)} €</p>
-      <button className="buy-button">Buy Now</button>
+      {/* <button className="buy-button">Buy Now</button> */}
+      <BuyWithTon amount="0.1" />
     </BuyCardStyled>
   );
 };
