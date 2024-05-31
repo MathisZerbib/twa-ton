@@ -5,6 +5,8 @@ import { faStar, faStarHalfStroke } from "@fortawesome/free-solid-svg-icons";
 import "./BuyCard.css";
 import styled from "styled-components";
 import { BuyWithTon } from "./BuyWithTon";
+import axios from "axios";
+import EmojiStrains from "./EmojiStrains";
 
 interface ProductProps {
   id: string;
@@ -36,6 +38,48 @@ const BuyCard: React.FC<ProductProps> = ({
     min-height: 300px;
   `;
 
+  // Function to get emoji based on strain
+  function getStrainEmoji(strain: string) {
+    return strain === "sleepy"
+      ? "😴"
+      : strain === "happy"
+      ? "😀"
+      : strain === "hungry"
+      ? "🍔"
+      : strain === "euphoric"
+      ? "😇"
+      : strain === "relaxed"
+      ? "😌"
+      : strain === "uplifted"
+      ? "🚀"
+      : strain === "creative"
+      ? "🎨"
+      : strain === "focused"
+      ? "🧠"
+      : strain === "energetic"
+      ? "🔋"
+      : strain === "talkative"
+      ? "💬"
+      : strain === "tingly"
+      ? "🌟"
+      : strain === "aroused"
+      ? "🔞"
+      : strain === "giggly"
+      ? "😂"
+      : "❓"; // Default emoji if no match found
+  }
+
+  const TonLogoImage = styled.img`
+    width: 20px;
+    height: 20px;
+  `;
+
+  const ButtonCenterDiv = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+
   return (
     <BuyCardStyled>
       <img src={imageUrl} alt={name} className="product-image" />
@@ -63,17 +107,14 @@ const BuyCard: React.FC<ProductProps> = ({
           />
         ))}
       </div>
+      <br />
+      <EmojiStrains strains={strains} />
+      <br />
+      <br />
 
-      {strains.map((strain, index) => (
-        /// make a UI representation of the strains percentage
-        <p key={index} className="strain">
-          {strain}
-        </p>
-      ))}
-
-      <p className="price">{price.toFixed(2)} €</p>
-      {/* <button className="buy-button">Buy Now</button> */}
-      <BuyWithTon amount="0.1" />
+      <ButtonCenterDiv>
+        <BuyWithTon amount={price} />
+      </ButtonCenterDiv>
     </BuyCardStyled>
   );
 };
