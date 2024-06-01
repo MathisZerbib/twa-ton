@@ -57,17 +57,11 @@ function CheckoutPage({ open, onClose }: any) {
             </h1>
           </Toolbar>
         </AppBar>
-        <CheckoutContainer
-          style={
-            {
-              // minHeight: "100vh",
-            }
-          }
-        >
+        <CheckoutContainer>
           <h2>Your Cart</h2>
           {cartItems.length > 0 ? (
             cartItems.map((item) => (
-              <CartItem item={item} removeItem={removeItem} />
+              <CartItem item={item} removeItem={removeItem} key={item.id} />
             ))
           ) : (
             <EmptyCart />

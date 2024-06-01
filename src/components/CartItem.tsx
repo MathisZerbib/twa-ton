@@ -1,6 +1,8 @@
 import { Button } from "@mui/material";
 import { CartItemStyled } from "../components/styled/styled";
 import products from "../shop/Products";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
 
 interface CartItemProps {
   item: any;
@@ -36,11 +38,24 @@ const CartItem: React.FC<CartItemProps> = ({ item, removeItem }) => {
           }}
         />
       )}
-      <p>
-        {product?.name} - {item.quantity}g
+      <p
+        style={{
+          textAlign: "center",
+        }}
+      >
+        {product?.name} -{" "}
+        <span style={{ color: "grey" }}>{item.quantity}G</span>
       </p>
       <p>{item.price} TON</p>
-      <Button onClick={() => removeItem(item)}>Remove</Button>
+      <Button onClick={() => removeItem(item)}>
+        <FontAwesomeIcon
+          icon={faCircleXmark}
+          style={{
+            color: "grey",
+            fontSize: "1.5rem",
+          }}
+        />
+      </Button>
     </CartItemStyled>
   );
 };

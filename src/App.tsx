@@ -33,7 +33,7 @@ import OrdersDrawer from "./components/OrderDrawer";
 
 function App() {
   const { network } = useTonConnect();
-  const { cartItems } = useCart();
+  const { totalPrice } = useCart();
 
   const [openCheckout, setOpenCheckout] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false); // State to control the drawer
@@ -88,7 +88,7 @@ function App() {
                 flexDirection: "row",
                 gap: "10px",
                 alignItems: "center",
-                minWidth: "80px",
+                minWidth: "120px",
                 borderRadius: "10px",
               }}
               size="large"
@@ -96,9 +96,19 @@ function App() {
                 showCheckout();
               }}
             >
-              <FontAwesomeIcon icon={faShoppingCart} />{" "}
               {/* Shopping cart icon */}
-              <span>{cartItems.length}</span> {/* Counter */}
+              <span>
+                {totalPrice.toFixed(2)}{" "}
+                <img
+                  src="ton.svg"
+                  alt="TON logo"
+                  style={{
+                    width: 20,
+                    height: 20,
+                  }}
+                />
+              </span>{" "}
+              {/* Counter */}
             </Fab>{" "}
             {/* Updated FAB */}
             <div
