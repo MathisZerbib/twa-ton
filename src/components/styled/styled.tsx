@@ -275,7 +275,7 @@ export const CheckoutContainer = styled.div`
   margin-bottom: 20px;
 `;
 
-export const CartItem = styled.div`
+export const CartItemStyled = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;

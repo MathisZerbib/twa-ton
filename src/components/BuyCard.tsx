@@ -3,8 +3,6 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar, faStarHalfStroke } from "@fortawesome/free-solid-svg-icons";
 import "./BuyCard.css";
-import styled from "styled-components";
-import { BuyWithTon } from "./BuyWithTon";
 import EmojiStrains from "./EmojiStrains";
 import { AddToCartButton } from "./AddToCartButton";
 import {
@@ -48,7 +46,7 @@ const BuyCard: React.FC<ProductProps> = ({
     }
   };
 
-  const totalPrice = selectedQuantity * price;
+  const overallPrice = selectedQuantity * price;
 
   return (
     <BuyCardStyled>
@@ -85,8 +83,8 @@ const BuyCard: React.FC<ProductProps> = ({
           ))}
         </select>
         <AddToCartButton
-          amount={totalPrice}
-          item={{ id: id, quantity: selectedQuantity, price: totalPrice }}
+          amount={overallPrice}
+          item={{ id: id, quantity: selectedQuantity, price: overallPrice }}
         />
         <br />
       </ButtonCenterDiv>

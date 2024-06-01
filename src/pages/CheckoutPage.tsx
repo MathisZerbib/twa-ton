@@ -1,15 +1,22 @@
 import { useCart } from "../providers/CartProvider";
-import { CartItem, CheckoutContainer } from "../components/styled/styled";
+import { CartItemStyled, CheckoutContainer } from "../components/styled/styled";
 import { BuyWithTon } from "../components/BuyWithTon";
 import products from "../shop/Products";
-import { SwipeableDrawer, AppBar, Toolbar, IconButton } from "@mui/material";
+import {
+  SwipeableDrawer,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Button,
+} from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
+import { CartItemProps } from "../components/types";
 
 const EmptyCart = () => <p>Your cart is empty</p>;
 
 function CheckoutPage({ open, onClose }: any) {
-  const { cartItems, totalPrice } = useCart();
+  const { cartItems, totalPrice, removeItem } = useCart();
 
   const closeDrawer = () => {
     onClose();
@@ -52,8 +59,8 @@ function CheckoutPage({ open, onClose }: any) {
           cartItems.map((item) => {
             const product = products.find((product) => product.id === item.id);
             return (
-              <CartItem
-                key={item.id}
+              <CartItemStyled
+                key={Date.now() + Math.random()}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -74,7 +81,8 @@ function CheckoutPage({ open, onClose }: any) {
                   {product?.name} - {item.quantity}g
                 </p>
                 <p>{item.price} TON</p>
-              </CartItem>
+                <Button onClick={() => removeItem(item)}>Remove</Button>
+              </CartItemStyled>
             );
           })
         ) : (
