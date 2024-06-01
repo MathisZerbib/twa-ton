@@ -26,7 +26,7 @@ const PaymentOptions = styled.p`
 const WelcomeStore: React.FC = () => {
   return (
     <Container>
-      <WelcomeText>Vite Mon CBD</WelcomeText>
+      <WelcomeText>Vite TON CBD</WelcomeText>
       <br />
       <PaymentOptions>
         Commandez dès maintenant votre CBD sur Montpellier
