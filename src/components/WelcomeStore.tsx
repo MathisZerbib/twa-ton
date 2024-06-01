@@ -10,7 +10,7 @@ const Container = styled.div`
 
 const WelcomeText = styled.h1`
   color: white;
-  font-size: 48px;
+  font-size: 46px;
   text-align: center;
   margin-bottom: 20px;
 `;
@@ -22,11 +22,18 @@ const PaymentOptions = styled.p`
   max-width: 800px;
   margin: auto;
 `;
-
+const tonLogo = "ton.svg";
 const WelcomeStore: React.FC = () => {
   return (
     <Container>
-      <WelcomeText>Vite TON CBD</WelcomeText>
+      <WelcomeText>
+        Vite TON CBD
+        <img
+          src={tonLogo}
+          alt="TON logo"
+          style={{ width: 24, height: 24, marginLeft: 10, marginBottom: 25 }}
+        />{" "}
+      </WelcomeText>
       <br />
       <PaymentOptions>
         Commandez dès maintenant votre CBD sur Montpellier

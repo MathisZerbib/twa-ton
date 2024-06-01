@@ -88,6 +88,8 @@ function App() {
                 flexDirection: "row",
                 gap: "10px",
                 alignItems: "center",
+                minWidth: "80px",
+                borderRadius: "10px",
               }}
               size="large"
               onClick={() => {
