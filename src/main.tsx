@@ -22,7 +22,6 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <HashRouter>
           <Routes>
             <Route path="/" element={<App />} />
-            <Route path="checkout" element={<CheckoutPage />} />
           </Routes>{" "}
         </HashRouter>
       </CartProvider>

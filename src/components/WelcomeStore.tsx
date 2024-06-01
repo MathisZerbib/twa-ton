@@ -29,7 +29,10 @@ const WelcomeStore: React.FC = () => {
       <WelcomeText>Vite Mon CBD</WelcomeText>
       <br />
       <PaymentOptions>
-        Vous pouvez commander votre CBD en utilisant The Open Network (TON)
+        Commandez dès maintenant votre CBD sur Montpellier
+        <br />
+        <br />
+        The Open Network (TON)
       </PaymentOptions>
     </Container>
   );

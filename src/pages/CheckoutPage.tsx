@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../providers/CartProvider";
 import styled from "styled-components";
@@ -9,26 +8,29 @@ import {
 } from "../components/styled/styled";
 import { BuyWithTon } from "../components/BuyWithTon";
 import products from "../shop/Products";
+import { Drawer } from "@mui/material";
+import { MouseEventHandler } from "react";
 
 const GoHomeButton = styled(Button)``;
 
 const EmptyCart = () => <p>Your cart is empty</p>;
-function CheckoutPage() {
+
+function CheckoutPage({ open, onClose }: any) {
   const { cartItems, totalPrice } = useCart();
   const navigate = useNavigate();
 
-  const goHome = () => {
-    navigate("/ ");
+  const closeDrawer = () => {
+    onClose();
   };
 
   return (
-    <div>
+    <Drawer anchor="bottom" open={open} onClose={onClose}>
       <CheckoutContainer
         style={{
           minHeight: "100vh",
         }}
       >
-        <GoHomeButton onClick={goHome}>←</GoHomeButton>
+        <GoHomeButton onClick={closeDrawer}>←</GoHomeButton>
         <h1>Checkout Page</h1>
         <h2>Your Cart</h2>
         {cartItems.length > 0 ? (
@@ -79,7 +81,7 @@ function CheckoutPage() {
         <BuyWithTon amount={totalPrice} />
         <br />
       </CheckoutContainer>
-    </div>
+    </Drawer>
   );
 }
 

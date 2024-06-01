@@ -27,16 +27,21 @@ import {
 } from "./components/styled/styled";
 /// use react dom router to navigate to cart
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import CheckoutPage from "./pages/CheckoutPage";
 
 function App() {
   const { network } = useTonConnect();
   const { cartItems } = useCart();
-  const navigate = useNavigate();
 
-  function navigateToCheckout() {
-    console.log("Navigating to cart");
-    /// navigate to cart with hash router #/checkout
-    navigate("/checkout");
+  const [openCheckout, setOpenCheckout] = useState(false);
+
+  function showCheckout() {
+    setOpenCheckout(true);
+  }
+
+  function closeCheckout() {
+    setOpenCheckout(false);
   }
 
   return (
@@ -60,7 +65,7 @@ function App() {
               }}
               size="large"
               onClick={() => {
-                navigateToCheckout();
+                showCheckout();
               }}
             >
               <FontAwesomeIcon icon={faShoppingCart} />{" "}
@@ -92,6 +97,7 @@ function App() {
           <br />
           <ProductsList products={products} />
         </FlexBoxCol>
+        <CheckoutPage open={openCheckout} onClose={closeCheckout} />
       </AppContainer>
     </StyledApp>
   );
