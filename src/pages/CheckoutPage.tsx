@@ -24,7 +24,7 @@ function CheckoutPage({ open, onClose }: any) {
     onClose();
   };
 
-  const totalPriceInTon = totalPrice.toFixed(4);
+  const totalPriceInTon = totalPrice.toFixed(3);
   return (
     <Paper>
       <SwipeableDrawer

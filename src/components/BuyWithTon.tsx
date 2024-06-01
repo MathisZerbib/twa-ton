@@ -7,10 +7,16 @@ type BuyWithTonProps = {
   amount: string;
   onClick: () => void;
 };
+import { CHAIN } from "@tonconnect/protocol";
 
 export function BuyWithTon({ amount, onClick }: BuyWithTonProps) {
-  const { sender, connected } = useTonConnect();
-  const tonRecipient = "kQCFEF5jY33lLFJugJmFuILYQcwg7ekHu8LVsBpV7JbIT_yE";
+  const { sender, connected, network } = useTonConnect();
+  const tonRecipient =
+    network === CHAIN.MAINNET
+      ? "kQCFEF5jY33lLFJugJmFuILYQcwg7ekHu8LVsBpV7JbIT_yE"
+      : network === CHAIN.TESTNET
+      ? "kQCFEF5jY33lLFJugJmFuILYQcwg7ekHu8LVsBpV7JbIT_yE"
+      : "";
   const { cartItems } = useCart();
 
   // Hardcoded image source
@@ -27,7 +33,10 @@ export function BuyWithTon({ amount, onClick }: BuyWithTonProps) {
           amount === "" ||
           cartItems.length === 0 ||
           isNaN(parseFloat(amount)) ||
-          parseFloat(amount) <= 0
+          parseFloat(amount) <= 0 ||
+          tonRecipient === "" ||
+          tonRecipient === undefined ||
+          tonRecipient === null
         }
         onClick={async () => {
           onClick();
@@ -45,7 +54,7 @@ export function BuyWithTon({ amount, onClick }: BuyWithTonProps) {
             height: "20px",
           }}
         />
-        Pay {amount} TON
+        Pay {parseInt(amount).toFixed(2)} TON
       </ButtonBuyTonStyled>
     </CenterDiv>
   );
