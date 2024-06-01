@@ -26,7 +26,6 @@ import {
   StoreLogo,
 } from "./components/styled/styled";
 /// use react dom router to navigate to cart
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import CheckoutPage from "./pages/CheckoutPage";
 

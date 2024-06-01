@@ -1,37 +1,52 @@
-import { useNavigate } from "react-router-dom";
 import { useCart } from "../providers/CartProvider";
-import styled from "styled-components";
-import {
-  Button,
-  CartItem,
-  CheckoutContainer,
-} from "../components/styled/styled";
+import { CartItem, CheckoutContainer } from "../components/styled/styled";
 import { BuyWithTon } from "../components/BuyWithTon";
 import products from "../shop/Products";
-import { Drawer } from "@mui/material";
-import { MouseEventHandler } from "react";
-
-const GoHomeButton = styled(Button)``;
+import { SwipeableDrawer, AppBar, Toolbar, IconButton } from "@mui/material";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClose } from "@fortawesome/free-solid-svg-icons";
 
 const EmptyCart = () => <p>Your cart is empty</p>;
 
 function CheckoutPage({ open, onClose }: any) {
   const { cartItems, totalPrice } = useCart();
-  const navigate = useNavigate();
 
   const closeDrawer = () => {
     onClose();
   };
 
   return (
-    <Drawer anchor="bottom" open={open} onClose={onClose}>
+    <SwipeableDrawer
+      anchor="bottom"
+      open={open}
+      onClose={onClose}
+      onOpen={() => {}}
+    >
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={closeDrawer}
+            aria-label="close"
+          >
+            <FontAwesomeIcon icon={faClose} />
+          </IconButton>
+          <h1
+            style={{
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+          >
+            Checkout Page
+          </h1>
+        </Toolbar>
+      </AppBar>
       <CheckoutContainer
         style={{
           minHeight: "100vh",
         }}
       >
-        <GoHomeButton onClick={closeDrawer}>←</GoHomeButton>
-        <h1>Checkout Page</h1>
         <h2>Your Cart</h2>
         {cartItems.length > 0 ? (
           cartItems.map((item) => {
@@ -58,11 +73,7 @@ function CheckoutPage({ open, onClose }: any) {
                 <p>
                   {product?.name} - {item.quantity}g
                 </p>
-                {/* <p>{product?.description}</p> */}
-                <p>
-                  {item.price} TON
-                  {/* Display price in TON */}
-                </p>
+                <p>{item.price} TON</p>
               </CartItem>
             );
           })
@@ -76,12 +87,11 @@ function CheckoutPage({ open, onClose }: any) {
           }}
         >
           Total Price: {totalPrice} TON
-        </h2>{" "}
-        {/* Display total price in TON */}
+        </h2>
         <BuyWithTon amount={totalPrice} />
         <br />
       </CheckoutContainer>
-    </Drawer>
+    </SwipeableDrawer>
   );
 }
 
