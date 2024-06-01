@@ -4,8 +4,6 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { CartProvider } from "./providers/CartProvider";
-import { Route, HashRouter, Routes } from "react-router-dom";
-import CheckoutPage from "./pages/CheckoutPage";
 
 // this manifest is used temporarily for development purposes
 const manifestUrl =
@@ -19,11 +17,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <TonConnectUIProvider manifestUrl={manifestUrl}>
     <QueryClientProvider client={queryClient}>
       <CartProvider>
-        <HashRouter>
-          <Routes>
-            <Route path="/" element={<App />} />
-          </Routes>
-        </HashRouter>
+        <App />
       </CartProvider>
     </QueryClientProvider>
   </TonConnectUIProvider>
