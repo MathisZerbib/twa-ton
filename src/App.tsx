@@ -35,7 +35,8 @@ function App() {
 
   function navigateToCheckout() {
     console.log("Navigating to cart");
-    navigate("#checkout");
+    /// navigate to cart with hash router #/checkout
+    navigate("/checkout");
   }
 
   return (

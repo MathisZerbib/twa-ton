@@ -18,7 +18,7 @@ function CheckoutPage() {
   const navigate = useNavigate();
 
   const goHome = () => {
-    navigate("/");
+    navigate("/ ");
   };
 
   return (
