@@ -22,7 +22,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <HashRouter>
           <Routes>
             <Route path="/" element={<App />} />
-          </Routes>{" "}
+          </Routes>
         </HashRouter>
       </CartProvider>
     </QueryClientProvider>
