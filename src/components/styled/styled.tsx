@@ -271,8 +271,6 @@ export const CheckoutContainer = styled.div`
   align-items: center;
   padding: 20px;
   background-color: #f5f5f5;
-  margin-top: 20px;
-  margin-bottom: 20px;
 `;
 
 export const CartItemStyled = styled.div`

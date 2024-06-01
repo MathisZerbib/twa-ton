@@ -28,19 +28,46 @@ import {
 /// use react dom router to navigate to cart
 import { useState } from "react";
 import CheckoutPage from "./pages/CheckoutPage";
+import { OrderProps } from "./components/types";
+import OrdersDrawer from "./components/OrderDrawer";
 
 function App() {
   const { network } = useTonConnect();
   const { cartItems } = useCart();
 
   const [openCheckout, setOpenCheckout] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false); // State to control the drawer
 
+  // Mock orders array for demonstration purposes
+  const mockOrders: OrderProps[] = [
+    {
+      id: "1",
+      recipient: "Alice",
+      price: 100,
+      status: "Pending",
+      dateCreated: "2021-10-01",
+    },
+    {
+      id: "2",
+      recipient: "Bob",
+      price: 200,
+      status: "Delivered",
+      dateCreated: "2021-10-02",
+    },
+    // Add more mock orders as needed
+  ];
   function showCheckout() {
     setOpenCheckout(true);
   }
 
   function closeCheckout() {
     setOpenCheckout(false);
+  }
+
+  function toggleDrawer(open: boolean) {
+    /// TODO implement the drawer open and close
+    // for OrdersDrawer
+    // setDrawerOpen(open);
   }
 
   return (
@@ -80,6 +107,24 @@ function App() {
                 alignItems: "center",
               }}
             >
+              {/* make a my orders link to open a drawer from right  */}
+              <Button
+                style={{
+                  borderRadius: "20px",
+                  color: "white",
+                  backgroundColor: "#121214",
+                  height: "40px",
+                  padding: "0 20px",
+                  width: "120px",
+                }}
+                onClick={() => {
+                  // create and open a drawer from right
+                  toggleDrawer(true); // Open the drawer
+                }}
+              >
+                My Orders
+              </Button>
+
               <TonConnectButton />
               <NetworkBadge
                 network={
@@ -97,6 +142,11 @@ function App() {
           <ProductsList products={products} />
         </FlexBoxCol>
         <CheckoutPage open={openCheckout} onClose={closeCheckout} />
+        <OrdersDrawer
+          orders={mockOrders}
+          open={drawerOpen}
+          onClose={toggleDrawer}
+        />
       </AppContainer>
     </StyledApp>
   );

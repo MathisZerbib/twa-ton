@@ -16,3 +16,11 @@ export interface CartItemProps {
     quantity: number;
     price: number;
 }
+
+export interface OrderProps {
+    id: string;
+    recipient: string;
+    price: number;
+    status: string;
+    dateCreated: string;
+}
