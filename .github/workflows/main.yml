@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Build and Deploy
 
 on:
@@ -14,17 +12,23 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v2.3.1
+      
       - name: install dependencies
         run: npm install
+      
       - name: Build
         run: npm run build
         env:
           CI: false
+          VITE_COINAPI_API_KEY: ${{ secrets.VITE_COINAPI_API_KEY }} # Pass the secret as an environment variable
+      
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: gh-pages # The branch the action should deploy to.
           folder: dist # The folder the action should deploy.
+        env:
+          VITE_COINAPI_API_KEY: ${{ secrets.VITE_COINAPI_API_KEY }} # Pass the secret as an environment variable
 
 permissions:
   contents: write
