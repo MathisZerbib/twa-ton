@@ -32,9 +32,11 @@ import OrdersDrawer from "./components/OrderDrawer";
 import PriceConverter from "./components/PriceConverter";
 import CurrencySwitcher from "./components/CurrencySwitcher";
 import { useCurrency } from "./providers/useCurrency";
+import WalletBalanceTon from "./components/WalletBalanceTon";
 
 function App() {
   const { network } = useTonConnect();
+  const { wallet } = useTonConnect();
   const { totalPrice } = useCart();
 
   const [openCheckout, setOpenCheckout] = useState(false);
@@ -115,6 +117,7 @@ function App() {
                 />
               </span>
             </Fab>
+
             <div
               style={{
                 display: "flex",
@@ -127,17 +130,24 @@ function App() {
                 selectedCurrency={selectedCurrency}
                 onCurrencyChange={handleCurrencyChange}
               />
-
-              <TonConnectButton />
-              <NetworkBadge
-                network={
-                  network === CHAIN.MAINNET
-                    ? "mainnet"
-                    : network === CHAIN.TESTNET
-                    ? "testnet"
-                    : ""
-                }
-              ></NetworkBadge>
+              <Button onClick={() => toggleDrawer(true)}>Orders</Button>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div
+                style={{ display: "flex", flexDirection: "row", gap: "10px" }}
+              >
+                <TonConnectButton />
+                <NetworkBadge
+                  network={
+                    network === CHAIN.MAINNET
+                      ? "mainnet"
+                      : network === CHAIN.TESTNET
+                      ? "testnet"
+                      : ""
+                  }
+                ></NetworkBadge>
+              </div>
+              {network && wallet && <WalletBalanceTon walletAddress={wallet} />}
             </div>
           </FlexBoxRowSpaceBetween>
           <WelcomeStore />

@@ -231,6 +231,8 @@ export const StyledProductsList = styled.div`
 export const NetworkBadge = styled.span<{ network: string }>`
   display: inline-block;
   padding: 5px;
+  height: 1px;
+  width: 1px;
   background-color: ${(props) => {
     switch (props.network) {
       case "mainnet":
