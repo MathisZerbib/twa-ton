@@ -25,11 +25,12 @@ import {
   NetworkBadge,
   StoreLogo,
 } from "./components/styled/styled";
-/// use react dom router to navigate to cart
 import { useState } from "react";
 import CheckoutPage from "./pages/CheckoutPage";
 import { OrderProps } from "./components/types";
 import OrdersDrawer from "./components/OrderDrawer";
+import PriceConverter from "./components/PriceConverter";
+import CurrencySwitcher from "./components/CurrencySwitcher";
 
 function App() {
   const { network } = useTonConnect();
@@ -37,6 +38,9 @@ function App() {
 
   const [openCheckout, setOpenCheckout] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false); // State to control the drawer
+  const [selectedCurrency, setSelectedCurrency] = useState<string>(
+    localStorage.getItem("selectedCurrency") || "TON"
+  );
 
   // Mock orders array for demonstration purposes
   const mockOrders: OrderProps[] = [
@@ -56,6 +60,7 @@ function App() {
     },
     // Add more mock orders as needed
   ];
+
   function showCheckout() {
     setOpenCheckout(true);
   }
@@ -65,10 +70,12 @@ function App() {
   }
 
   function toggleDrawer(open: boolean) {
-    /// TODO implement the drawer open and close
-    // for OrdersDrawer
-    // setDrawerOpen(open);
+    setDrawerOpen(open);
   }
+
+  const handleCurrencyChange = (currency: string) => {
+    setSelectedCurrency(currency);
+  };
 
   return (
     <StyledApp>
@@ -96,7 +103,7 @@ function App() {
                 showCheckout();
               }}
             >
-              {/* Shopping cart icon */}
+              <FontAwesomeIcon icon={faShoppingCart} />
               <span>
                 {totalPrice.toFixed(2)}{" "}
                 <img
@@ -107,10 +114,8 @@ function App() {
                     height: 20,
                   }}
                 />
-              </span>{" "}
-              {/* Counter */}
-            </Fab>{" "}
-            {/* Updated FAB */}
+              </span>
+            </Fab>
             <div
               style={{
                 display: "flex",
@@ -119,23 +124,10 @@ function App() {
                 alignItems: "center",
               }}
             >
-              {/* make a my orders link to open a drawer from right  */}
-              <Button
-                style={{
-                  borderRadius: "20px",
-                  color: "white",
-                  backgroundColor: "#121214",
-                  height: "40px",
-                  padding: "0 20px",
-                  width: "120px",
-                }}
-                onClick={() => {
-                  // create and open a drawer from right
-                  toggleDrawer(true); // Open the drawer
-                }}
-              >
-                My Orders
-              </Button>
+              <CurrencySwitcher
+                selectedCurrency={selectedCurrency}
+                onCurrencyChange={handleCurrencyChange}
+              />
 
               <TonConnectButton />
               <NetworkBadge
@@ -159,6 +151,7 @@ function App() {
           open={drawerOpen}
           onClose={toggleDrawer}
         />
+        <PriceConverter />
       </AppContainer>
     </StyledApp>
   );

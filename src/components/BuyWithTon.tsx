@@ -6,10 +6,11 @@ import { useCart } from "../providers/CartProvider";
 type BuyWithTonProps = {
   amount: string;
   onClick: () => void;
+  currency: string;
 };
 import { CHAIN } from "@tonconnect/protocol";
 
-export function BuyWithTon({ amount, onClick }: BuyWithTonProps) {
+export function BuyWithTon({ amount, onClick, currency }: BuyWithTonProps) {
   const { sender, connected, network } = useTonConnect();
   const tonRecipient =
     network === CHAIN.MAINNET
@@ -19,8 +20,9 @@ export function BuyWithTon({ amount, onClick }: BuyWithTonProps) {
       : "";
   const { cartItems } = useCart();
 
-  // Hardcoded image source
+  // Hardcoded image sources
   const tonLogoUrl = "ton.svg";
+  const usdtLogoUrl = "usdt.svg";
 
   return (
     <CenterDiv>
@@ -40,21 +42,26 @@ export function BuyWithTon({ amount, onClick }: BuyWithTonProps) {
         }
         onClick={async () => {
           onClick();
-          sender.send({
-            to: Address.parse(tonRecipient),
-            value: toNano(amount),
-          });
+          if (currency === "TON") {
+            sender.send({
+              to: Address.parse(tonRecipient),
+              value: toNano(amount),
+            });
+          } else if (currency === "USDT") {
+            // Handle USDT payment
+            // Add your logic for USDT payment here
+          }
         }}
       >
         <img
-          src={tonLogoUrl}
-          alt="Buy with TON"
+          src={currency === "TON" ? tonLogoUrl : usdtLogoUrl}
+          alt={currency === "TON" ? "Buy with TON" : "Buy with USDT"}
           style={{
             width: "20px",
             height: "20px",
           }}
         />
-        Pay {parseInt(amount).toFixed(2)} TON
+        Pay {parseInt(amount).toFixed(2)} {currency}
       </ButtonBuyTonStyled>
     </CenterDiv>
   );

@@ -1,5 +1,5 @@
-import React, { useState, createContext, useContext } from "react";
-
+import React, { useState, createContext, useContext, useEffect } from "react";
+import performCurrencyConversion from "../services/exchangeRateService";
 // Define the shape of the items in the cart
 interface CartItem {
   id: string;
@@ -22,6 +22,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
+  const selectedCurrency = localStorage.getItem("selectedCurrency");
 
   // Update the addToCart function to add items to the cart array
   const addToCart = (item: CartItem) => {
@@ -36,9 +37,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     setTotalPrice((prevPrice) => prevPrice - item.price);
   };
 
-  // const totalGrams = cartItems.reduce((acc, item) => {
-  //   return acc + (item.quantity ?? 0);
-  // }, 0);
+  // Convert total price when selected currency changes
+  useEffect(() => {
+    const convertTotalPrice = async () => {
+      if (selectedCurrency) {
+        try {
+          const convertedPrice = await performCurrencyConversion(
+            totalPrice,
+            selectedCurrency
+          );
+          setTotalPrice(convertedPrice);
+        } catch (error) {
+          console.error("Failed to convert total price:", error);
+        }
+      }
+    };
+
+    convertTotalPrice();
+  }, [selectedCurrency, totalPrice]);
 
   return (
     <CartContext.Provider
