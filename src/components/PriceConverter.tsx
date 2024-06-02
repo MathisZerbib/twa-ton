@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import {
-  fetchInitialExchangeRate,
-  connectWebSocket,
-} from "../services/exchangeRateService";
+import { fetchInitialExchangeRate } from "../services/exchangeRateService";
 
 const PriceConverter: React.FC = () => {
   const [tonUsdtRate, setTonUsdtRate] = useState<number>(0);
@@ -21,14 +18,6 @@ const PriceConverter: React.FC = () => {
     };
 
     getInitialRate();
-  }, []);
-
-  useEffect(() => {
-    const ws = connectWebSocket((rate) => setTonUsdtRate(rate));
-
-    return () => {
-      ws.close();
-    };
   }, []);
 
   const convertUsdToTon = (amount: string): number => {

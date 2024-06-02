@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-const API_KEY = 'FD3DCB80-D05F-4E79-A156-2C6BFB7A7981';
+const API_KEY = import.meta.env.VITE_COINAPI_API_KEY ?? "";
 const API_URL = `https://rest.coinapi.io/v1/exchangerate/`;
-const WS_URL = 'wss://ws.coinapi.io/v1/';
 
 interface ExchangeRateResponse {
     time: string;
@@ -21,38 +20,6 @@ export const fetchInitialExchangeRate = async (): Promise<number> => {
     }
 };
 
-export const connectWebSocket = (onRateUpdate: (rate: number) => void): WebSocket => {
-    const ws = new WebSocket(WS_URL);
-
-    ws.onopen = () => {
-        const msg = {
-            type: 'hello',
-            apikey: API_KEY,
-            heartbeat: false,
-            subscribe_data_type: ['exrate'],
-            subscribe_filter_asset_id: ['TON/USDT'],
-        };
-        ws.send(JSON.stringify(msg));
-    };
-
-    ws.onmessage = (event) => {
-        const data: any = JSON.parse(event.data);
-        if (data.rate && data.asset_id_base === 'TON' && data.asset_id_quote === 'USDT') {
-            onRateUpdate(data.rate);
-        }
-    };
-
-    ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-    };
-
-    ws.onclose = () => {
-        console.log('WebSocket connection closed, reconnecting...');
-        setTimeout(() => connectWebSocket(onRateUpdate), 1000);
-    };
-
-    return ws;
-};
 
 const performCurrencyConversion = async (price: number, currency: string | null) => {
     try {
