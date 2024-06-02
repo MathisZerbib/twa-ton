@@ -17,21 +17,20 @@ const EmptyCart = () => <p>Your cart is empty</p>;
 
 function CheckoutPage({ open, onClose }: any) {
   const { cartItems, totalPrice, removeItem } = useCart();
-  const [selectedCurrency, setSelectedCurrency] = useState<string>("TON");
+  const [selectedCurrency, setSelectedCurrency] = useState<string>(
+    localStorage.getItem("selectedCurrency") || "USDT"
+  );
 
   useEffect(() => {
     const currency = localStorage.getItem("selectedCurrency");
-    setSelectedCurrency(currency || "TON");
+    setSelectedCurrency(currency || "USDT");
   }, []);
 
   const closeDrawer = () => {
     onClose();
   };
 
-  const totalPriceInSelectedCurrency =
-    selectedCurrency === "TON"
-      ? totalPrice.toFixed(3)
-      : (totalPrice * 2).toFixed(3);
+  const totalPriceFixed = totalPrice.toFixed(3);
 
   return (
     <SwipeableDrawer
@@ -88,12 +87,11 @@ function CheckoutPage({ open, onClose }: any) {
             marginTop: "20px",
           }}
         >
-          Total Price: {parseFloat(totalPriceInSelectedCurrency)}{" "}
-          {selectedCurrency}
+          Total Price: {parseFloat(totalPriceFixed)} {selectedCurrency}
         </h2>
         <div style={{ marginTop: "20px", marginBottom: "20px" }}>
           <BuyWithCrypto
-            amount={totalPriceInSelectedCurrency}
+            amount={totalPriceFixed}
             onClick={closeDrawer}
             currency={selectedCurrency}
           />

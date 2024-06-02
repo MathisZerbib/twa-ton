@@ -10,19 +10,17 @@ interface ExchangeRateResponse {
     rate: number;
 }
 
-export const fetchInitialExchangeRate = async (): Promise<number> => {
+export const fetchInitialExchangeRate = async (baseCurrency: string, quoteCurrency: string): Promise<number> => {
     try {
-        const response = await axios.get<ExchangeRateResponse>(`${API_URL}TON/USDT?apikey=${API_KEY}`);
+        const response = await axios.get<ExchangeRateResponse>(`${API_URL}${baseCurrency}/${quoteCurrency}?apikey=${API_KEY}`);
         return response.data.rate;
     } catch (error) {
-        // console.error('Failed to fetch initial exchange rate:', error);
-        // throw error;
         return 0;
     }
 };
 
 
-const performCurrencyConversion = async (price: number, currency: string | null) => {
+export const performCurrencyConversion = async (price: number, currency: string | null) => {
     try {
         if (currency === 'USDT') {
             return price;
