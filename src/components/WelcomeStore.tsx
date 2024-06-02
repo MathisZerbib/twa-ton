@@ -1,6 +1,7 @@
 // src/components/WelcomeStore.tsx
 import React from "react";
 import styled from "styled-components";
+import { useCurrency } from "../providers/useCurrency";
 
 const Container = styled.div`
   display: flex;
@@ -23,13 +24,15 @@ const PaymentOptions = styled.p`
   margin: auto;
 `;
 const tonLogo = "ton.svg";
+const usdtLogo = "usdt.svg";
+
 const WelcomeStore: React.FC = () => {
   return (
     <Container>
       <WelcomeText>
-        Vite TON CBD
+        Vite {useCurrency().selectedCurrency === "TON" ? "TON" : "USDT"} CBD
         <img
-          src={tonLogo}
+          src={useCurrency().selectedCurrency === "TON" ? tonLogo : usdtLogo}
           alt="TON logo"
           style={{ width: 24, height: 24, marginLeft: 10, marginBottom: 25 }}
         />{" "}
@@ -39,7 +42,17 @@ const WelcomeStore: React.FC = () => {
         Commandez dès maintenant votre CBD sur Montpellier
         <br />
         <br />
-        The Open Network (TON)
+        {useCurrency().selectedCurrency === "TON" ? (
+          <>
+            Payez en TON
+            <br />
+          </>
+        ) : (
+          <>
+            Payez en USDT
+            <br />
+          </>
+        )}
       </PaymentOptions>
     </Container>
   );
