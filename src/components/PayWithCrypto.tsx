@@ -47,10 +47,15 @@ export function BuyWithCrypto({
         onClick={async () => {
           onClick();
           if (currency === "TON") {
+            /// TODO If ok then empty the cart and send the payment snackbar
             sender.send({
               to: Address.parse(tonRecipient),
               value: toNano(amount),
             });
+
+            // show snackbar
+
+            // empty the cart
           } else if (currency === "USDT") {
             // Handle USDT payment
             // Add your logic for USDT payment here
