@@ -13,6 +13,7 @@ import { faClose } from "@fortawesome/free-solid-svg-icons";
 import CartItem from "../components/CartItem";
 // import { CHAIN } from "@tonconnect/protocol";
 import { useCurrency } from "../providers/useCurrency";
+import AutoFetchGeolocation from "../components/AutoFetchGeolocation";
 
 const EmptyCart = () => <p>Your cart is empty</p>;
 
@@ -74,6 +75,8 @@ function CheckoutPage({ open, onClose }: any) {
           alignItems: "center",
         }}
       >
+        <AutoFetchGeolocation />
+
         <h2>Your Cart</h2>
         {cartItems.length > 0 ? (
           cartItems.map((item) => (
