@@ -39,7 +39,11 @@ function App() {
   const [openCheckout, setOpenCheckout] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false); // State to control the drawer
   const [selectedCurrency, setSelectedCurrency] = useState<string>(
-    localStorage.getItem("selectedCurrency") || "USDT"
+    (localStorage.getItem("selectedCurrency") &&
+      localStorage.getItem("selectedCurrency")!.toUpperCase() !== "USDT") ||
+      localStorage.getItem("selectedCurrency")!.toUpperCase() !== "TON"
+      ? "USDT"
+      : localStorage.getItem("selectedCurrency")!.toUpperCase()
   );
 
   // Mock orders array for demonstration purposes
