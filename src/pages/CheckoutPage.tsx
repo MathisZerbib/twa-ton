@@ -12,18 +12,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import CartItem from "../components/CartItem";
 // import { CHAIN } from "@tonconnect/protocol";
+import { useCurrency } from "../providers/useCurrency";
 
 const EmptyCart = () => <p>Your cart is empty</p>;
 
 function CheckoutPage({ open, onClose }: any) {
   const { cartItems, totalPrice, removeItem } = useCart();
-  const [selectedCurrency, setSelectedCurrency] = useState<string>(
-    localStorage.getItem("selectedCurrency") || "USDT"
-  );
+  const { selectedCurrency, updateSelectedCurrency } = useCurrency();
 
   useEffect(() => {
     const currency = localStorage.getItem("selectedCurrency");
-    setSelectedCurrency(currency || "USDT");
+    if (currency) {
+      updateSelectedCurrency(currency);
+    }
   }, []);
 
   const closeDrawer = () => {

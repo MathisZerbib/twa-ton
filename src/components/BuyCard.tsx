@@ -13,6 +13,7 @@ import {
   BuyCardStyled,
 } from "./styled/styled";
 import performCurrencyConversion from "../services/exchangeRateService";
+import { useCurrency } from "../providers/useCurrency";
 
 interface ProductProps {
   id: string;
@@ -32,9 +33,7 @@ const BuyCard: React.FC<ProductProps> = ({
   price,
 }) => {
   const [selectedQuantity, setSelectedQuantity] = useState<number>(5);
-  const [selectedCurrency, setSelectedCurrency] = useState<string>(
-    localStorage.getItem("selectedCurrency") || "USDT"
-  );
+  const { selectedCurrency, updateSelectedCurrency } = useCurrency();
   const [totalPrice, setTotalPrice] = useState<number>(5 * price); // State to hold the total price
 
   // Function to handle quantity change
@@ -51,7 +50,7 @@ const BuyCard: React.FC<ProductProps> = ({
   useEffect(() => {
     const currency = localStorage.getItem("selectedCurrency");
     if (currency) {
-      setSelectedCurrency(currency);
+      updateSelectedCurrency(currency);
     }
   }, []);
 

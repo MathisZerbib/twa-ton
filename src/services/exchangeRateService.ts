@@ -12,7 +12,11 @@ interface ExchangeRateResponse {
 
 export const fetchInitialExchangeRate = async (baseCurrency: string, quoteCurrency: string): Promise<number> => {
     try {
-        const response = await axios.get<ExchangeRateResponse>(`${API_URL}${baseCurrency}/${quoteCurrency}?apikey=${API_KEY}`);
+        const response = await axios.get<ExchangeRateResponse>(`${API_URL}${baseCurrency}/${quoteCurrency}`, {
+            params: {
+                apikey: API_KEY,
+            },
+        });
         return response.data.rate;
     } catch (error) {
         return 0;

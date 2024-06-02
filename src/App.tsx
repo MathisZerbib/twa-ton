@@ -31,6 +31,7 @@ import { OrderProps } from "./components/types";
 import OrdersDrawer from "./components/OrderDrawer";
 import PriceConverter from "./components/PriceConverter";
 import CurrencySwitcher from "./components/CurrencySwitcher";
+import { useCurrency } from "./providers/useCurrency";
 
 function App() {
   const { network } = useTonConnect();
@@ -38,14 +39,8 @@ function App() {
 
   const [openCheckout, setOpenCheckout] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false); // State to control the drawer
-  const [selectedCurrency, setSelectedCurrency] = useState<string>(
-    (localStorage.getItem("selectedCurrency") &&
-      localStorage.getItem("selectedCurrency")!.toUpperCase() !== "USDT") ||
-      localStorage.getItem("selectedCurrency")!.toUpperCase() !== "TON"
-      ? "USDT"
-      : localStorage.getItem("selectedCurrency")!.toUpperCase()
-  );
-
+  const selectedCurrency = useCurrency().selectedCurrency;
+  const updateSelectedCurrency = useCurrency().updateSelectedCurrency;
   // Mock orders array for demonstration purposes
   const mockOrders: OrderProps[] = [
     {
@@ -78,7 +73,7 @@ function App() {
   }
 
   const handleCurrencyChange = (currency: string) => {
-    setSelectedCurrency(currency);
+    updateSelectedCurrency(currency);
   };
 
   return (

@@ -3,6 +3,7 @@ import { useTonConnect } from "../hooks/useTonConnect";
 import { useCart } from "../providers/CartProvider";
 import { CenterDiv, AddToCartButtonCard, FlexBoxRow } from "./styled/styled";
 import { CartItemProps } from "./types";
+import { useCurrency } from "../providers/useCurrency";
 
 type AddToCartButtonProps = {
   amount: number;
@@ -13,7 +14,7 @@ export function AddToCartButton({ amount, item }: AddToCartButtonProps) {
   const { connected } = useTonConnect();
   const { addToCart } = useCart();
   const [successMessage, setSuccessMessage] = useState("");
-  const selectedCurrency = localStorage.getItem("selectedCurrency") || "USDT";
+  const selectedCurrency = useCurrency().selectedCurrency;
 
   // Hardcoded image source
   const tonLogoUrl = "ton.svg";

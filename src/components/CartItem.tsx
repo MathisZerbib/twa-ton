@@ -3,7 +3,7 @@ import { CartItemStyled } from "../components/styled/styled";
 import products from "../shop/Products";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
-
+import { useCurrency } from "../providers/useCurrency";
 interface CartItemProps {
   item: any;
   removeItem: (item: any) => void;
@@ -11,7 +11,7 @@ interface CartItemProps {
 
 const CartItem: React.FC<CartItemProps> = ({ item, removeItem }) => {
   const product = products.find((product) => product.id === item.id);
-  const useCurrency = localStorage.getItem("selectedCurrency") || "TON";
+  const selectedCurrency = useCurrency().selectedCurrency;
 
   return (
     <CartItemStyled
@@ -48,7 +48,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, removeItem }) => {
         <span style={{ color: "grey" }}>{item.quantity}G</span>
       </p>
       <p>
-        {item.price} {useCurrency}
+        {item.price} {selectedCurrency}
       </p>
       <Button onClick={() => removeItem(item)}>
         <FontAwesomeIcon
