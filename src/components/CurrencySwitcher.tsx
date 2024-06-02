@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useCart } from "../providers/CartProvider";
 
 interface CurrencySwitcherProps {
   selectedCurrency: string;
@@ -13,8 +12,8 @@ const CurrencySwitcher: React.FC<CurrencySwitcherProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const currencies = [
-    { value: "TON", label: "TON" },
     { value: "USDT", label: "USDT" },
+    { value: "TON", label: "TON" },
   ];
 
   const toggleDropdown = () => setIsOpen(!isOpen);

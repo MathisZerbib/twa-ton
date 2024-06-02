@@ -85,7 +85,7 @@ function App() {
           <FlexBoxRowSpaceBetween>
             <StoreLogo src="logo.png" alt="Store Logo" />
             <Fab
-              color={selectedCurrency === "TON" ? "primary" : "secondary"}
+              color={selectedCurrency === "USDT" ? "primary" : "secondary"}
               aria-label="shopping-cart"
               style={{
                 position: "fixed",

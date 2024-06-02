@@ -13,7 +13,7 @@ export function AddToCartButton({ amount, item }: AddToCartButtonProps) {
   const { connected } = useTonConnect();
   const { addToCart } = useCart();
   const [successMessage, setSuccessMessage] = useState("");
-  const selectedCurrency = localStorage.getItem("selectedCurrency");
+  const selectedCurrency = localStorage.getItem("selectedCurrency") || "USDT";
 
   // Hardcoded image source
   const tonLogoUrl = "ton.svg";
