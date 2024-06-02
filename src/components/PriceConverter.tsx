@@ -75,7 +75,7 @@ const PriceConverter: React.FC = () => {
   useEffect(() => {
     const getInitialRate = async () => {
       try {
-        const rate = await fetchInitialExchangeRate("USDT", "TON");
+        const rate = await fetchInitialExchangeRate("TON", "USDT");
         setTonUsdtRate(rate);
       } catch (error) {
         console.error("Failed to fetch initial exchange rate:", error);
