@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { useCart } from "../providers/CartProvider";
 
 interface CurrencySwitcherProps {
   selectedCurrency: string;
@@ -22,6 +23,8 @@ const CurrencySwitcher: React.FC<CurrencySwitcherProps> = ({
     onCurrencyChange(currency);
     localStorage.setItem("selectedCurrency", currency);
     setIsOpen(false); // Close the dropdown after selection
+
+    window.location.reload(); // Reload the page to reflect the changes
   };
 
   return (

@@ -3,7 +3,6 @@ export interface ProductProps {
     id: string;
     imageUrl: string;
     name: string;
-    grams: number;
     rating: number;
     strains: string[];
     price: number;

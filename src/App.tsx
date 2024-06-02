@@ -85,11 +85,11 @@ function App() {
           <FlexBoxRowSpaceBetween>
             <StoreLogo src="logo.png" alt="Store Logo" />
             <Fab
-              color="primary"
+              color={selectedCurrency === "TON" ? "primary" : "secondary"}
               aria-label="shopping-cart"
               style={{
                 position: "fixed",
-                bottom: 20,
+                bottom: 50,
                 right: 20,
                 display: "flex",
                 flexDirection: "row",
@@ -107,8 +107,8 @@ function App() {
               <span>
                 {totalPrice.toFixed(2)}{" "}
                 <img
-                  src="ton.svg"
-                  alt="TON logo"
+                  src={selectedCurrency.toLowerCase() + ".svg"}
+                  alt={selectedCurrency + " icon"}
                   style={{
                     width: 20,
                     height: 20,
@@ -151,6 +151,7 @@ function App() {
           open={drawerOpen}
           onClose={toggleDrawer}
         />
+        <br />
         <PriceConverter />
       </AppContainer>
     </StyledApp>

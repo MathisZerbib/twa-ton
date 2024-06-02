@@ -3,14 +3,18 @@ import { useTonConnect } from "../hooks/useTonConnect";
 import { CenterDiv, ButtonBuyTonStyled } from "./styled/styled";
 import { useCart } from "../providers/CartProvider";
 
-type BuyWithTonProps = {
+type PayWithCryptoProps = {
   amount: string;
   onClick: () => void;
   currency: string;
 };
 import { CHAIN } from "@tonconnect/protocol";
 
-export function BuyWithTon({ amount, onClick, currency }: BuyWithTonProps) {
+export function BuyWithCrypto({
+  amount,
+  onClick,
+  currency,
+}: PayWithCryptoProps) {
   const { sender, connected, network } = useTonConnect();
   const tonRecipient =
     network === CHAIN.MAINNET
@@ -61,7 +65,7 @@ export function BuyWithTon({ amount, onClick, currency }: BuyWithTonProps) {
             height: "20px",
           }}
         />
-        Pay {parseInt(amount).toFixed(2)} {currency}
+        Pay {parseFloat(amount).toFixed(3)} {currency}
       </ButtonBuyTonStyled>
     </CenterDiv>
   );

@@ -11,6 +11,7 @@ interface CartItemProps {
 
 const CartItem: React.FC<CartItemProps> = ({ item, removeItem }) => {
   const product = products.find((product) => product.id === item.id);
+  const useCurrency = localStorage.getItem("selectedCurrency") || "TON";
 
   return (
     <CartItemStyled
@@ -46,7 +47,9 @@ const CartItem: React.FC<CartItemProps> = ({ item, removeItem }) => {
         {product?.name} -{" "}
         <span style={{ color: "grey" }}>{item.quantity}G</span>
       </p>
-      <p>{item.price} TON</p>
+      <p>
+        {item.price} {useCurrency}
+      </p>
       <Button onClick={() => removeItem(item)}>
         <FontAwesomeIcon
           icon={faCircleXmark}

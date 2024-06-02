@@ -1,6 +1,4 @@
-// src/components/BuyCard.tsx
-import React, { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useEffect } from "react";
 import { faStar, faStarHalfStroke } from "@fortawesome/free-solid-svg-icons";
 import "./BuyCard.css";
 import EmojiStrains from "./EmojiStrains";
@@ -14,6 +12,7 @@ import {
   HalfStar,
   BuyCardStyled,
 } from "./styled/styled";
+import performCurrencyConversion from "../services/exchangeRateService";
 
 interface ProductProps {
   id: string;
@@ -33,10 +32,12 @@ const BuyCard: React.FC<ProductProps> = ({
   price,
 }) => {
   const [selectedQuantity, setSelectedQuantity] = useState<number>(5);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>(
+    localStorage.getItem("selectedCurrency") || "USDT"
+  );
+  const [totalPrice, setTotalPrice] = useState<number>(5 * price); // State to hold the total price
 
-  const intPart = Math.floor(rating);
-  const fracPart = rating % 1;
-
+  // Function to handle quantity change
   const handleQuantityChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -46,7 +47,33 @@ const BuyCard: React.FC<ProductProps> = ({
     }
   };
 
-  const overallPrice = selectedQuantity * price;
+  // Function to retrieve selected currency from localStorage
+  useEffect(() => {
+    const currency = localStorage.getItem("selectedCurrency");
+    if (currency) {
+      setSelectedCurrency(currency);
+    }
+  }, []);
+
+  // Function to update the total price based on the selected currency
+  useEffect(() => {
+    const convertPrice = async () => {
+      try {
+        const convertedPrice = await performCurrencyConversion(
+          price,
+          selectedCurrency
+        );
+        setTotalPrice(selectedQuantity * convertedPrice);
+      } catch (error) {
+        console.error("Failed to convert price:", error);
+      }
+    };
+
+    convertPrice();
+  }, [selectedCurrency, selectedQuantity, price]);
+
+  const intPart = Math.floor(rating);
+  const fracPart = rating % 1;
 
   return (
     <BuyCardStyled>
@@ -83,8 +110,8 @@ const BuyCard: React.FC<ProductProps> = ({
           ))}
         </select>
         <AddToCartButton
-          amount={overallPrice}
-          item={{ id: id, quantity: selectedQuantity, price: overallPrice }}
+          amount={totalPrice}
+          item={{ id: id, quantity: selectedQuantity, price: totalPrice }}
         />
         <br />
       </ButtonCenterDiv>

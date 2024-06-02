@@ -64,7 +64,7 @@ export const Input = styled("input")`
 export const AddToCartButtonCard = styled(Button)`
   position: relative;
   display: flex;
-  width: 150px;
+  width: 120px;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -115,7 +115,9 @@ export const HeaderWrapper = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
-  margin-top: 5px;
+  margin-top: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
 `;
 
 export const ButtonCenterDiv = styled.div`
@@ -250,8 +252,7 @@ export const StyledApp = styled.div`
     background-color: #222;
     color: white;
   }
-  min-height: 100vh;
-  padding: 20px 20px;
+  padding: 40px 20px;
 `;
 
 export const AppContainer = styled.div`

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useCart } from "../providers/CartProvider";
-import { BuyWithTon } from "../components/BuyWithTon";
+import { BuyWithCrypto } from "../components/PayWithCrypto";
 import {
   SwipeableDrawer,
   AppBar,
@@ -11,7 +11,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import CartItem from "../components/CartItem";
-import { CHAIN } from "@tonconnect/protocol";
+// import { CHAIN } from "@tonconnect/protocol";
 
 const EmptyCart = () => <p>Your cart is empty</p>;
 
@@ -43,6 +43,7 @@ function CheckoutPage({ open, onClose }: any) {
       <AppBar
         style={{
           position: "relative",
+          backgroundColor: "#000",
         }}
       >
         <Toolbar>
@@ -91,7 +92,7 @@ function CheckoutPage({ open, onClose }: any) {
           {selectedCurrency}
         </h2>
         <div style={{ marginTop: "20px", marginBottom: "20px" }}>
-          <BuyWithTon
+          <BuyWithCrypto
             amount={totalPriceInSelectedCurrency}
             onClick={closeDrawer}
             currency={selectedCurrency}

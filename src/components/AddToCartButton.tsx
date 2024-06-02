@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useTonConnect } from "../hooks/useTonConnect";
 import { useCart } from "../providers/CartProvider";
-import { CenterDiv, AddToCartButtonCard } from "./styled/styled";
+import { CenterDiv, AddToCartButtonCard, FlexBoxRow } from "./styled/styled";
 import { CartItemProps } from "./types";
 
 type AddToCartButtonProps = {
@@ -13,9 +13,11 @@ export function AddToCartButton({ amount, item }: AddToCartButtonProps) {
   const { connected } = useTonConnect();
   const { addToCart } = useCart();
   const [successMessage, setSuccessMessage] = useState("");
+  const selectedCurrency = localStorage.getItem("selectedCurrency");
 
   // Hardcoded image source
   const tonLogoUrl = "ton.svg";
+  const usdtLogoUrl = "usdt.svg";
 
   const handleAddToCart = async () => {
     try {
@@ -28,19 +30,29 @@ export function AddToCartButton({ amount, item }: AddToCartButtonProps) {
     }
   };
 
-  return (
-    <CenterDiv>
-      <AddToCartButtonCard disabled={!connected} onClick={handleAddToCart}>
+  return amount > 0 ? (
+    <AddToCartButtonCard disabled={!connected} onClick={handleAddToCart}>
+      <FlexBoxRow
+        style={{
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        {amount.toFixed(2)}
+
         <img
-          src={tonLogoUrl}
-          alt="Buy with TON"
+          src={selectedCurrency === "TON" ? tonLogoUrl : usdtLogoUrl}
+          alt={"Buy with" + selectedCurrency}
           style={{
             width: "20px",
             height: "20px",
           }}
         />
-        {amount} TON
-      </AddToCartButtonCard>
+      </FlexBoxRow>
+    </AddToCartButtonCard>
+  ) : (
+    <CenterDiv>
+      <p style={{ color: "red" }}>Out of stock</p>
     </CenterDiv>
   );
 }
