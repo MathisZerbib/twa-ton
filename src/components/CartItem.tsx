@@ -6,10 +6,10 @@ import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
 import { useCurrency } from "../providers/useCurrency";
 interface CartItemProps {
   item: any;
-  removeItem: (item: any) => void;
+  onRemoveItem: (item: any) => void;
 }
 
-const CartItem: React.FC<CartItemProps> = ({ item, removeItem }) => {
+const CartItem: React.FC<CartItemProps> = ({ item, onRemoveItem }) => {
   const product = products.find((product) => product.id === item.id);
   const selectedCurrency = useCurrency().selectedCurrency;
 
@@ -48,9 +48,9 @@ const CartItem: React.FC<CartItemProps> = ({ item, removeItem }) => {
         <span style={{ color: "grey" }}>{item.quantity}G</span>
       </p>
       <p>
-        {item.price} {selectedCurrency}
+        {parseFloat(item.price).toFixed(3)} {selectedCurrency}
       </p>
-      <Button onClick={() => removeItem(item)}>
+      <Button onClick={() => onRemoveItem(item)}>
         <FontAwesomeIcon
           icon={faCircleXmark}
           style={{

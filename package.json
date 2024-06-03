@@ -26,6 +26,7 @@
     "axios": "^1.7.2",
     "buffer": "^6.0.3",
     "leaflet": "^1.9.4",
+    "nominatim-client": "^3.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",

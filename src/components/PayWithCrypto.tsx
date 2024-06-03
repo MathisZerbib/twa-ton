@@ -70,7 +70,7 @@ export function BuyWithCrypto({
             height: "20px",
           }}
         />
-        Pay {parseFloat(amount).toFixed(3)} {currency}
+        Payer {parseFloat(amount).toFixed(2)} {currency}
       </ButtonBuyTonStyled>
     </CenterDiv>
   );

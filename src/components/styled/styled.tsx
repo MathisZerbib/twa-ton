@@ -170,7 +170,9 @@ export const CenterDiv = styled.div`
 export const ButtonBuyTonStyled = styled(Button)`
 position: relative; // Enable absolute positioning inside this container
 display: flex;
-width: 200px;
+min-width: 250px;
+min-height: 50px;
+width: 100%;
 align-items: center;
 justify-content: center;
 gap: 10px;

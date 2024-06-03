@@ -147,7 +147,7 @@ function App() {
                   }
                 ></NetworkBadge>
               </div>
-              {network && wallet && <WalletBalanceTon walletAddress={wallet} />}
+              {/* {network && wallet && <WalletBalanceTon walletAddress={wallet} />} */}
             </div>
           </FlexBoxRowSpaceBetween>
           <WelcomeStore />

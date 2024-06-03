@@ -53,7 +53,24 @@ export function AddToCartButton({ amount, item }: AddToCartButtonProps) {
     </AddToCartButtonCard>
   ) : (
     <CenterDiv>
-      <p style={{ color: "red" }}>Out of stock</p>
+      {/* display button out of stock  */}
+
+      <AddToCartButtonCard disabled={true}>
+        <FlexBoxRow
+          style={{
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "12px",
+            }}
+          >
+            Out of stock
+          </span>
+        </FlexBoxRow>
+      </AddToCartButtonCard>
     </CenterDiv>
   );
 }
