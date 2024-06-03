@@ -130,24 +130,25 @@ function App() {
                 selectedCurrency={selectedCurrency}
                 onCurrencyChange={handleCurrencyChange}
               />
-              <Button onClick={() => toggleDrawer(true)}>Orders</Button>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <div
-                style={{ display: "flex", flexDirection: "row", gap: "10px" }}
-              >
-                <TonConnectButton />
-                <NetworkBadge
-                  network={
-                    network === CHAIN.MAINNET
-                      ? "mainnet"
-                      : network === CHAIN.TESTNET
-                      ? "testnet"
-                      : ""
-                  }
-                ></NetworkBadge>
+              {/* <Button onClick={() => toggleDrawer(true)}>Orders</Button> */}
+
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div
+                  style={{ display: "flex", flexDirection: "row", gap: "10px" }}
+                >
+                  <TonConnectButton />
+                  <NetworkBadge
+                    network={
+                      network === CHAIN.MAINNET
+                        ? "mainnet"
+                        : network === CHAIN.TESTNET
+                        ? "testnet"
+                        : ""
+                    }
+                  ></NetworkBadge>
+                </div>
+                {/* {network && wallet && <WalletBalanceTon walletAddress={wallet} />} */}
               </div>
-              {/* {network && wallet && <WalletBalanceTon walletAddress={wallet} />} */}
             </div>
           </FlexBoxRowSpaceBetween>
           <WelcomeStore />

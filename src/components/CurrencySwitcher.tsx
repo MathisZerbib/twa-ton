@@ -27,14 +27,12 @@ const CurrencySwitcher: React.FC<CurrencySwitcherProps> = ({
   return (
     <StyledCurrencySwitcher>
       <div onClick={toggleDropdown} className="currency-title">
-        <span>{selectedCurrency}</span>
         <img
           src={`${selectedCurrency.toLowerCase()}.svg`}
           alt={`${selectedCurrency}`}
           style={{
             width: "20px",
             height: "20px",
-            marginLeft: "10px",
           }}
         />
       </div>
@@ -46,14 +44,12 @@ const CurrencySwitcher: React.FC<CurrencySwitcherProps> = ({
               onClick={() => handleCurrencyClick(currency.value)}
               className="currency-item"
             >
-              <span>{currency.label}</span>
               <img
                 src={`${currency.value.toLowerCase()}.svg`}
                 alt={`${currency.value}`}
                 style={{
                   width: "20px",
                   height: "20px",
-                  marginLeft: "10px",
                 }}
               />
             </li>
@@ -76,7 +72,6 @@ const StyledCurrencySwitcher = styled.div`
     border-radius: 5px;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Aligns items to opposite ends */
   }
 
   .currency-list {
