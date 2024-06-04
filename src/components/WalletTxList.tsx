@@ -30,7 +30,7 @@ const WalletTxList: React.FC<WalletTxListProps> = ({ walletAddress }) => {
         const queryToGetTransactions = `https://${url}tonapi.io/v2/blockchain/accounts/${address.toString()}/transactions?limit=100&sort_order=desc`;
         const response = await fetch(queryToGetTransactions);
         const { transactions } = await response.json();
-
+        console.log("address", address.toString());
         console.log("transactions", transactions);
         setTransactions(transactions);
       } catch (error) {
@@ -52,21 +52,23 @@ const WalletTxList: React.FC<WalletTxListProps> = ({ walletAddress }) => {
         marginTop: "10px",
       }}
     >
-      {transactions.map((tx, index) => {
-        return (
-          <div key={index}>
-            <ul
-              style={{
-                color: tx.success === true ? "green" : "red",
-              }}
-            >
-              <li>Hash: {tx.hash}</li>
-              <li>Success: {tx.success ? "Yes" : "No"}</li>
-              <li>Destination: {tx.in_msg.destination.address.toString()}</li>
-            </ul>
-          </div>
-        );
-      })}
+      {transactions &&
+        transactions.length > 0 &&
+        transactions.map((tx, index) => {
+          return (
+            <div key={index}>
+              <ul
+                style={{
+                  color: tx.success === true ? "green" : "red",
+                }}
+              >
+                <li>Hash: {tx.hash}</li>
+                <li>Success: {tx.success ? "Yes" : "No"}</li>
+                <li>Destination: {tx.in_msg.destination.address.toString()}</li>
+              </ul>
+            </div>
+          );
+        })}
     </div>
   );
 };
