@@ -150,7 +150,9 @@ function App() {
                 </div>
                 {/* {network && wallet && <WalletBalanceTon walletAddress={wallet} />} */}
                 {/* {network && wallet && <WalletTxList walletAddress={wallet} />} */}
-                <Button onClick={() => toggleDrawer(true)}>Orders</Button>
+                <Button onClick={() => toggleDrawer(true)}>
+                  <FontAwesomeIcon icon={faShoppingCart} />
+                </Button>
                 <OrdersDrawer
                   orders={mockOrders}
                   open={drawerOpen}
