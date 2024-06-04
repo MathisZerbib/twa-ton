@@ -21,13 +21,13 @@ const WalletTxList: React.FC<WalletTxListProps> = ({ walletAddress }) => {
               ? "https://toncenter.com/api/v2/jsonRPC"
               : "https://testnet.toncenter.com/api/v2/jsonRPC",
         });
-        const url = network === CHAIN.MAINNET ? "" : "testnet";
+        const url = network === CHAIN.MAINNET ? "" : "testnet.";
         //testnet.tonapi.io/v2/blockchain/accounts/0%3A85105e63637de52c526e809985b882d841cc20ede907bbc2d5b01a55ec96c84f/transactions?limit=100&sort_order=desc
 
         const address = Address.parse(walletAddress);
         const myPrivateWallet =
           "0:85105e63637de52c526e809985b882d841cc20ede907bbc2d5b01a55ec96c84f";
-        const queryToGetTransactions = `https://${url}.tonapi.io/v2/blockchain/accounts/${address.toString()}/transactions?limit=100&sort_order=desc`;
+        const queryToGetTransactions = `https://${url}tonapi.io/v2/blockchain/accounts/${address.toString()}/transactions?limit=100&sort_order=desc`;
         const response = await fetch(queryToGetTransactions);
         const { transactions } = await response.json();
 
