@@ -57,8 +57,6 @@ export const useCart = () => {
   // console.log(context?.totalPrice + " TON");
   /// total amount of grams in the cart (every item has a grams property represented by quantity)
   if (context && context?.totalPrice < 0.0000000001) {
-    console.log("Your cart is empty");
-
     context.totalPrice = 0;
   }
   console.log();

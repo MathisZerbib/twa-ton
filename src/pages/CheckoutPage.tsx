@@ -6,33 +6,21 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Dialog,
-  DialogContent,
-  DialogTitle,
   Button,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faAddressCard,
   faCartArrowDown,
   faClose,
+  faPersonBiking,
 } from "@fortawesome/free-solid-svg-icons";
 import CartItem from "../components/CartItem";
 import { useCurrency } from "../providers/useCurrency";
-import AutoFetchGeolocation from "../components/AutoFetchGeolocation";
+import MapWithGeocoder from "../components/MapWithGeocoder";
 import Divider from "@mui/material/Divider";
+// import MapDelivery from "../components/MapDelivery";
 
-const EmptyCart = () => <p>Your cart is empty</p>;
-
-const style = {
-  py: 0,
-  width: "100%",
-  maxWidth: 360,
-  borderRadius: 2,
-  border: "1px solid",
-  borderColor: "divider",
-  backgroundColor: "background.paper",
-};
+const EmptyCart = () => <h2>Vous n'avez pas d'article dans votre panier</h2>;
 
 function CheckoutPage({ open, onClose }: any) {
   const { cartItems, totalPrice, removeItem } = useCart();
@@ -51,11 +39,6 @@ function CheckoutPage({ open, onClose }: any) {
 
   const closeDrawer = () => {
     onClose();
-  };
-
-  const handleAddressClick = (address: string) => {
-    setSelectedAddress(address);
-    setOpenModal(true);
   };
 
   const handleOpenModal = () => {
@@ -123,13 +106,6 @@ function CheckoutPage({ open, onClose }: any) {
             >
               Panier
             </h1>
-
-            <FontAwesomeIcon
-              icon={faCartArrowDown}
-              style={{
-                width: "50px",
-              }}
-            />
           </Toolbar>
         </AppBar>
         <div
@@ -141,7 +117,6 @@ function CheckoutPage({ open, onClose }: any) {
             alignItems: "center",
           }}
         >
-          <h2>Your Cart</h2>
           {cartItems.length > 0 ? (
             cartItems.map((item, index) => (
               <React.Fragment key={item.id}>
@@ -163,14 +138,23 @@ function CheckoutPage({ open, onClose }: any) {
               alignSelf: "flex-end",
             }}
           >
-            Frais de gestion: {fees.toFixed(4)} {selectedCurrency}
+            {/* Frais de gestion: {fees.toFixed(4)} {selectedCurrency} */}
+            {/* //same here */}
+            {parseInt(totalPriceFeesIncluded) > 0
+              ? `Frais de gestion: ${fees.toFixed(4)} ${selectedCurrency}`
+              : ""}
           </p>
           <h2
             style={{
               alignSelf: "flex-end",
             }}
           >
-            Total Price: {totalPriceFeesIncluded} {selectedCurrency}
+            {
+              // do not show if the total price is 0
+              parseInt(totalPriceFeesIncluded) > 0
+                ? `Total: ${totalPriceFeesIncluded} ${selectedCurrency}`
+                : ""
+            }
           </h2>
           <div style={{ marginTop: "20px", marginBottom: "20px" }}>
             <BuyWithCrypto
@@ -181,8 +165,23 @@ function CheckoutPage({ open, onClose }: any) {
           </div>
         </div>
         {/* Button to open the modal */}
-        <Button variant="contained" onClick={handleOpenModal}>
-          {selectedAddress ? "Changer l'adresse" : "Selectionner votre adresse"}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            if (parseInt(totalPriceFeesIncluded) > 0) {
+              handleOpenModal();
+            }
+          }}
+          disabled={parseInt(totalPriceFeesIncluded) === 0} // Disable the button if the total is 0
+        >
+          {selectedAddress ? selectedAddress : "Selectionner votre adresse"}
+          <FontAwesomeIcon
+            icon={faPersonBiking}
+            style={{
+              marginLeft: "10px",
+            }}
+          />
         </Button>
       </SwipeableDrawer>
       {/* New Drawer for selecting address */}
@@ -260,7 +259,14 @@ function CheckoutPage({ open, onClose }: any) {
                 </p>
               </Toolbar>
             </AppBar>
-            <AutoFetchGeolocation onAddressClick={handleAddressClick} />
+            <MapWithGeocoder onSelectedAddress={setSelectedAddress} />
+            {/* <MapDelivery
+              onLocationSelect={(location) => {
+                console.log("Location selected" + location);
+              }}
+              startPoint={{ lat: 43.650769, lng: 3.876716 }}
+              endPoint={{ lat: 43.611, lng: 3.876 }}
+            /> */}
           </SwipeableDrawer>
         </div>
       </SwipeableDrawer>
