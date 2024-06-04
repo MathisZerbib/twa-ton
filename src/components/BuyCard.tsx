@@ -12,7 +12,7 @@ import {
   HalfStar,
   BuyCardStyled,
 } from "./styled/styled";
-import performCurrencyConversion from "../services/exchangeRateService";
+import { convertToTon } from "../services/exchangeRateService";
 import { useCurrency } from "../providers/useCurrency";
 
 interface ProductProps {
@@ -58,7 +58,7 @@ const BuyCard: React.FC<ProductProps> = ({
   useEffect(() => {
     const convertPrice = async () => {
       try {
-        const convertedPrice = await performCurrencyConversion(
+        const convertedPrice = await convertToTon(
           price,
           selectedCurrency
         );

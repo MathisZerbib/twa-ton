@@ -71,28 +71,34 @@ const PriceConverter: React.FC = () => {
   const [usdAmount, setUsdAmount] = useState<string>("");
   const [tonAmount, setTonAmount] = useState<string>("");
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [cachedRates, setCachedRates] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     const getInitialRate = async () => {
       try {
-        const rate = await fetchInitialExchangeRate("TON", "USDT");
-        setTonUsdtRate(rate);
+        // Check if the rate is already cached
+        if (!cachedRates["TON_USDT"]) {
+          const rate = await fetchInitialExchangeRate();
+          setTonUsdtRate(rate);
+          cachedRates["TON_USDT"] = rate; // Cache the rate
+        } else {
+          setTonUsdtRate(cachedRates["TON_USDT"]);
+        }
       } catch (error) {
         console.error("Failed to fetch initial exchange rate:", error);
       }
     };
 
     getInitialRate();
-  }, []);
-
+  }, [cachedRates]);
   const convertUsdToTon = (amount: string): number => {
     if (!tonUsdtRate || !amount) return 0;
-    return parseFloat(amount) / tonUsdtRate;
+    return parseFloat(amount) * tonUsdtRate;
   };
 
   const convertTonToUsd = (amount: string): number => {
     if (!tonUsdtRate || !amount) return 0;
-    return parseFloat(amount) * tonUsdtRate;
+    return parseFloat(amount) / tonUsdtRate;
   };
 
   const handleUsdAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {

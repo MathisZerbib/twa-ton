@@ -1,42 +1,54 @@
+// services/exchangeRateService.js
+
 import axios from 'axios';
+import { useEffect, useState } from 'react'; // Import useState for local state management
 
-const API_KEY = import.meta.env.VITE_COINAPI_API_KEY!;
-const API_URL = `https://rest.coinapi.io/v1/exchangerate/`;
-
-interface ExchangeRateResponse {
-    time: string;
-    asset_id_base: string;
-    asset_id_quote: string;
-    rate: number;
+interface TonApiResponse {
+    rates: {
+        [token: string]: {
+            prices: {
+                [currency: string]: number;
+            };
+            diff_24h?: {
+                [token: string]: string;
+            };
+            diff_7d?: {
+                [token: string]: string;
+            };
+            diff_30d?: {
+                [token: string]: string;
+            };
+        };
+    };
 }
 
-export const fetchInitialExchangeRate = async (baseCurrency: string, quoteCurrency: string): Promise<number> => {
+let cachedRates = {}; // Global variable to store cached rates
+
+export const fetchInitialExchangeRate = async (): Promise<number> => {
     try {
-        const response = await axios.get<ExchangeRateResponse>(`${API_URL}${baseCurrency}/${quoteCurrency}`, {
-            params: {
-                apikey: API_KEY,
-            },
-        });
-        return response.data.rate;
+        const response = await axios.get<TonApiResponse>(`https://tonapi.io/v2/rates?tokens=USD&currencies=TON`);
+        const priceInUsd = response.data.rates['USD']?.prices['TON'];
+        console.log('Initial exchange rate:', priceInUsd);
+        return priceInUsd;
     } catch (error) {
+        console.error('Failed to fetch initial exchange rate:', error);
         return 0;
     }
 };
 
-
-export const performCurrencyConversion = async (price: number, currency: string | null) => {
+export const convertToTon = async (amount: number, currency: string): Promise<number> => {
     try {
-        if (currency === 'USDT') {
-            return price;
+        if (currency == "USDT") {
+            return amount;
         } else {
-            const response = await axios.get<ExchangeRateResponse>(`${API_URL}USDT/${currency}?apikey=${API_KEY}`);
-            return price * response.data.rate;
+            const response = await axios.get<TonApiResponse>(`https://tonapi.io/v2/rates?tokens=USD&currencies=TON`);
+            const priceInUsd = response.data.rates['USD']?.prices[currency] || 0;
+            return amount * priceInUsd;
         }
     } catch (error) {
-        // console.error('Failed to perform currency conversion:', error);
-        // throw error;
+        console.error('Failed to perform currency conversion:', error);
         return 0;
     }
 };
 
-export default performCurrencyConversion;
+

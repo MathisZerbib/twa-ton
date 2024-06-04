@@ -24,7 +24,8 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
     const map = new mapboxgl.Map({
       container: mapRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [-79.4512, 43.6568], // Starting position [lng, lat]
+      // Starting position in south of france montpellier
+      center: [3.8767, 43.6116], // Starting position [lng, lat]
       zoom: 13, // Starting zoom
     });
 
