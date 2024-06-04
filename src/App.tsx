@@ -32,7 +32,8 @@ import OrdersDrawer from "./components/OrderDrawer";
 import PriceConverter from "./components/PriceConverter";
 import CurrencySwitcher from "./components/CurrencySwitcher";
 import { useCurrency } from "./providers/useCurrency";
-import WalletBalanceTon from "./components/WalletBalanceTon";
+// import WalletBalanceTon from "./components/WalletBalanceTon";
+// import WalletTxList from "./components/WalletTxList";
 
 function App() {
   const { network } = useTonConnect();
@@ -148,6 +149,7 @@ function App() {
                   ></NetworkBadge>
                 </div>
                 {/* {network && wallet && <WalletBalanceTon walletAddress={wallet} />} */}
+                {/* {network && wallet && <WalletTxList walletAddress={wallet} />} */}
               </div>
             </div>
           </FlexBoxRowSpaceBetween>

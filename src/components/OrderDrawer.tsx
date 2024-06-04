@@ -16,6 +16,7 @@ import {
   faCircleXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
+import { useTonConnect } from "../hooks/useTonConnect";
 
 interface OrdersDrawerProps {
   orders: OrderProps[];
@@ -28,6 +29,9 @@ const OrdersDrawer: React.FC<OrdersDrawerProps> = ({
   open,
   onClose,
 }) => {
+  const { connected } = useTonConnect();
+  const { wallet } = useTonConnect();
+
   const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent) => {
     if (event.key !== "Tab" && event.key !== "Shift") {
       onClose(!open);

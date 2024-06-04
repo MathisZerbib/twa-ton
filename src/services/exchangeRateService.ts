@@ -1,7 +1,6 @@
 // services/exchangeRateService.js
 
 import axios from 'axios';
-import { useEffect, useState } from 'react'; // Import useState for local state management
 
 interface TonApiResponse {
     rates: {
