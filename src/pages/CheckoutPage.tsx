@@ -49,11 +49,7 @@ function CheckoutPage({ open, onClose }: any) {
     setOpenModal(false);
   };
 
-  const handleOpenDrawer = () => {
-    setOpenDrawer(true);
-  };
-
-  const handleCloseDrawer = () => {
+  const handleCloseDrawerAddress = () => {
     setOpenDrawer(false);
   };
 
@@ -133,29 +129,16 @@ function CheckoutPage({ open, onClose }: any) {
             <EmptyCart />
           )}
           {/* fees for the overall process of delivery */}
-          <p
+          {/* <p
             style={{
               alignSelf: "flex-end",
             }}
           >
-            {/* Frais de gestion: {fees.toFixed(4)} {selectedCurrency} */}
-            {/* //same here */}
             {parseInt(totalPriceFeesIncluded) > 0
               ? `Frais de gestion: ${fees.toFixed(4)} ${selectedCurrency}`
               : ""}
-          </p>
-          <h2
-            style={{
-              alignSelf: "flex-end",
-            }}
-          >
-            {
-              // do not show if the total price is 0
-              parseInt(totalPriceFeesIncluded) > 0
-                ? `Total: ${totalPriceFeesIncluded} ${selectedCurrency}`
-                : ""
-            }
-          </h2>
+          </p> */}
+
           <div style={{ marginTop: "20px", marginBottom: "20px" }}>
             <BuyWithCrypto
               enabled={
@@ -179,7 +162,9 @@ function CheckoutPage({ open, onClose }: any) {
           }}
           disabled={parseInt(totalPriceFeesIncluded) === 0} // Disable the button if the total is 0
         >
-          {selectedAddress ? selectedAddress : "Selectionner votre adresse"}
+          {selectedAddress
+            ? selectedAddress
+            : "Faites vous livrer en moins de 2H"}
           <FontAwesomeIcon
             icon={faPersonBiking}
             style={{
@@ -192,7 +177,7 @@ function CheckoutPage({ open, onClose }: any) {
       <SwipeableDrawer
         anchor="bottom"
         open={openDrawer}
-        onClose={handleCloseDrawer}
+        onClose={handleCloseDrawerAddress}
         onOpen={() => {}}
       >
         <AppBar
@@ -205,7 +190,7 @@ function CheckoutPage({ open, onClose }: any) {
             <IconButton
               edge="start"
               color="inherit"
-              onClick={handleCloseDrawer}
+              onClick={handleCloseDrawerAddress}
               aria-label="close"
             >
               <FontAwesomeIcon icon={faClose} />
@@ -257,9 +242,7 @@ function CheckoutPage({ open, onClose }: any) {
                     marginRight: "auto",
                   }}
                 >
-                  {selectedAddress
-                    ? selectedAddress
-                    : "Selectionner votre adresse"}
+                  {selectedAddress ? selectedAddress : "Adresse de livraison"}
                 </p>
               </Toolbar>
             </AppBar>
