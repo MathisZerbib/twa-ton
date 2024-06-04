@@ -7,6 +7,7 @@ type PayWithCryptoProps = {
   amount: string;
   onClick: () => void;
   currency: string;
+  enabled: boolean;
 };
 import { CHAIN } from "@tonconnect/protocol";
 
@@ -14,6 +15,7 @@ export function BuyWithCrypto({
   amount,
   onClick,
   currency,
+  enabled,
 }: PayWithCryptoProps) {
   const { sender, connected, network } = useTonConnect();
   const tonRecipient =
@@ -42,7 +44,11 @@ export function BuyWithCrypto({
           parseFloat(amount) <= 0 ||
           tonRecipient === "" ||
           tonRecipient === undefined ||
-          tonRecipient === null
+          tonRecipient === null ||
+          currency === "" ||
+          currency === undefined ||
+          currency === null ||
+          !enabled
         }
         onClick={async () => {
           onClick();

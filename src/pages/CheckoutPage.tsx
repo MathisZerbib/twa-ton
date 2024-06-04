@@ -158,6 +158,10 @@ function CheckoutPage({ open, onClose }: any) {
           </h2>
           <div style={{ marginTop: "20px", marginBottom: "20px" }}>
             <BuyWithCrypto
+              enabled={
+                parseInt(totalPriceFeesIncluded) > 0 &&
+                selectedAddress.length > 0
+              }
               amount={totalPriceFeesIncluded}
               onClick={closeDrawer}
               currency={selectedCurrency}
