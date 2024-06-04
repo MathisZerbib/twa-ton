@@ -16,7 +16,10 @@ import WelcomeStore from "./components/WelcomeStore";
 import products from "./shop/Products";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPersonBiking,
+  faShoppingCart,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCart } from "./providers/CartProvider";
 import {
@@ -150,8 +153,11 @@ function App() {
                 </div>
                 {/* {network && wallet && <WalletBalanceTon walletAddress={wallet} />} */}
                 {/* {network && wallet && <WalletTxList walletAddress={wallet} />} */}
-                <Button onClick={() => toggleDrawer(true)}>
-                  <FontAwesomeIcon icon={faShoppingCart} />
+                <Button
+                  onClick={() => toggleDrawer(true)}
+                  style={{ marginTop: 10 }}
+                >
+                  <FontAwesomeIcon icon={faPersonBiking} />
                 </Button>
                 <OrdersDrawer
                   orders={mockOrders}
