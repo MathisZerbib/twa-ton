@@ -33,7 +33,7 @@ import PriceConverter from "./components/PriceConverter";
 import CurrencySwitcher from "./components/CurrencySwitcher";
 import { useCurrency } from "./providers/useCurrency";
 // import WalletBalanceTon from "./components/WalletBalanceTon";
-// import WalletTxList from "./components/WalletTxList";
+import WalletTxList from "./components/WalletTxList";
 
 function App() {
   const { network } = useTonConnect();
@@ -150,6 +150,12 @@ function App() {
                 </div>
                 {/* {network && wallet && <WalletBalanceTon walletAddress={wallet} />} */}
                 {/* {network && wallet && <WalletTxList walletAddress={wallet} />} */}
+                <Button onClick={() => toggleDrawer(true)}>Orders</Button>
+                <OrdersDrawer
+                  orders={mockOrders}
+                  open={drawerOpen}
+                  onClose={toggleDrawer}
+                />
               </div>
             </div>
           </FlexBoxRowSpaceBetween>

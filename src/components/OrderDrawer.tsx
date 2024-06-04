@@ -17,7 +17,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { useTonConnect } from "../hooks/useTonConnect";
-
+import WalletTxList from "./WalletTxList";
 interface OrdersDrawerProps {
   orders: OrderProps[];
   open: boolean;
@@ -62,7 +62,9 @@ const OrdersDrawer: React.FC<OrdersDrawerProps> = ({
       <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
         Your Orders
       </Typography>
-      <List sx={{ pt: 0 }}>
+      {/* <List sx={{ pt: 0 }}>
+
+        
         {orders.map((order, index) => (
           <ListItem key={index} button sx={{ py: 1, px: 2 }}>
             <FontAwesomeIcon
@@ -71,7 +73,8 @@ const OrdersDrawer: React.FC<OrdersDrawerProps> = ({
             <ListItemText primary={`Order ${index + 1}: ${order.status}`} />
           </ListItem>
         ))}
-      </List>
+      </List> */}
+      <WalletTxList walletAddress={wallet!} />
     </div>
   );
 

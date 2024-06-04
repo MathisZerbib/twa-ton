@@ -59,7 +59,7 @@ function CheckoutPage({ open, onClose }: any) {
   ).toFixed(2);
 
   useEffect(() => {
-    setFees(totalPriceFixed * 0.02);
+    setFees(totalPriceFixed * 0.002);
   }, [totalPriceFixed]);
 
   return (

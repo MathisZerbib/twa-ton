@@ -1,4 +1,4 @@
-import { Address, toNano } from "ton";
+import { Address, Cell, toNano } from "ton";
 import { useTonConnect } from "../hooks/useTonConnect";
 import { CenterDiv, ButtonBuyTonStyled } from "./styled/styled";
 import { useCart } from "../providers/CartProvider";
@@ -30,6 +30,14 @@ export function BuyWithCrypto({
   const tonLogoUrl = "ton.svg";
   const usdtLogoUrl = "usdt.svg";
 
+  const cart = cartItems.map((item) => {
+    return {
+      id: item.id,
+      price: item.price,
+      quantity: item.quantity,
+    };
+  });
+
   return (
     <CenterDiv>
       <ButtonBuyTonStyled
@@ -54,10 +62,16 @@ export function BuyWithCrypto({
           onClick();
           if (currency === "TON") {
             /// TODO If ok then empty the cart and send the payment snackbar
-            sender.send({
-              to: Address.parse(tonRecipient),
-              value: toNano(amount),
-            });
+            try {
+              const amountNano = toNano(amount);
+              const message = await sender.send({
+                to: Address.parse(tonRecipient),
+                value: amountNano,
+              });
+              console.log("Transaction sent", message);
+            } catch (error) {
+              console.log("Transaction failed", error);
+            }
 
             // show snackbar
 
@@ -65,6 +79,8 @@ export function BuyWithCrypto({
           } else if (currency === "USDT") {
             // Handle USDT payment
             // Add your logic for USDT payment here
+            // show snackbar
+            // empty the cart
           }
         }}
       >
