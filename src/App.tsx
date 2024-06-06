@@ -140,7 +140,22 @@ function App() {
                 <div
                   style={{ display: "flex", flexDirection: "row", gap: "10px" }}
                 >
+                  {/* <Button
+                    onClick={() => toggleDrawer(true)}
+                    disabled={!wallet}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faPersonBiking} />
+                  </Button> */}
+
                   <TonConnectButton />
+
                   <NetworkBadge
                     network={
                       network === CHAIN.MAINNET
@@ -153,12 +168,7 @@ function App() {
                 </div>
                 {/* {network && wallet && <WalletBalanceTon walletAddress={wallet} />} */}
                 {/* {network && wallet && <WalletTxList walletAddress={wallet} />} */}
-                <Button
-                  onClick={() => toggleDrawer(true)}
-                  style={{ marginTop: 10 }}
-                >
-                  <FontAwesomeIcon icon={faPersonBiking} />
-                </Button>
+
                 <OrdersDrawer
                   orders={mockOrders}
                   open={drawerOpen}

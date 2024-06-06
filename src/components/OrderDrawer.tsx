@@ -6,7 +6,8 @@ import {
   ListItem,
   ListItemText,
   Typography,
-  IconButton, // Import IconButton
+  IconButton,
+  AppBar, // Import IconButton
 } from "@mui/material";
 import { OrderProps } from "./types"; // Adjust the import path as necessary
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -47,34 +48,43 @@ const OrdersDrawer: React.FC<OrdersDrawerProps> = ({
       role="presentation"
       onClick={handleClick(open)}
       onKeyDown={toggleDrawer(open)}
-      style={{ minWidth: 420 }}
+      style={{
+        minWidth: "90vw",
+      }}
     >
-      <IconButton
-        edge="start"
-        color="inherit"
-        onClick={handleClick(open)}
-        sx={{ ml: 2, mt: 2 }}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          gap: "10px",
+          padding: "10px",
+        }}
       >
-        {" "}
-        {/* Close button */}
-        <FontAwesomeIcon icon={fas.faTimes} />
-      </IconButton>
-      <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-        Your Orders
-      </Typography>
-      {/* <List sx={{ pt: 0 }}>
-
-        
+        <IconButton
+          edge="start"
+          color="inherit"
+          onClick={handleClick(open)}
+          sx={{ ml: 1 }}
+        >
+          {" "}
+          {/* Close button */}
+          <FontAwesomeIcon icon={fas.faTimes} />
+        </IconButton>
+        <Typography variant="h6" textAlign={"center"} sx={{ flexGrow: 1 }}>
+          Your Orders
+        </Typography>
+      </div>
+      <List sx={{ pt: 0 }}>
         {orders.map((order, index) => (
-          <ListItem key={index} button sx={{ py: 1, px: 2 }}>
+          <ListItem key={index} sx={{ mb: 1 }}>
             <FontAwesomeIcon
               icon={order.status === "Completed" ? faCheckCircle : faClock}
             />
             <ListItemText primary={`Order ${index + 1}: ${order.status}`} />
           </ListItem>
         ))}
-      </List> */}
-      <WalletTxList walletAddress={wallet!} />
+      </List>
+      {/* <WalletTxList walletAddress={wallet!} /> */}
     </div>
   );
 
