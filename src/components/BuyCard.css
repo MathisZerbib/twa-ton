@@ -1,8 +1,8 @@
 /* Product Image Styling */
 .product-image {
-  border-radius: 10px;
   width: 100%;
-  height: auto; /* Height set to auto to maintain aspect ratio */
+  height: 200px;
+  object-fit: cover;
 }
 
 /* Strain List Item Styling */

@@ -9,7 +9,6 @@ import {
   ProductName,
   Rating,
   Star,
-  HalfStar,
   BuyCardStyled,
 } from "./styled/styled";
 import { convertToTon } from "../services/exchangeRateService";
@@ -58,10 +57,7 @@ const BuyCard: React.FC<ProductProps> = ({
   useEffect(() => {
     const convertPrice = async () => {
       try {
-        const convertedPrice = await convertToTon(
-          price,
-          selectedCurrency
-        );
+        const convertedPrice = await convertToTon(price, selectedCurrency);
         setTotalPrice(selectedQuantity * convertedPrice);
       } catch (error) {
         console.error("Failed to convert price:", error);
@@ -71,22 +67,26 @@ const BuyCard: React.FC<ProductProps> = ({
     convertPrice();
   }, [selectedCurrency, selectedQuantity, price]);
 
-  const intPart = Math.floor(rating);
-  const fracPart = rating % 1;
-
   return (
     <BuyCardStyled>
-      <img src={imageUrl} alt={name} className="product-image" />
+      <img
+        src={imageUrl}
+        alt={name}
+        style={{ width: "100%", borderRadius: "15px", marginBottom: "10px" }}
+      />
       <HeaderWrapper>
         <ProductName>{name}</ProductName>
         <Rating>
-          {[...Array(intPart)].map((_, index) => (
-            <Star icon={faStar} key={index} />
-          ))}
-          {fracPart > 0 && <Star icon={faStarHalfStroke} />}
-          {[...Array(5 - Math.ceil(rating))].map((_, index) => (
-            <HalfStar icon={faStar} key={index} />
-          ))}
+          <p
+            style={{
+              fontSize: "1rem",
+              marginRight: "5px",
+              color: "#333",
+            }}
+          >
+            {rating.toString()}
+          </p>
+          <Star icon={faStar} />
         </Rating>
       </HeaderWrapper>
 
@@ -112,7 +112,6 @@ const BuyCard: React.FC<ProductProps> = ({
           amount={totalPrice}
           item={{ id: id, quantity: selectedQuantity, price: totalPrice }}
         />
-        <br />
       </ButtonCenterDiv>
     </BuyCardStyled>
   );

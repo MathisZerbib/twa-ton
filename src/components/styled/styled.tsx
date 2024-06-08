@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import styled from "styled-components";
 
 export const Card = styled.div`
-  padding: 18px 20px;
+  padding: 10px 20px;
   border-radius: 8px;
   background-color: white;
 
@@ -103,11 +103,9 @@ export const AddToCartButtonCard = styled(Button)`
 
 export const BuyCardStyled = styled.div`
   background-color: #ffffff;
-  border-radius: 10px;
-  padding: 20px;
+  border-radius: 15px;
   margin: 10px;
-  width: 250px;
-  min-height: 300px;
+  padding: 10px;
 `;
 
 export const HeaderWrapper = styled.div`
@@ -222,11 +220,13 @@ export const StrainText = styled.p`
   color: inherit;
 `;
 
-export const StyledProductsList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
+export const ProductsListContainer = styled.div`
+  background-color: #3bb75e;
+`;
+export const StyledProductContainer = styled.div`
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 // Define NetworkBadge outside of any component
@@ -260,7 +260,6 @@ export const StyledApp = styled.div`
 `;
 
 export const AppContainer = styled.div`
-  max-width: 900px;
   margin: 0 auto;
 `;
 

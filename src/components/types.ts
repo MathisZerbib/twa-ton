@@ -1,5 +1,6 @@
 // src/components/types.ts
 export interface ProductProps {
+    category: string;
     id: string;
     imageUrl: string;
     name: string;
