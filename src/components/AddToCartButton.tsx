@@ -22,7 +22,7 @@ export function AddToCartButton({ amount, item }: AddToCartButtonProps) {
 
   const handleAddToCart = async () => {
     try {
-      await addToCart(item);
+      addToCart(item);
       setSuccessMessage("Added to cart!");
       setTimeout(() => setSuccessMessage(""), 3000); // Clear the message after 3 seconds
     } catch (error) {

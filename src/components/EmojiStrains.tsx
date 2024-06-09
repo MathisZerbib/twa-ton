@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import { Chip, StrainText } from "./styled/styled";
 // EmojiStrains component
 const EmojiStrains = ({ strains }: { strains: string[] }) => {
@@ -22,9 +23,9 @@ const EmojiStrains = ({ strains }: { strains: string[] }) => {
     <div>
       {strains.map((strain) => (
         <Chip key={strain}>
-          <StrainText>
+          <Typography style={{ fontSize: "0.8rem", color: "#fff" }}>
             {strainEmojis[strain] || "❓"} {strain}
-          </StrainText>
+          </Typography>
         </Chip>
       ))}
     </div>

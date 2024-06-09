@@ -6,13 +6,13 @@ import { AddToCartButton } from "./AddToCartButton";
 import {
   ButtonCenterDiv,
   HeaderWrapper,
-  ProductName,
   Rating,
   Star,
   BuyCardStyled,
 } from "./styled/styled";
 import { convertToTon } from "../services/exchangeRateService";
 import { useCurrency } from "../providers/useCurrency";
+import { Typography } from "@mui/material";
 
 interface ProductProps {
   id: string;
@@ -69,50 +69,51 @@ const BuyCard: React.FC<ProductProps> = ({
 
   return (
     <BuyCardStyled>
-      <img
-        src={imageUrl}
-        alt={name}
-        style={{ width: "100%", borderRadius: "15px", marginBottom: "10px" }}
-      />
-      <HeaderWrapper>
-        <ProductName>{name}</ProductName>
-        <Rating>
-          <p
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <img
+          src={imageUrl}
+          alt={name}
+          style={{
+            width: "100%",
+            height: "150px",
+            objectFit: "cover",
+            borderRadius: "10px",
+          }}
+        />
+      </div>
+      <div style={{ padding: "5px" }}>
+        <HeaderWrapper>
+          <Typography>{name}</Typography>
+          <Rating>
+            <Typography>{rating.toString()}</Typography>
+            <Star icon={faStar} />
+          </Rating>
+        </HeaderWrapper>
+
+        <EmojiStrains strains={strains} />
+        <br />
+        <ButtonCenterDiv>
+          <select
+            value={selectedQuantity}
+            onChange={handleQuantityChange}
             style={{
-              fontSize: "1rem",
-              marginRight: "5px",
-              color: "#333",
+              padding: "10px 20px",
+              borderRadius: "10px",
+              border: "1px solid #c2c2c2",
             }}
           >
-            {rating.toString()}
-          </p>
-          <Star icon={faStar} />
-        </Rating>
-      </HeaderWrapper>
-
-      <EmojiStrains strains={strains} />
-      <br />
-      <ButtonCenterDiv>
-        <select
-          value={selectedQuantity}
-          onChange={handleQuantityChange}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "10px",
-            border: "1px solid #c2c2c2",
-          }}
-        >
-          {[5, 10, 20, 50, 100].map((option) => (
-            <option key={option} value={option}>
-              {option}g
-            </option>
-          ))}
-        </select>
-        <AddToCartButton
-          amount={totalPrice}
-          item={{ id: id, quantity: selectedQuantity, price: totalPrice }}
-        />
-      </ButtonCenterDiv>
+            {[5, 10, 20, 50, 100].map((option) => (
+              <option key={option} value={option}>
+                {option}g
+              </option>
+            ))}
+          </select>
+          <AddToCartButton
+            amount={totalPrice}
+            item={{ id: id, quantity: selectedQuantity, price: totalPrice }}
+          />
+        </ButtonCenterDiv>
+      </div>
     </BuyCardStyled>
   );
 };

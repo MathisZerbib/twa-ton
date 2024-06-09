@@ -14,10 +14,11 @@ interface ProductsListProps {
 const ProductsList: React.FC<ProductsListProps> = ({ products }) => {
   const settings = {
     dots: false,
+    arrows: false,
     infinite: false,
     speed: 500,
-    slidesToShow: 4,
-    slidesToScroll: 4,
+    slidesToShow: 3,
+    slidesToScroll: 3,
 
     responsive: [
       {

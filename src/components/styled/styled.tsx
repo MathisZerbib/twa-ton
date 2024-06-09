@@ -64,7 +64,6 @@ export const Input = styled("input")`
 export const AddToCartButtonCard = styled(Button)`
   position: relative;
   display: flex;
-  width: 120px;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -102,20 +101,14 @@ export const AddToCartButtonCard = styled(Button)`
 `;
 
 export const BuyCardStyled = styled.div`
-  background-color: #ffffff;
   border-radius: 15px;
-  margin: 10px;
-  padding: 10px;
+  margin: 0 10px;
 `;
 
 export const HeaderWrapper = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  margin-top: 10px;
-  margin-left: 5px;
-  margin-right: 5px;
+  flex-direction: row;
+  gap: 10px;
 `;
 
 export const ButtonCenterDiv = styled.div`
@@ -129,14 +122,14 @@ export const ProductName = styled.h2`
   margin: 0;
   font-size: 0.9rem;
   font-weight: bold;
-  color: var(--tg-theme-text-color, #333);
+  color: var(--tg-theme-text-color);
 `;
 
 export const Quantity = styled.p`
   margin: 0;
   font-size: 1rem;
   font-style: italic;
-  color: var(--tg-theme-text-color, #333);
+  color: var(--tg-theme-text-color);
 `;
 
 export const Rating = styled.div`
@@ -165,30 +158,30 @@ export const CenterDiv = styled.div`
   align-items: center;
   text-align: center;
 `;
-export const ButtonBuyTonStyled = styled(Button)`
-position: relative; // Enable absolute positioning inside this container
-display: flex;
-min-width: 250px;
-min-height: 50px;
-width: 100%;
-align-items: center;
-justify-content: center;
-gap: 10px;
-padding: 10px 20px;
-background-color: #000;
-color: #fff;
-border: none;
-border-radius: 10px;
-cursor: pointer;
-font-size: 16px;
-transition: all 0.3s;
-}
 
-&:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-animation: fadeIn 0.5s;
+export const ButtonBuyTonStyled = styled(Button)`
+  position: relative;
+  display: flex;
+  min-width: 250px;
+  min-height: 50px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  animation: fadeIn 0.5s;
 `;
 
 export const Chip = styled.span`
@@ -196,17 +189,14 @@ export const Chip = styled.span`
   border-color: rgba(0, 0, 0, 0.48);
   border-style: solid;
   border-width: 1px;
-  color: #333;
+  color: var(--tg-theme-text-color);
   border-radius: 15px;
   padding: 5px 10px;
-  margin-right: 5px;
-  margin-bottom: 5px;
   font-size: 12px;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   backdrop-filter: blur(10px);
-
   transition: all 0.3s ease;
 
   &:hover {
@@ -221,15 +211,15 @@ export const StrainText = styled.p`
 `;
 
 export const ProductsListContainer = styled.div`
-  background-color: #3bb75e;
+  background-color: var(--tg-theme-bg-color);
 `;
+
 export const StyledProductContainer = styled.div`
   background: white;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
-// Define NetworkBadge outside of any component
 export const NetworkBadge = styled.span<{ network: string }>`
   display: inline-block;
   padding: 5px;
@@ -261,6 +251,7 @@ export const StyledApp = styled.div`
 
 export const AppContainer = styled.div`
   margin: 0 auto;
+  margin-bottom: 100px;
 `;
 
 export const StoreLogo = styled.img`
@@ -292,8 +283,8 @@ export const CartItemStyled = styled.div`
 export const CheckoutButton = styled.button`
   padding: 10px 20px;
   margin-top: 20px;
-  background-color: #007bff;
-  color: #fff;
+  background-color: var(--tg-theme-button-color);
+  color: var(--tg-theme-button-text-color);
   border: none;
   border-radius: 5px;
   cursor: pointer;

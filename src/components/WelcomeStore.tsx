@@ -1,7 +1,7 @@
 // src/components/WelcomeStore.tsx
 import React from "react";
 import styled from "styled-components";
-import { useCurrency } from "../providers/useCurrency";
+// import { useCurrency } from "../providers/useCurrency";
 
 const Container = styled.div`
   display: flex;
@@ -29,20 +29,20 @@ const usdtLogo = "usdt.svg";
 const WelcomeStore: React.FC = () => {
   return (
     <Container>
-      <WelcomeText>
+      {/* <WelcomeText>
         Vite {useCurrency().selectedCurrency === "TON" ? "TON" : "USDT"} CBD
         <img
           src={useCurrency().selectedCurrency === "TON" ? tonLogo : usdtLogo}
           alt="TON logo"
           style={{ width: 24, height: 24, marginLeft: 10, marginBottom: 25 }}
         />{" "}
-      </WelcomeText>
+      </WelcomeText> */}
       <br />
       <PaymentOptions>
         Commandez dès maintenant votre CBD sur Montpellier
         <br />
         <br />
-        {useCurrency().selectedCurrency === "TON" ? (
+        {/* {useCurrency().selectedCurrency === "TON" ? (
           <>
             Payez en TON
             <br />
@@ -52,7 +52,7 @@ const WelcomeStore: React.FC = () => {
             Payez en USDT
             <br />
           </>
-        )}
+        )} */}
       </PaymentOptions>
     </Container>
   );
