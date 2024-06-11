@@ -4,7 +4,7 @@ import styled from "styled-components";
 export const Card = styled.div`
   padding: 10px 20px;
   border-radius: 8px;
-  background-color: white;
+  background-color: var(--tg-theme-text-color);
 
   @media (prefers-color-scheme: dark) {
     background-color: #111;
@@ -111,7 +111,7 @@ export const HeaderWrapper = styled.div`
   gap: 10px;
 `;
 
-export const ButtonCenterDiv = styled.div`
+export const ButtonSpaceBetweenContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -239,14 +239,17 @@ export const NetworkBadge = styled.span<{ network: string }>`
 `;
 
 export const StyledApp = styled.div`
-  background-color: #e8e8e8;
-  color: black;
+  background-color: ${({ theme }) => theme.bgColor};
+  color: ${({ theme }) => theme.textColor};
 
   @media (prefers-color-scheme: dark) {
-    background-color: #222;
-    color: white;
+    background-color: ${({ theme }) => theme.darkBgColor};
+    color: ${({ theme }) => theme.darkTextColor};
   }
+
   padding: 40px 20px;
+
+  /* Additional responsive styles can be added here */
 `;
 
 export const AppContainer = styled.div`

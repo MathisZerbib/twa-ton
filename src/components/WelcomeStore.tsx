@@ -17,7 +17,7 @@ const WelcomeText = styled.h1`
 `;
 
 const PaymentOptions = styled.p`
-  color: white;
+  color: var(--tg-theme-text-color);
   font-size: 24px;
   text-align: center;
   max-width: 800px;

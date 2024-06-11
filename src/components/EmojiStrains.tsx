@@ -20,10 +20,20 @@ const EmojiStrains = ({ strains }: { strains: string[] }) => {
   };
 
   return (
-    <div>
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "5px",
+        justifyContent: "start",
+      }}
+    >
+      {strains.length === 0 && <StrainText>No strains available</StrainText>}
       {strains.map((strain) => (
         <Chip key={strain}>
-          <Typography style={{ fontSize: "0.8rem", color: "#fff" }}>
+          <Typography
+            style={{ fontSize: "0.8rem", color: "var(--tg-theme-text-color)" }}
+          >
             {strainEmojis[strain] || "❓"} {strain}
           </Typography>
         </Chip>

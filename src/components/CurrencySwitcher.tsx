@@ -63,8 +63,7 @@ const CurrencySwitcher: React.FC<CurrencySwitcherProps> = ({
 const StyledCurrencySwitcher = styled.div`
   position: relative;
   cursor: pointer;
-  background-color: #333; /* Dark background */
-  color: white; /* White text */
+  color: var(--tg-theme-text-color);
 
   .currency-title {
     padding: 10px 14px;
@@ -83,7 +82,7 @@ const StyledCurrencySwitcher = styled.div`
     border-top: none;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    background-color: #444; /* Slightly lighter than the parent for contrast */
+    background-color: var(--tg-theme-text-color);
     z-index: 1;
     list-style-type: none;
     padding: 0;

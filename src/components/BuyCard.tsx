@@ -4,7 +4,7 @@ import "./BuyCard.css";
 import EmojiStrains from "./EmojiStrains";
 import { AddToCartButton } from "./AddToCartButton";
 import {
-  ButtonCenterDiv,
+  ButtonSpaceBetweenContainer,
   HeaderWrapper,
   Rating,
   Star,
@@ -13,6 +13,7 @@ import {
 import { convertToTon } from "../services/exchangeRateService";
 import { useCurrency } from "../providers/useCurrency";
 import { Typography } from "@mui/material";
+import Link from "@mui/material/Link"; // Import Link component from MUI
 
 interface ProductProps {
   id: string;
@@ -21,6 +22,7 @@ interface ProductProps {
   rating: number;
   strains: string[];
   price: number;
+  description: string;
 }
 
 const BuyCard: React.FC<ProductProps> = ({
@@ -30,12 +32,12 @@ const BuyCard: React.FC<ProductProps> = ({
   rating,
   strains,
   price,
+  description,
 }) => {
   const [selectedQuantity, setSelectedQuantity] = useState<number>(5);
   const { selectedCurrency, updateSelectedCurrency } = useCurrency();
-  const [totalPrice, setTotalPrice] = useState<number>(5 * price); // State to hold the total price
-
-  // Function to handle quantity change
+  const [totalPrice, setTotalPrice] = useState<number>(5 * price);
+  const descriptionFirstSentence = description.split(".")[0];
   const handleQuantityChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -45,7 +47,6 @@ const BuyCard: React.FC<ProductProps> = ({
     }
   };
 
-  // Function to retrieve selected currency from localStorage
   useEffect(() => {
     const currency = localStorage.getItem("selectedCurrency");
     if (currency) {
@@ -53,7 +54,6 @@ const BuyCard: React.FC<ProductProps> = ({
     }
   }, []);
 
-  // Function to update the total price based on the selected currency
   useEffect(() => {
     const convertPrice = async () => {
       try {
@@ -81,9 +81,17 @@ const BuyCard: React.FC<ProductProps> = ({
           }}
         />
       </div>
-      <div style={{ padding: "5px" }}>
+      <div
+        style={{
+          padding: "5px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          justifyContent: "space-between",
+        }}
+      >
         <HeaderWrapper>
-          <Typography>{name}</Typography>
+          <Typography variant="h6">{name}</Typography>
           <Rating>
             <Typography>{rating.toString()}</Typography>
             <Star icon={faStar} />
@@ -91,8 +99,13 @@ const BuyCard: React.FC<ProductProps> = ({
         </HeaderWrapper>
 
         <EmojiStrains strains={strains} />
-        <br />
-        <ButtonCenterDiv>
+
+        {/* Description with a link */}
+        <Typography variant="body2">
+          {descriptionFirstSentence + "."}
+        </Typography>
+
+        <ButtonSpaceBetweenContainer>
           <select
             value={selectedQuantity}
             onChange={handleQuantityChange}
@@ -100,6 +113,8 @@ const BuyCard: React.FC<ProductProps> = ({
               padding: "10px 20px",
               borderRadius: "10px",
               border: "1px solid #c2c2c2",
+              backgroundColor: "white",
+              color: "black",
             }}
           >
             {[5, 10, 20, 50, 100].map((option) => (
@@ -112,7 +127,7 @@ const BuyCard: React.FC<ProductProps> = ({
             amount={totalPrice}
             item={{ id: id, quantity: selectedQuantity, price: totalPrice }}
           />
-        </ButtonCenterDiv>
+        </ButtonSpaceBetweenContainer>
       </div>
     </BuyCardStyled>
   );
