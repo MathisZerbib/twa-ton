@@ -7,6 +7,11 @@
   --tg-theme-text-color: #333;
 }
 
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 /* Responsive */
 
@@ -26,7 +31,7 @@
 /* General */
 
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Prompt', sans-serif;
   background-color: var(--tg-theme-bg-color);
   color: var(--tg-theme-text-color);
   margin: 0;

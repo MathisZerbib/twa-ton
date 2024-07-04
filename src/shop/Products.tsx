@@ -15,7 +15,7 @@ const products: ProductProps[] = [
   {
     id: "2",
     category: "flowers",
-    imageUrl: "product_2.png",
+    imageUrl: "product_1.png",
     name: "Girl Scout Cookies",
     rating: 4.0,
     strains: ["hungry", "euphoric"],
@@ -26,7 +26,7 @@ const products: ProductProps[] = [
   {
     id: "3",
     category: "flowers",
-    imageUrl: "product_3.png",
+    imageUrl: "product_1.png",
     name: "OG Kush",
     rating: 5.0,
     strains: ["relaxed", "uplifted"],
@@ -37,7 +37,7 @@ const products: ProductProps[] = [
   {
     id: "4",
     category: "flowers",
-    imageUrl: "product_4.png",
+    imageUrl: "product_1.png",
     name: "Sour Diesel",
     rating: 3,
     strains: ["creative", "focused"],
@@ -48,7 +48,7 @@ const products: ProductProps[] = [
   {
     id: "5",
     category: "flowers",
-    imageUrl: "product_5.png",
+    imageUrl: "product_1.png",
     name: "Cheese Quake",
     rating: 5,
     strains: ["energetic", "talkative"],
@@ -59,7 +59,7 @@ const products: ProductProps[] = [
   {
     id: "6",
     category: "flowers",
-    imageUrl: "product_6.png",
+    imageUrl: "product_1.png",
     name: "Pineapple Express",
     rating: 4.5,
     strains: ["tingly", "aroused"],
@@ -70,7 +70,7 @@ const products: ProductProps[] = [
   {
     id: "7",
     category: "flowers",
-    imageUrl: "product_7.png",
+    imageUrl: "product_1.png",
     name: "Purple Haze",
     rating: 4.2,
     strains: ["energetic", "happy"],
@@ -81,7 +81,7 @@ const products: ProductProps[] = [
   {
     id: "8",
     category: "flowers",
-    imageUrl: "product_8.png",
+    imageUrl: "product_1.png",
     name: "Green Crack",
     rating: 4.8,
     strains: ["focused", "happy"],
@@ -92,7 +92,7 @@ const products: ProductProps[] = [
   {
     id: "9",
     category: "flowers",
-    imageUrl: "product_9.png",
+    imageUrl: "product_1.png",
     name: "Super Lemon Haze",
     rating: 4.7,
     strains: ["energetic", "creative"],
@@ -103,7 +103,7 @@ const products: ProductProps[] = [
   {
     id: "10",
     category: "flowers",
-    imageUrl: "product_10.png",
+    imageUrl: "product_1.png",
     name: "AK-47",
     rating: 4.9,
     strains: ["relaxed", "happy"],
@@ -114,7 +114,7 @@ const products: ProductProps[] = [
   {
     id: "11",
     category: "hash",
-    imageUrl: "product_11.jpg",
+    imageUrl: "product_11.png",
     name: "Afghan Hash",
     rating: 4.6,
     strains: ["relaxed", "euphoric"],
@@ -125,7 +125,7 @@ const products: ProductProps[] = [
   {
     id: "12",
     category: "hash",
-    imageUrl: "product_12.jpeg",
+    imageUrl: "product_12.png",
     name: "Moroccan Hash",
     rating: 4.3,
     strains: ["happy", "relaxed"],
@@ -136,7 +136,7 @@ const products: ProductProps[] = [
   {
     id: "13",
     category: "hash",
-    imageUrl: "product_12.jpeg",
+    imageUrl: "product_12.png",
     name: "Lebanese Hash",
     rating: 4.7,
     strains: ["happy", "creative"],
@@ -147,7 +147,7 @@ const products: ProductProps[] = [
   {
     id: "14",
     category: "hash",
-    imageUrl: "product_12.jpeg",
+    imageUrl: "product_12.png",
     name: "Charas",
     rating: 4.5,
     strains: ["relaxed", "focused"],
@@ -158,7 +158,7 @@ const products: ProductProps[] = [
   {
     id: "15",
     category: "hash",
-    imageUrl: "product_12.jpeg",
+    imageUrl: "product_12.png",
     name: "Bubble Hash",
     rating: 4.8,
     strains: ["happy", "relaxed"],
@@ -169,7 +169,7 @@ const products: ProductProps[] = [
   {
     id: "16",
     category: "hash",
-    imageUrl: "product_12.jpeg",
+    imageUrl: "product_12.png",
     name: "Nepalese Hash",
     rating: 4.4,
     strains: ["happy", "uplifted"],
@@ -180,7 +180,7 @@ const products: ProductProps[] = [
   {
     id: "17",
     category: "hash",
-    imageUrl: "product_12.jpeg",
+    imageUrl: "product_12.png",
     name: "Indian Hash",
     rating: 4.2,
     strains: ["relaxed", "happy"],
@@ -191,7 +191,7 @@ const products: ProductProps[] = [
   {
     id: "18",
     category: "hash",
-    imageUrl: "product_12.jpeg",
+    imageUrl: "product_12.png",
     name: "Jamaican Hash",
     rating: 4.5,
     strains: ["uplifted", "happy"],
@@ -202,7 +202,7 @@ const products: ProductProps[] = [
   {
     id: "19",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "CBD Oil",
     rating: 4.8,
     strains: ["relaxed", "focused"],
@@ -213,7 +213,7 @@ const products: ProductProps[] = [
   {
     id: "20",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "THC Oil",
     rating: 4.7,
     strains: ["euphoric", "relaxed"],
@@ -224,7 +224,7 @@ const products: ProductProps[] = [
   {
     id: "21",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "Rick Simpson Oil",
     rating: 4.9,
     strains: ["relaxed", "happy"],
@@ -235,7 +235,7 @@ const products: ProductProps[] = [
   {
     id: "22",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "Hemp Oil",
     rating: 4.5,
     strains: ["focused", "happy"],
@@ -246,7 +246,7 @@ const products: ProductProps[] = [
   {
     id: "23",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "Full Spectrum Oil",
     rating: 4.6,
     strains: ["relaxed", "euphoric"],
@@ -257,7 +257,7 @@ const products: ProductProps[] = [
   {
     id: "24",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "Broad Spectrum Oil",
     rating: 4.4,
     strains: ["happy", "focused"],
@@ -268,7 +268,7 @@ const products: ProductProps[] = [
   {
     id: "25",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "Isolate Oil",
     rating: 4.3,
     strains: ["relaxed", "focused"],
@@ -279,7 +279,7 @@ const products: ProductProps[] = [
   {
     id: "26",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "Cannabis Oil",
     rating: 4.7,
     strains: ["euphoric", "relaxed"],
@@ -290,7 +290,7 @@ const products: ProductProps[] = [
   {
     id: "27",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "CBD Isolate Oil",
     rating: 4.5,
     strains: ["happy", "relaxed"],
@@ -301,7 +301,7 @@ const products: ProductProps[] = [
   {
     id: "28",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "THC Free Oil",
     rating: 4.3,
     strains: ["focused", "happy"],
@@ -312,7 +312,7 @@ const products: ProductProps[] = [
   {
     id: "29",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "Delta-8 Oil",
     rating: 4.6,
     strains: ["euphoric", "relaxed"],
@@ -323,7 +323,7 @@ const products: ProductProps[] = [
   {
     id: "30",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "CBG Oil",
     rating: 4.4,
     strains: ["focused", "happy"],
@@ -334,7 +334,7 @@ const products: ProductProps[] = [
   {
     id: "31",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "CBN Oil",
     rating: 4.2,
     strains: ["relaxed", "happy"],
@@ -345,7 +345,7 @@ const products: ProductProps[] = [
   {
     id: "32",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "THCV Oil",
     rating: 4.5,
     strains: ["focused", "happy"],
@@ -356,7 +356,7 @@ const products: ProductProps[] = [
   {
     id: "33",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "CBC Oil",
     rating: 4.3,
     strains: ["happy", "relaxed"],
@@ -367,7 +367,7 @@ const products: ProductProps[] = [
   {
     id: "34",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "Raw CBD Oil",
     rating: 4.7,
     strains: ["relaxed", "focused"],
@@ -378,7 +378,7 @@ const products: ProductProps[] = [
   {
     id: "35",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "Raw THC Oil",
     rating: 4.9,
     strains: ["euphoric", "relaxed"],
@@ -389,7 +389,7 @@ const products: ProductProps[] = [
   {
     id: "36",
     category: "oils",
-    imageUrl: "product_19.jpg",
+    imageUrl: "product_19.png",
     name: "Raw Full Spectrum Oil",
     rating: 4.8,
     strains: ["relaxed", "happy"],

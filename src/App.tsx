@@ -38,6 +38,8 @@ import { useCurrency } from "./providers/useCurrency";
 // import WalletBalanceTon from "./components/WalletBalanceTon";
 import WalletTxList from "./components/WalletTxList";
 
+import backgroundBlured from "../public/app-background.svg";
+
 function App() {
   const { network } = useTonConnect();
   const { wallet } = useTonConnect();
@@ -83,7 +85,11 @@ function App() {
   };
 
   return (
-    <StyledApp>
+    <StyledApp
+      style={{
+        background: "#f0f0f0",
+      }}
+    >
       <ToastContainer /> {/* Place ToastContainer at the root level */}
       <AppContainer>
         <FlexBoxCol>

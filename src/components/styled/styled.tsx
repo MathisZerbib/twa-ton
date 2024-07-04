@@ -100,15 +100,9 @@ export const AddToCartButtonCard = styled(Button)`
   animation: fadeIn 0.5s;
 `;
 
-export const BuyCardStyled = styled.div`
-  border-radius: 15px;
-  margin: 0 10px;
-`;
-
 export const HeaderWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 10px;
 `;
 
 export const ButtonSpaceBetweenContainer = styled.div`

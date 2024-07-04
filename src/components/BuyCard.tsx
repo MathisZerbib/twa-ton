@@ -8,12 +8,10 @@ import {
   HeaderWrapper,
   Rating,
   Star,
-  BuyCardStyled,
 } from "./styled/styled";
 import { convertToTon } from "../services/exchangeRateService";
 import { useCurrency } from "../providers/useCurrency";
 import { Typography } from "@mui/material";
-import Link from "@mui/material/Link"; // Import Link component from MUI
 
 interface ProductProps {
   id: string;
@@ -37,7 +35,7 @@ const BuyCard: React.FC<ProductProps> = ({
   const [selectedQuantity, setSelectedQuantity] = useState<number>(5);
   const { selectedCurrency, updateSelectedCurrency } = useCurrency();
   const [totalPrice, setTotalPrice] = useState<number>(5 * price);
-  const descriptionFirstSentence = description.split(".")[0];
+  const descriptionFirstSentence = description.split(".")[0] + ".";
   const handleQuantityChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -68,18 +66,32 @@ const BuyCard: React.FC<ProductProps> = ({
   }, [selectedCurrency, selectedQuantity, price]);
 
   return (
-    <BuyCardStyled>
+    <div
+      style={{
+        background: "white",
+        borderRadius: "10px",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        padding: "10px",
+        margin: "10px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        // width: "300px",
+      }}
+    >
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <img
-          src={imageUrl}
-          alt={name}
+        <div
           style={{
-            width: "100%",
-            height: "150px",
-            objectFit: "cover",
+            width: "200px",
+            objectFit: "contain",
             borderRadius: "10px",
+            backgroundImage: `url(${imageUrl})`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            height: "200px",
           }}
-        />
+        ></div>
       </div>
       <div
         style={{
@@ -88,22 +100,30 @@ const BuyCard: React.FC<ProductProps> = ({
           flexDirection: "column",
           gap: "10px",
           justifyContent: "space-between",
+          height: "200px",
         }}
       >
         <HeaderWrapper>
-          <Typography variant="h6">{name}</Typography>
-          <Rating>
-            <Typography>{rating.toString()}</Typography>
-            <Star icon={faStar} />
-          </Rating>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
+            <Typography variant="h6">{name}</Typography>
+            <Rating>
+              <Typography>{rating.toString()}</Typography>
+              <Star icon={faStar} />
+            </Rating>
+          </div>
         </HeaderWrapper>
 
         <EmojiStrains strains={strains} />
-
-        {/* Description with a link */}
-        <Typography variant="body2">
-          {descriptionFirstSentence + "."}
-        </Typography>
+        <div style={{ height: "100px", overflow: "hidden" }}>
+          {/* Description with a link */}
+          <Typography variant="body2">{descriptionFirstSentence}</Typography>
+        </div>
 
         <ButtonSpaceBetweenContainer>
           <select
@@ -129,7 +149,7 @@ const BuyCard: React.FC<ProductProps> = ({
           />
         </ButtonSpaceBetweenContainer>
       </div>
-    </BuyCardStyled>
+    </div>
   );
 };
 

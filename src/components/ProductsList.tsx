@@ -19,6 +19,7 @@ const ProductsList: React.FC<ProductsListProps> = ({ products }) => {
     speed: 500,
     slidesToShow: 3,
     slidesToScroll: 3,
+    rows: 1,
 
     responsive: [
       {
@@ -28,6 +29,7 @@ const ProductsList: React.FC<ProductsListProps> = ({ products }) => {
           slidesToScroll: 2,
           infinite: false,
           dots: false,
+          rows: 1,
         },
       },
       {
@@ -35,6 +37,7 @@ const ProductsList: React.FC<ProductsListProps> = ({ products }) => {
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
+          rows: 1,
         },
       },
     ],
@@ -59,11 +62,13 @@ const ProductsList: React.FC<ProductsListProps> = ({ products }) => {
         Flowers
       </Typography>
 
-      <Slider {...settings}>
-        {flowers.map((product) => (
-          <BuyCard {...product} key={product.id} />
-        ))}
-      </Slider>
+      <div key="flowers">
+        <Slider {...settings}>
+          {flowers.map((product) => (
+            <BuyCard {...product} key={product.id} />
+          ))}
+        </Slider>
+      </div>
 
       <br />
       <br />
@@ -75,12 +80,13 @@ const ProductsList: React.FC<ProductsListProps> = ({ products }) => {
         Hash
       </Typography>
 
-      <Slider {...settings}>
-        {hash.map((product) => (
-          <BuyCard {...product} key={product.id} />
-        ))}
-      </Slider>
-
+      <div key="hash">
+        <Slider {...settings}>
+          {hash.map((product) => (
+            <BuyCard {...product} key={product.id} />
+          ))}
+        </Slider>
+      </div>
       <br />
       <br />
       <Typography
@@ -89,12 +95,13 @@ const ProductsList: React.FC<ProductsListProps> = ({ products }) => {
       >
         Oils
       </Typography>
-
-      <Slider {...settings}>
-        {oils.map((product) => (
-          <BuyCard {...product} key={product.id} />
-        ))}
-      </Slider>
+      <div key="oils">
+        <Slider {...settings}>
+          {oils.map((product) => (
+            <BuyCard {...product} key={product.id} />
+          ))}
+        </Slider>
+      </div>
     </>
   );
 };
