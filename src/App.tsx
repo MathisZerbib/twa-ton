@@ -1,202 +1,164 @@
-import "./App.css";
-import { TonConnectButton } from "@tonconnect/ui-react";
-import styled from "styled-components";
-import { Fab } from "@mui/material";
+import React, { useContext, useState } from "react";
+import styled, {
+  ThemeProvider as StyledThemeProvider,
+} from "styled-components";
+import Header from "./components/Header";
+import Shop from "./pages/Shop";
+import { ThemeContext, ThemeProvider } from "./contexts/theme";
 
-import {
-  Button,
-  FlexBoxCol,
-  FlexBoxRowSpaceBetween,
-} from "./components/styled/styled";
-import { useTonConnect } from "./hooks/useTonConnect";
-import { CHAIN } from "@tonconnect/protocol";
-import "@twa-dev/sdk";
-import ProductsList from "./components/ProductsList";
-import WelcomeStore from "./components/WelcomeStore";
-import products from "./shop/Products";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import {
-  faPersonBiking,
-  faShoppingCart,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useCart } from "./providers/CartProvider";
-import {
-  StyledApp,
-  AppContainer,
-  NetworkBadge,
-  StoreLogo,
-} from "./components/styled/styled";
-import { useState } from "react";
-import CheckoutPage from "./pages/CheckoutPage";
-import { OrderProps } from "./components/types";
-import OrdersDrawer from "./components/OrderDrawer";
-import PriceConverter from "./components/PriceConverter";
-import CurrencySwitcher from "./components/CurrencySwitcher";
-import { useCurrency } from "./providers/useCurrency";
-// import WalletBalanceTon from "./components/WalletBalanceTon";
-import WalletTxList from "./components/WalletTxList";
+const HeroSection = styled.header`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+  background-color: ${(props) => props.theme["--tg-theme-bg-color"]};
+  color: ${(props) => props.theme["--tg-theme-text-color"]};
 
-import backgroundBlured from "../public/app-background.svg";
+  @media (min-width: 768px) {
+    /* Tablet and larger */
+    flex-direction: row;
+    padding: 0 50px;
+  }
+
+  @media (min-width: 1024px) {
+    /* Desktop and larger */
+    padding: 0 100px;
+  }
+`;
+
+const HeroContent = styled.div`
+  max-width: 600px;
+  text-align: center;
+
+  @media (min-width: 768px) {
+    /* Tablet and larger */
+    text-align: left;
+    margin-right: 50px;
+  }
+
+  @media (min-width: 1024px) {
+    /* Desktop and larger */
+    max-width: 800px;
+  }
+`;
+
+const HeroImage = styled.div`
+  display: none; /* Hide image by default */
+
+  @media (min-width: 768px) {
+    /* Tablet and larger */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%; /* Take 50% width on tablets */
+    height: 100%;
+  }
+
+  @media (min-width: 1024px) {
+    /* Desktop and larger */
+    width: 40%; /* Reduce width on desktop */
+  }
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+`;
+
+const HeroTitle = styled.h1`
+  font-size: 3rem;
+  margin-bottom: 20px;
+`;
+
+const HeroDescription = styled.p`
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+`;
+
+const CtaButton = styled.button`
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  background-color: ${(props) => props.theme["--tg-theme-button-color"]};
+  color: ${(props) => props.theme["--tg-theme-button-text-color"]};
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: ${(props) =>
+      props.theme.themeMode === "dark" ? "#1c8abf" : "#1c8abf"};
+  }
+`;
+
+const AppContainer = styled.div`
+  background-color: var(--tg-theme-bg-color);
+  color: var(--tg-theme-text-color);
+`;
 
 function App() {
-  const { network } = useTonConnect();
-  const { wallet } = useTonConnect();
-  const { totalPrice } = useCart();
+  const themeContext = useContext(ThemeContext);
+  const themeMode = themeContext ? themeContext[0].themeName! : "light";
 
-  const [openCheckout, setOpenCheckout] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false); // State to control the drawer
-  const selectedCurrency = useCurrency().selectedCurrency;
-  const updateSelectedCurrency = useCurrency().updateSelectedCurrency;
-  // Mock orders array for demonstration purposes
-  const mockOrders: OrderProps[] = [
-    {
-      id: "1",
-      recipient: "Alice",
-      price: 100,
-      status: "Pending",
-      dateCreated: "2021-10-01",
-    },
-    {
-      id: "2",
-      recipient: "Bob",
-      price: 200,
-      status: "Delivered",
-      dateCreated: "2021-10-02",
-    },
-    // Add more mock orders as needed
-  ];
-
-  function showCheckout() {
-    setOpenCheckout(true);
-  }
-
-  function closeCheckout() {
-    setOpenCheckout(false);
-  }
-
-  function toggleDrawer(open: boolean) {
-    setDrawerOpen(open);
-  }
-
-  const handleCurrencyChange = (currency: string) => {
-    updateSelectedCurrency(currency);
+  const [showShop, setShowShop] = useState(false);
+  const [showHome, setShowHome] = useState(false);
+  const handleShopClick = () => {
+    setShowShop(true);
   };
 
   return (
-    <StyledApp
-      style={{
-        background: "#f0f0f0",
-      }}
-    >
-      <ToastContainer /> {/* Place ToastContainer at the root level */}
-      <AppContainer>
-        <FlexBoxCol>
-          <FlexBoxRowSpaceBetween>
-            <StoreLogo src="logo.png" alt="Store Logo" />
-            <Fab
-              color={selectedCurrency === "USDT" ? "primary" : "secondary"}
-              aria-label="shopping-cart"
-              style={{
-                position: "fixed",
-                bottom: 50,
-                right: 20,
-                display: "flex",
-                flexDirection: "row",
-                gap: "10px",
-                alignItems: "center",
-                minWidth: "120px",
-                borderRadius: "10px",
-              }}
-              size="large"
-              onClick={() => {
-                showCheckout();
-              }}
-            >
-              <FontAwesomeIcon icon={faShoppingCart} />
-              <span>
-                {totalPrice.toFixed(2)}{" "}
-                <img
-                  src={selectedCurrency.toLowerCase() + ".svg"}
-                  alt={selectedCurrency + " icon"}
-                  style={{
-                    width: 20,
-                    height: 20,
-                  }}
-                />
-              </span>
-            </Fab>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "10px",
-                alignItems: "center",
-              }}
-            >
-              <CurrencySwitcher
-                selectedCurrency={selectedCurrency}
-                onCurrencyChange={handleCurrencyChange}
-              />
-              {/* <Button onClick={() => toggleDrawer(true)}>Orders</Button> */}
-
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div
-                  style={{ display: "flex", flexDirection: "row", gap: "10px" }}
-                >
-                  {/* <Button
-                    onClick={() => toggleDrawer(true)}
-                    disabled={!wallet}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
+    <ThemeProvider>
+      <StyledThemeProvider
+        theme={{
+          "--tg-theme-bg-color": themeMode === "light" ? "#ffffff" : "#2e2e2e",
+          "--tg-theme-text-color":
+            themeMode === "light" ? "#333333" : "#ffffff",
+          "--tg-theme-button-color":
+            themeMode === "light" ? "#2eaddc" : "#1c8abf",
+          "--tg-theme-button-text-color": "#ffffff",
+        }}
+      >
+        <AppContainer className={`app ${themeMode}`}>
+          {!showShop && (
+            <>
+              <Header showConnectButton={showShop} />
+              <HeroSection>
+                <HeroContent>
+                  <HeroTitle>Welcome to the TON Shop!</HeroTitle>
+                  <HeroDescription>
+                    Discover the finest CBD products,
+                    <br />
+                    with seamless delivery and crypto payments.
+                  </HeroDescription>
+                  <CtaButton
+                    onClick={() => {
+                      handleShopClick();
                     }}
                   >
-                    <FontAwesomeIcon icon={faPersonBiking} />
-                  </Button> */}
-
-                  <TonConnectButton />
-
-                  <NetworkBadge
-                    network={
-                      network === CHAIN.MAINNET
-                        ? "mainnet"
-                        : network === CHAIN.TESTNET
-                        ? "testnet"
-                        : ""
-                    }
-                  ></NetworkBadge>
-                </div>
-                {/* {network && wallet && <WalletBalanceTon walletAddress={wallet} />} */}
-                {/* {network && wallet && <WalletTxList walletAddress={wallet} />} */}
-
-                <OrdersDrawer
-                  orders={mockOrders}
-                  open={drawerOpen}
-                  onClose={toggleDrawer}
-                />
-              </div>
-            </div>
-          </FlexBoxRowSpaceBetween>
-          <WelcomeStore />
-          <br />
-          <ProductsList products={products} />
-        </FlexBoxCol>
-        <CheckoutPage open={openCheckout} onClose={closeCheckout} />
-        <OrdersDrawer
-          orders={mockOrders}
-          open={drawerOpen}
-          onClose={toggleDrawer}
-        />
-        <br />
-        <PriceConverter />
-      </AppContainer>
-    </StyledApp>
+                    Shop Now
+                  </CtaButton>
+                </HeroContent>
+                <HeroImage>
+                  <img
+                    src="home.jpg"
+                    alt="CBD products"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "500px",
+                      objectFit: "cover",
+                      borderRadius: "10px",
+                    }}
+                  />
+                </HeroImage>
+              </HeroSection>
+            </>
+          )}
+          {showShop && <Shop />}
+        </AppContainer>
+      </StyledThemeProvider>
+    </ThemeProvider>
   );
 }
 

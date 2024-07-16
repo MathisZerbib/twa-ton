@@ -140,15 +140,17 @@ function CheckoutPage({ open, onClose }: any) {
           </p> */}
 
           <div style={{ marginTop: "20px", marginBottom: "20px" }}>
-            <BuyWithCrypto
-              enabled={
-                parseInt(totalPriceFeesIncluded) > 0 &&
-                selectedAddress.length > 0
-              }
-              amount={totalPriceFeesIncluded}
-              onClick={closeDrawer}
-              currency={selectedCurrency}
-            />
+            {selectedAddress && (
+              <BuyWithCrypto
+                enabled={
+                  parseInt(totalPriceFeesIncluded) > 0 &&
+                  selectedAddress.length > 0
+                }
+                amount={totalPriceFeesIncluded}
+                onClick={closeDrawer}
+                currency={selectedCurrency}
+              />
+            )}
           </div>
         </div>
         {/* Button to open the modal */}
@@ -244,6 +246,13 @@ function CheckoutPage({ open, onClose }: any) {
                 >
                   {selectedAddress ? selectedAddress : "Adresse de livraison"}
                 </p>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleCloseModal}
+                >
+                  Valider
+                </Button>
               </Toolbar>
             </AppBar>
             <MapWithGeocoder onSelectedAddress={setSelectedAddress} />

@@ -1,11 +1,11 @@
-:root {
+/* :root {
   --tg-theme-bg-color: #ffffff;
   --tg-theme-bg-color-dark: #2e2e2e;
   
   --tg-theme-button-color: #2eaddc;
   --tg-theme-button-text-color: #fff;
   --tg-theme-text-color: #333;
-}
+} */
 
 *{
   margin: 0;
@@ -38,3 +38,41 @@ body {
   padding: 0;
 }
 
+
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 80px 40px;
+  background-color: #f0f0f0;
+}
+
+.hero-content {
+  max-width: 600px;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.hero-description {
+  font-size: 1.5rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+.hero-image {
+  flex: 1;
+  text-align: center;
+}
+
+.hero-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}

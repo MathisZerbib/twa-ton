@@ -6,7 +6,7 @@ import styled from "styled-components";
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
 const MapWrapper = styled.div`
-  height: 80vh;
+  height: 100%;
   width: 100%;
   margin: 0 auto;
   position: relative;

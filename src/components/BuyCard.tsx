@@ -76,13 +76,14 @@ const BuyCard: React.FC<ProductProps> = ({
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
+        cursor: "grab",
         // width: "300px",
       }}
     >
       <div style={{ display: "flex", justifyContent: "center" }}>
         <div
           style={{
-            width: "200px",
+            width: "150px",
             objectFit: "contain",
             borderRadius: "10px",
             backgroundImage: `url(${imageUrl})`,

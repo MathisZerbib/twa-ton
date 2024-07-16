@@ -39,7 +39,8 @@ const WelcomeStore: React.FC = () => {
       </WelcomeText> */}
       <br />
       <PaymentOptions>
-        Commandez dès maintenant votre CBD sur Montpellier
+        {/* Commandez dès maintenant votre CBD sur Montpellier  */}
+        Command your CBD now on Montpellier in matter of seconds !
         <br />
         <br />
         {/* {useCurrency().selectedCurrency === "TON" ? (

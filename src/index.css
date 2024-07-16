@@ -1,0 +1,84 @@
+
+:root  {
+    font-family: 'Prompt', sans-serif;
+    --tg-theme-bg-color: #ffffff;
+    --tg-theme-bg-color-dark: #2e2e2e;
+    
+}
+
+h1 {
+    font-size: 3rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+}   
+
+h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+h4 {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+a {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .tg-container {
+        padding: 0 20px;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .tg-container {
+        padding: 0 10px;
+    }
+}
+
+
+/* General */
+
+body {
+    font-family: 'Prompt', sans-serif;
+    background-color: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+    margin: 0;
+    padding: 0;
+}
+
+.hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 80px 40px;
+    background-color: #f0f0f0;
+}
+
+
+.hero-content {
+    max-width: 600px;
+}
+
