@@ -614,14 +614,27 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
                 })}
             </StepsRow>
 
-            {/* ── Live Map (only when courier is active) ── */}
-            <MapContainer style={{ display: showMap || courierPos ? "block" : "none" }}>
+            {/* ── Live Map ── */}
+            <MapContainer style={{ display: order ? "block" : "none" }}>
+                {!mapboxgl.accessToken && (
+                    <div style={{ position: 'absolute', inset: 0, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontSize: '0.8rem', padding: 20, textAlign: 'center', zIndex: 10 }}>
+                        ⚠️ Mapbox Token Missing. Please check VITE_MAPBOX_ACCESS_TOKEN.
+                    </div>
+                )}
                 <MapInner ref={mapContainerRef} />
                 <MapOverlay>
-                    {showMap && courierPos ? (
-                        <><LiveDot /> Courier location · live</>
+                    {order?.status === 'delivered' ? (
+                        <><FontAwesomeIcon icon={faCheckCircle} style={{ color: '#4caf50' }} /> Order delivered successfully</>
+                    ) : order?.status === 'pending' ? (
+                        <><FontAwesomeIcon icon={faUtensils} style={{ color: '#FF6B35' }} /> Restaurant is preparing your food</>
+                    ) : order?.status === 'accepted' || order?.status === 'picked_up' ? (
+                        courierPos ? (
+                            <><LiveDot /> Courier location · live</>
+                        ) : (
+                            <><FontAwesomeIcon icon={faWifi} /> Finding courier location...</>
+                        )
                     ) : (
-                        <><FontAwesomeIcon icon={faWifi} /> Waiting for courier…</>
+                        <><FontAwesomeIcon icon={faWifi} /> Waiting for update...</>
                     )}
                 </MapOverlay>
             </MapContainer>
