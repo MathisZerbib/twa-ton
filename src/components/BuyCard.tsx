@@ -81,6 +81,11 @@ const ItemName = styled.h3`
   margin: 0;
   line-height: 1.3;
   flex: 1;
+  min-height: 2.5rem; /* Space for 2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 `;
 
 const TagRow = styled.div`
@@ -108,14 +113,15 @@ const Desc = styled.p`
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  min-height: 2.4rem;
+  min-height: 2.4rem; /* Exactly 2 lines of text */
 `;
 
 const BottomAction = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: auto; /* Push to bottom */
+  padding-top: 14px;
 `;
 
 const QtyWrapper = styled.div`

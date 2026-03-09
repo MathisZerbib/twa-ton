@@ -59,6 +59,9 @@ const ALLOWED_ORIGINS = [
   /^https?:\/\/.*\.ngrok\.io$/,
   // Any localhost port (dev)
   /^https?:\/\/localhost(:\d+)?$/,
+  // Vercel Production & Previews
+  'https://twa-ton.vercel.app',
+  /^https?:\/\/.*\.vercel\.app$/,
 ];
 
 function originAllowed(origin, callback) {
@@ -79,8 +82,8 @@ app.use(helmet({
 }));
 
 app.use(cors({ origin: originAllowed, credentials: true }));
-// Express 5 requires a named wildcard; '/{*path}' catches all pre-flight OPTIONS
-app.options('/{*path}', cors({ origin: originAllowed, credentials: true }));
+// Express-cors manual preflight handling
+app.options('*', cors({ origin: originAllowed, credentials: true })); 
 
 // Body parsing — limit payload to 1 MB to prevent DoS
 app.use(express.json({ limit: '1mb' }));

@@ -45,12 +45,19 @@ const StyledButton = styled.button`
 `;
 
 const SuccessOverlay = styled.div`
-  color: #4caf50;
-  font-size: 0.8rem;
-  font-weight: 800;
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  flex: 1; /* Match button's flex */
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  animation: none;
 `;
 
 import { useCurrency } from "../providers/useCurrency";

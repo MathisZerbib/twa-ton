@@ -145,6 +145,10 @@ const Name = styled.h3`
   font-weight: 800;
   margin: 0;
   color: #1a1a1a;
+  min-height: 1.4rem; /* Safe slot for 1 line */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const Rating = styled.span`
@@ -163,6 +167,7 @@ const Category = styled.p`
   font-size: 0.85rem;
   color: #666;
   margin: 0 0 12px;
+  min-height: 1.2rem; /* Consistent spacing */
 `;
 
 const MetaRow = styled.div`
