@@ -17,7 +17,6 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
   const mapInstance = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
   const [address, setAddress] = useState("");
-  const [locating, setLocating] = useState(false);
 
   // Keep latest callback in a ref to avoid re-run of effect
   const callbackRef = useRef(onSelectedAddress);
@@ -41,33 +40,7 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
   }, []);
 
   // ── Geolocate me button handler ────────────────────────────────────────────
-  const handleGeolocate = useCallback(() => {
-    if (!navigator.geolocation) return;
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLocating(false);
-        const lngLat = { lng: pos.coords.longitude, lat: pos.coords.latitude };
-        const map = mapInstance.current;
-        if (map) {
-          map.flyTo({ center: [lngLat.lng, lngLat.lat], zoom: 16, duration: 1200 });
-          markerRef.current?.setLngLat(lngLat);
-          fetchAddress(lngLat);
-          // update circle
-          const source = map.getSource("circle") as mapboxgl.GeoJSONSource;
-          if (source) {
-            source.setData({
-              type: "Feature",
-              geometry: { type: "Point", coordinates: [lngLat.lng, lngLat.lat] },
-              properties: {},
-            });
-          }
-        }
-      },
-      () => setLocating(false),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
-  }, [fetchAddress]);
+  // (handled imperatively inside initMap via DOM button)
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -86,24 +59,7 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
 
       mapInstance.current = map;
 
-      const geocoder = new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken!,
-        mapboxgl: mapboxgl as any,
-        marker: false,
-        placeholder: "Chercher une adresse",
-        language: "fr",
-        addressAccuracy: "street",
-        types: "address,poi",
-        limit: 5,
-      });
-
-      const geocoderContainer = document.createElement("div");
-      geocoderContainer.className = "geocoder-container";
-
-      const geocoderIcon = geocoder.onAdd(map);
-      geocoderContainer.appendChild(geocoderIcon);
-      map.getContainer().appendChild(geocoderContainer);
-
+      // ── Marker + circle (declared first so geolocate button can reference them) ──
       const marker = new mapboxgl.Marker({
         draggable: true,
         color: "#FF6B35",
@@ -149,6 +105,50 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
         }
       };
 
+      // ── Geocoder search bar ──
+      const geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken!,
+        mapboxgl: mapboxgl as any,
+        marker: false,
+        placeholder: "Chercher une adresse",
+        language: "fr",
+        addressAccuracy: "street",
+        types: "address,poi",
+        limit: 5,
+      });
+
+      const geocoderContainer = document.createElement("div");
+      geocoderContainer.className = "geocoder-container";
+
+      const geocoderIcon = geocoder.onAdd(map);
+      geocoderContainer.appendChild(geocoderIcon);
+
+      // ── Geolocate button (next to the search bar) ──
+      const geoBtn = document.createElement("button");
+      geoBtn.className = "geo-btn";
+      geoBtn.title = "Use my location";
+      geoBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>`;
+      geoBtn.addEventListener("click", () => {
+        if (!navigator.geolocation) return;
+        geoBtn.classList.add("geo-btn--loading");
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            geoBtn.classList.remove("geo-btn--loading");
+            const lngLat = { lng: pos.coords.longitude, lat: pos.coords.latitude };
+            map.flyTo({ center: [lngLat.lng, lngLat.lat], zoom: 16, duration: 1200 });
+            marker.setLngLat(lngLat);
+            fetchAddress(lngLat);
+            addCircle(lngLat);
+          },
+          () => geoBtn.classList.remove("geo-btn--loading"),
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+      });
+      geocoderContainer.appendChild(geoBtn);
+
+      map.getContainer().appendChild(geocoderContainer);
+
+      // ── Events ──
       marker.on("dragend", () => {
         const lngLat = marker.getLngLat();
         fetchAddress(lngLat);
@@ -209,51 +209,6 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
     <>
       <div style={{ position: "relative", width: "100%", height: "90vh" }}>
         <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
-
-        {/* ── Geolocate Me button (rendered AFTER map so it layers on top) ── */}
-        <button
-          onClick={handleGeolocate}
-          disabled={locating}
-          style={{
-            position: "absolute",
-            bottom: 32,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "12px 24px",
-            background: "#FF6B35",
-            color: "#fff",
-            border: "none",
-            borderRadius: 50,
-            fontSize: "0.9rem",
-            fontWeight: 700,
-            cursor: locating ? "wait" : "pointer",
-            boxShadow: "0 4px 16px rgba(255,107,53,0.4)",
-            opacity: locating ? 0.7 : 1,
-            transition: "opacity 0.2s, transform 0.15s",
-            pointerEvents: "auto",
-          }}
-        >
-          {locating ? (
-            <>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "spin 1s linear infinite" }}>
-                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-              </svg>
-              Locating…
-            </>
-          ) : (
-            <>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3" />
-                <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
-              </svg>
-              Use my location
-            </>
-          )}
-        </button>
       </div>
 
       <style>
@@ -263,11 +218,42 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 80%;
+            width: 90%;
             z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
           }
-          .mapboxgl-ctrl-geocoder {
-            min-width: 100%;
+          .geocoder-container .mapboxgl-ctrl-geocoder {
+            min-width: 0;
+            flex: 1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            border-radius: 12px;
+          }
+          .geo-btn {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: none;
+            background: #FF6B35;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255,107,53,0.35);
+            transition: opacity 0.2s, transform 0.15s;
+          }
+          .geo-btn:active {
+            transform: scale(0.92);
+          }
+          .geo-btn--loading {
+            opacity: 0.6;
+            cursor: wait;
+          }
+          .geo-btn--loading svg {
+            animation: spin 1s linear infinite;
           }
           @keyframes spin {
             to { transform: rotate(360deg); }
