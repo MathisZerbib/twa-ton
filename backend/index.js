@@ -62,40 +62,51 @@ const ALLOWED_ORIGINS = [
   // Vercel Production & Previews
   'https://twa-ton.vercel.app',
   /^https?:\/\/.*\.vercel\.app$/,
+  // Render internal/previews (useful for cross-service calls)
+  /^https?:\/\/.*\.onrender\.com$/,
 ];
 
 // ── Security Middleware ───────────────────────────────────────────────────────
-// Helper for CORS validation used by Socket.io
+/**
+ * Global CORS whitelist validator.
+ * Consistent across REST (Express) and WebSockets (Socket.io).
+ */
 function checkOrigin(origin, callback) {
+  // 🚀 Pass-through for same-origin or tool-based requests (curl, etc.)
   if (!origin) return callback(null, true);
-  const ok = ALLOWED_ORIGINS.some(pattern =>
+
+  // ✅ Whitelist check
+  const isAllowed = ALLOWED_ORIGINS.some(pattern =>
     typeof pattern === 'string' ? pattern === origin : pattern.test(origin)
   );
-  callback(null, ok);
+
+  if (isAllowed) {
+    callback(null, true);
+  } else {
+    // ⚠️ Log rejected origin to help troubleshoot in Render logs
+    console.warn(`[CORS] ❌ Blocked origin: ${origin}`);
+    callback(null, false);
+  }
 }
 
-// Manual CORS handler to ensure headers are ALWAYS present
+// REST (Express) CORS + Preflight — Manual implementation for maximum Vercel compatibility
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   
-  // Whitelist check
-  const isAllowed = !origin || ALLOWED_ORIGINS.some(pattern =>
-    typeof pattern === 'string' ? pattern === origin : pattern.test(origin)
-  );
+  checkOrigin(origin, (err, allowed) => {
+    if (allowed && origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      res.setHeader('Access-Control-Max-Age', '86400');
+    }
 
-  if (isAllowed && origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight for 24h
-  }
-
-  // Handle preflight
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  next();
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+    next();
+  });
 });
 
 app.use(helmet({

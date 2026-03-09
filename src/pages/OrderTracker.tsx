@@ -30,7 +30,8 @@ import { useTonConnect } from "../hooks/useTonConnect";
 
 const BOT_NAME = import.meta.env.VITE_BOT_NAME ?? "YourTONEatsBot";
 
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN as string;
+const MAPBOX_TOKEN = (import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || "") as string;
+mapboxgl.accessToken = MAPBOX_TOKEN;
 
 // ─── Animations ───────────────────────────────────────────────────────────────
 const fadeUp = keyframes`from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}`;
@@ -132,15 +133,18 @@ const StepLine = styled.div<{ $done: boolean }>`
 // ── Map ───────────────────────────────────────────────────────────────────────
 
 const MapContainer = styled.div`
-  flex: 1;
-  min-height: 300px;
+  width: 100%;
+  height: 350px;
   position: relative;
+  background: #eee;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  overflow: hidden;
 `;
 
 const MapInner = styled.div`
   width: 100%;
   height: 100%;
-  min-height: 300px;
 `;
 
 const MapOverlay = styled.div`
@@ -469,13 +473,17 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
 
     // ── Init Mapbox ───────────────────────────────────────────────────────────
     useEffect(() => {
-        if (!mapContainerRef.current || mapRef.current) return;
+        if (!MAPBOX_TOKEN || !mapContainerRef.current) {
+            console.error("Mapbox token or container missing!");
+            return;
+        }
 
         const m = new mapboxgl.Map({
             container: mapContainerRef.current,
             style: "mapbox://styles/mapbox/streets-v12",
             center: [2.3522, 48.8566], // Paris default
             zoom: 13,
+            attributionControl: false,
         });
 
         m.addControl(new mapboxgl.NavigationControl(), "bottom-right");
@@ -535,7 +543,9 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
         const ro = new ResizeObserver(() => {
             m.resize();
         });
-        ro.observe(mapContainerRef.current);
+        if (mapContainerRef.current) {
+            ro.observe(mapContainerRef.current);
+        }
 
         return () => {
             ro.disconnect();
