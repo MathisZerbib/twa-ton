@@ -148,8 +148,15 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
       });
 
       map.on("load", () => {
+        map.resize();
         addCircle(map.getCenter());
       });
+
+      // Resize when container becomes visible (e.g. inside a drawer)
+      const ro = new ResizeObserver(() => {
+        map.resize();
+      });
+      ro.observe(mapRef.current!);
     };
 
     if (navigator.geolocation) {

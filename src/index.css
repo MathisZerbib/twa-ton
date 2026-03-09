@@ -107,6 +107,18 @@ select, input, textarea {
   border-radius: 2px;
 }
 
+/* ── Mapbox GL overrides ──────────────────────────── */
+.mapboxgl-map img {
+  max-width: none !important;
+  display: inline !important;
+}
+
+.mapboxgl-canvas {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+}
+
 /* ── MUI overrides for Telegram feel ─────────────── */
 .MuiDrawer-paper {
   border-radius: 28px 28px 0 0 !important;

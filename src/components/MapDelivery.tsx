@@ -141,7 +141,14 @@ const MapDelivery: React.FC<MapDeliveryProps> = ({
 
     initMap();
 
+    // Resize when container becomes visible
+    const ro = new ResizeObserver(() => {
+      if (map) map.resize();
+    });
+    if (mapRef.current) ro.observe(mapRef.current);
+
     return () => {
+      ro.disconnect();
       if (map) map.remove();
       if (animationFrameRef.current)
         cancelAnimationFrame(animationFrameRef.current);
