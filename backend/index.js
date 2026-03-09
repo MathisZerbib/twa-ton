@@ -64,26 +64,38 @@ const ALLOWED_ORIGINS = [
   /^https?:\/\/.*\.vercel\.app$/,
 ];
 
-function originAllowed(origin, callback) {
-  // No origin header (curl, mobile clients, same-origin) → allow
+// ── Security Middleware ───────────────────────────────────────────────────────
+// Helper for CORS validation - avoids passing Error (which strips headers)
+function checkOrigin(origin, callback) {
+  // 1. Allow if no origin (e.g. server-to-server or local dev tools)
   if (!origin) return callback(null, true);
+
+  // 2. Check against our allowed list
   const ok = ALLOWED_ORIGINS.some(pattern =>
-    typeof pattern === 'string'
-      ? pattern === origin
-      : pattern.test(origin)
+    typeof pattern === 'string' ? pattern === origin : pattern.test(origin)
   );
-  callback(ok ? null : new Error('CORS blocked'), ok);
+
+  if (ok) {
+    callback(null, true);
+  } else {
+    // Deny without throwing an error to ensure proper response headers
+    callback(null, false);
+  }
 }
 
-// ── Security Middleware ───────────────────────────────────────────────────────
-app.use(helmet({
-  // CSP is managed by the frontend; don't block APIs
-  contentSecurityPolicy: false,
+app.use(cors({
+  origin: checkOrigin,
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 
-app.use(cors({ origin: originAllowed, credentials: true }));
-// Express-cors manual preflight handling
-app.options('*', cors({ origin: originAllowed, credentials: true })); 
+// Robust preflight handling for ALL routes
+app.options('*', cors());
+
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));
+ 
 
 // Body parsing — limit payload to 1 MB to prevent DoS
 app.use(express.json({ limit: '1mb' }));
@@ -113,7 +125,7 @@ app.use('/api/merchants', writeLimiter);
 
 // ── Socket.io ─────────────────────────────────────────────────────────────────
 const io = new Server(httpServer, {
-  cors: { origin: originAllowed, methods: ['GET', 'POST', 'PATCH'] },
+  cors: { origin: checkOrigin, methods: ['GET', 'POST', 'PATCH'] },
   transports: ['websocket', 'polling'],
   pingTimeout: 60000,
 });
