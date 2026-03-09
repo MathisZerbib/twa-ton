@@ -8,6 +8,7 @@ import {
   faMotorcycle,
   faReceipt,
   faClockRotateLeft,
+  faShieldHalved,
 } from "@fortawesome/free-solid-svg-icons";
 import { StoreLogo, FlexBoxRowSpaceBetween } from "../components/styled/styled";
 import { TonConnectButton } from "@tonconnect/ui-react";
@@ -214,6 +215,13 @@ const Header: React.FC<Props> = ({
             <NavLink onClick={() => go("/order-history")}>
               <FontAwesomeIcon icon={faClockRotateLeft} />
               Order History
+            </NavLink>
+
+            <Divider />
+
+            <NavLink $accent onClick={() => go("/admin")}>
+              <FontAwesomeIcon icon={faShieldHalved} />
+              Super Admin
             </NavLink>
           </Drawer>
         </>

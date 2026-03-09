@@ -17,12 +17,13 @@ import { BrowserRouter, Routes, Route, Navigate, useParams, useNavigate } from "
 import styled, { ThemeProvider as StyledThemeProvider } from "styled-components";
 import { ThemeContext, ThemeProvider } from "./contexts/theme";
 import Shop from "./pages/Shop";
-import CourierDashboard from "./pages/CourierDashboard";
+import CourierApp from "./pages/courier/CourierApp";
 import OrderTracker from "./pages/OrderTracker";
 import DiscoveryPage from "./pages/DiscoveryPage";
 import MerchantOnboarding from "./pages/MerchantOnboarding";
 import MyOrdersPage from "./pages/MyOrdersPage";
 import OrderHistoryPage from "./pages/OrderHistoryPage";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 
 // ─── Deep-link Parser ─────────────────────────────────────────────────────────
 
@@ -121,12 +122,14 @@ function InnerApp() {
           <Route path="/store/:storeId" element={<Shop />} />
           <Route path="/track/:orderId" element={<TrackPage />} />
           {/* ── Courier App ── */}
-          <Route path="/courier" element={<CourierDashboard />} />
+          <Route path="/courier" element={<CourierApp />} />
           {/* ── Merchant App ── */}
           <Route path="/merchant/onboard" element={<MerchantOnboarding />} />
           {/* ── User Orders ── */}
           <Route path="/my-orders" element={<MyOrdersPage />} />
           <Route path="/order-history" element={<OrderHistoryPage />} />
+          {/* ── Admin ── */}
+          <Route path="/admin" element={<SuperAdminDashboard />} />
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

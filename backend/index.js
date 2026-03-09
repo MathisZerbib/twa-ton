@@ -188,6 +188,7 @@ app.use('/api/orders',    require('./routes/orders'));
 app.use('/api/merchants', require('./routes/merchants'));
 app.use('/api/prices',    require('./routes/prices'));
 app.use('/api/manifest',  require('./routes/manifest'));
+app.use('/api/admin',     require('./routes/admin'));
 
 // ── Health Check ──────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({ ok: true, uptime: process.uptime() }));

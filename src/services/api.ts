@@ -33,11 +33,41 @@ export interface BackendOrder {
     protocolFeeTon: number;
     referrerWallet: string | null;
     confirmCode: string;
-    status: "pending" | "accepted" | "picked_up" | "delivered";
+    status: "pending" | "accepted" | "picked_up" | "delivered" | "cancelled";
     courierWallet: string | null;
     courierLocation: { lat: number; lng: number } | null;
     createdAt: number;
     updatedAt: number;
+}
+
+export interface AdminStats {
+    orders: {
+        total: number;
+        pending: number;
+        accepted: number;
+        picked_up: number;
+        delivered: number;
+        cancelled: number;
+    };
+    revenue: {
+        totalTon: number;
+        protocolFees: number;
+        deliveryFees: number;
+    };
+    users: {
+        totalMerchants: number;
+        totalCouriers: number;
+        totalBuyers: number;
+    };
+    recentOrders: Array<{
+        id: string;
+        orderId: string;
+        status: string;
+        deliveryAddress: string;
+        foodTotalTon: number;
+        deliveryFeeTon: number;
+        createdAt: string;
+    }>;
 }
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
@@ -131,4 +161,26 @@ export const api = {
     /** Get all orders a courier has accepted/delivered */
     getCourierOrders: (courierWallet: string) =>
         req<BackendOrder[]>(`/api/orders/courier/${courierWallet}`),
+
+    // ─── Admin ───────────────────────────────────────────────────────────────
+
+    /** Admin: get platform-wide statistics */
+    getAdminStats: () => req<AdminStats>("/api/admin/stats"),
+
+    /** Admin: get all orders with optional filters */
+    getAdminOrders: (params?: { status?: string; limit?: number; offset?: number; search?: string }) => {
+        const qs = new URLSearchParams();
+        if (params?.status) qs.set("status", params.status);
+        if (params?.limit) qs.set("limit", String(params.limit));
+        if (params?.offset) qs.set("offset", String(params.offset));
+        if (params?.search) qs.set("search", params.search);
+        return req<{ orders: BackendOrder[]; total: number }>(`/api/admin/orders?${qs.toString()}`);
+    },
+
+    /** Admin: cancel an order */
+    cancelOrder: (id: string) =>
+        req<BackendOrder>(`/api/admin/orders/${id}/cancel`, { method: "PATCH" }),
+
+    /** Admin: get all merchants */
+    getAdminMerchants: () => req<any[]>("/api/admin/merchants"),
 };
