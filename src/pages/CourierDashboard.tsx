@@ -39,6 +39,7 @@ import Header from "../components/Header";
 import WalletTxList from "../components/WalletTxList";
 import { useTONEatsEscrow, DELIVERY_FEE_TON } from "../hooks/useTONEatsEscrow";
 import { useTonConnect } from "../hooks/useTonConnect";
+import LoadingAnimation from "../components/LoadingAnimation";
 import { useSocket } from "../hooks/useSocket";
 import { api, BackendOrder } from "../services/api";
 
@@ -562,8 +563,7 @@ const CourierDashboard: React.FC = () => {
                         <>
                             {loading ? (
                                 <Center>
-                                    <SpinIcon icon={faSpinner} style={{ fontSize: "2rem", color: "#FF6B35" }} />
-                                    <StateMsg>Loading available deliveries…</StateMsg>
+                                    <LoadingAnimation message="Loading available deliveries…" size={140} />
                                 </Center>
                             ) : error ? (
                                 <Center>

@@ -23,6 +23,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import * as turf from "@turf/turf";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle, faMotorcycle, faUtensils, faBoxOpen, faWifi, faXmarkCircle, faCopy, faCheck, faShareNodes, faFire, faCoins, faLink } from "@fortawesome/free-solid-svg-icons";
+import LoadingAnimation from "../components/LoadingAnimation";
 import { useSocket } from "../hooks/useSocket";
 import { api, BackendOrder } from "../services/api";
 import { useTONEatsEscrow, PROTOCOL_FEE_TON, REFERRER_CASHBACK_PERCENT } from "../hooks/useTONEatsEscrow";
@@ -792,7 +793,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     // ─── Render ───────────────────────────────────────────────────────────────
 
     if (loading) return (
-        <Centered><SpinIcon icon={faBoxOpen} style={{ fontSize: "2.5rem", color: "#FF6B35" }} /><p>Loading your order…</p></Centered>
+        <Centered><LoadingAnimation message="Loading your order…" /></Centered>
     );
     if (error || !order) return (
         <Centered>

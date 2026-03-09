@@ -10,12 +10,12 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faClockRotateLeft,
-  faSpinner,
   faCheckCircle,
   faRotateRight,
   faInbox,
 } from "@fortawesome/free-solid-svg-icons";
 import Header from "../components/Header";
+import LoadingAnimation from "../components/LoadingAnimation";
 import { api, BackendOrder } from "../services/api";
 import { useTonConnect } from "../hooks/useTonConnect";
 
@@ -200,9 +200,7 @@ const OrderHistoryPage: React.FC = () => {
         </Title>
 
         {loading && (
-          <Loader>
-            <FontAwesomeIcon icon={faSpinner} />
-          </Loader>
+          <LoadingAnimation message="Loading order history…" />
         )}
 
         {!loading && !wallet && (

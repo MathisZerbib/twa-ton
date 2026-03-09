@@ -9,6 +9,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
+import LoadingAnimation from "../components/LoadingAnimation";
 import { useParams, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -236,7 +237,7 @@ const Shop: React.FC = () => {
 
   const cartCount = cartItems.length;
 
-  if (loading) return <PageWrapper><div style={{ padding: 40, textAlign: 'center' }}>Loading store...</div></PageWrapper>;
+  if (loading) return <PageWrapper><LoadingAnimation message="Loading store…" /></PageWrapper>;
   if (!store) return <PageWrapper><div style={{ padding: 40, textAlign: 'center' }}>Store not found</div></PageWrapper>;
 
   return (
