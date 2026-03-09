@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { CartProvider } from "./providers/CartProvider";
+import { CurrencyProvider } from "./providers/useCurrency";
 
 /**
  * TonConnect manifest URL.
@@ -27,9 +28,11 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <TonConnectUIProvider manifestUrl={manifestUrl}>
     <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        <App />
-      </CartProvider>
+      <CurrencyProvider>
+        <CartProvider>
+          <App />
+        </CartProvider>
+      </CurrencyProvider>
     </QueryClientProvider>
   </TonConnectUIProvider>
 );

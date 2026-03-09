@@ -1,33 +1,45 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 
-// Custom hook to manage currency selection
-export const useCurrency = () => {
-  // Initialize selectedCurrency from local storage or default to 'USD'
+interface CurrencyContextType {
+  selectedCurrency: string;
+  updateSelectedCurrency: (newCurrency: string) => void;
+}
+
+const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
+
+export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedCurrency, setSelectedCurrency] = useState(
     localStorage.getItem("selectedCurrency") || "USDT"
   );
 
-  // Function to update the selected currency
   const updateSelectedCurrency = (newCurrency: string) => {
     setSelectedCurrency(newCurrency);
-    // Update local storage whenever the selected currency changes
     localStorage.setItem("selectedCurrency", newCurrency);
   };
 
-  // Optionally, you can listen for changes to local storage and update the state accordingly
+  // Listen for cross-tab changes
   useEffect(() => {
-    const handleStorageChange = () => {
-      const currency = localStorage.getItem("selectedCurrency");
-      if (currency !== selectedCurrency) {
-        setSelectedCurrency(currency || "USDT");
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "selectedCurrency" && e.newValue && e.newValue !== selectedCurrency) {
+        setSelectedCurrency(e.newValue);
       }
     };
-
     window.addEventListener("storage", handleStorageChange);
-
-    // Cleanup the event listener
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [selectedCurrency]);
 
-  return { selectedCurrency, updateSelectedCurrency };
+  return (
+    <CurrencyContext.Provider value={{ selectedCurrency, updateSelectedCurrency }}>
+      {children}
+    </CurrencyContext.Provider>
+  );
+};
+
+// Custom hook to consume the context
+export const useCurrency = (): CurrencyContextType => {
+  const context = useContext(CurrencyContext);
+  if (!context) {
+    throw new Error("useCurrency must be used within a CurrencyProvider");
+  }
+  return context;
 };
