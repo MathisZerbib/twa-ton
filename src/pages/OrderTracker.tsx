@@ -472,8 +472,14 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     }, [socket, orderId, confirmDelivery]);
 
     // ── Init Mapbox ───────────────────────────────────────────────────────────
+    // NOTE: We intentionally depend only on `loading` so the map is created
+    // exactly once when the initial fetch completes.  `order` is read via ref
+    // to avoid the cleanup/recreate cycle that caused the grey↔white glitch.
+    const orderRef = useRef(order);
+    orderRef.current = order;
+
     useEffect(() => {
-        if (loading || !order || !mapContainerRef.current || mapRef.current) return;
+        if (loading || !orderRef.current || !mapContainerRef.current || mapRef.current) return;
 
         if (!MAPBOX_TOKEN) {
             console.error("Mapbox token missing!");
@@ -555,7 +561,8 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
             mapRef.current = null;
             setMapLoaded(false);
         };
-    }, [loading, order]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [loading]);
 
     const showMap = ["accepted", "picked_up"].includes(order?.status ?? "");
 
