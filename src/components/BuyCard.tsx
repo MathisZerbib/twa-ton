@@ -146,7 +146,8 @@ interface ProductProps {
   name: string;
   rating: number;
   strains?: string[];  // optional tags
-  price: number;       // in TON
+  price: number;       // Converted price for UI
+  priceUsdt: number;   // Base price in USDT for cart/checkout
   description: string;
 }
 
@@ -157,10 +158,11 @@ const BuyCard: React.FC<ProductProps> = ({
   rating,
   strains = [],
   price,
+  priceUsdt,
   description,
 }) => {
   const [qty, setQty] = useState(1);
-  const totalPrice = parseFloat((qty * price).toFixed(4));
+  const displayPrice = parseFloat((qty * price).toFixed(2));
   const safeStrains = Array.isArray(strains) ? strains : [];
   const safeDesc = typeof description === 'string' ? (description.split(".")[0] + ".") : "";
 
@@ -200,8 +202,8 @@ const BuyCard: React.FC<ProductProps> = ({
           </QtyWrapper>
 
           <AddToCartButton
-            amount={totalPrice}
-            item={{ id, quantity: qty, price: totalPrice }}
+            amount={displayPrice}
+            item={{ id, name, quantity: qty, priceUsdt: priceUsdt, imageUrl }}
           />
         </BottomAction>
       </Body>

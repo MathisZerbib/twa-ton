@@ -30,13 +30,6 @@ export function BuyWithCrypto({
   const tonLogoUrl = "ton.svg";
   const usdtLogoUrl = "usdt.svg";
 
-  const cart = cartItems.map((item) => {
-    return {
-      id: item.id,
-      price: item.price,
-      quantity: item.quantity,
-    };
-  });
 
   return (
     <CenterDiv>

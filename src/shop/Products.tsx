@@ -11,6 +11,7 @@ const products: ProductProps[] = [
     rating: 4.8,
     strains: ["Beef", "Cheese"],
     price: 3.5,
+    priceUsdt: 21.0,
     description: "A perfectly smashed beef patty with American cheese, secret sauce, pickles, and caramelized onions on a toasted brioche bun.",
     storeId: "1"
   },
@@ -22,6 +23,7 @@ const products: ProductProps[] = [
     rating: 4.9,
     strains: ["Bacon", "Beef"],
     price: 5.0,
+    priceUsdt: 30.0,
     description: "Two 120g smashed beef patties loaded with crispy streaky bacon, aged cheddar, burger sauce and fresh lettuce.",
     storeId: "1"
   },
@@ -33,6 +35,7 @@ const products: ProductProps[] = [
     rating: 4.6,
     strains: ["Spicy", "Crispy"],
     price: 4.2,
+    priceUsdt: 25.0,
     description: "Crispy fried chicken breast, pickled jalapeños, ghost pepper mayo, and a drizzle of hot honey.",
     storeId: "1"
   },
@@ -44,6 +47,7 @@ const products: ProductProps[] = [
     rating: 4.5,
     strains: ["Veggie", "Umami"],
     price: 4.0,
+    priceUsdt: 24.0,
     description: "A juicy beef patty topped with sautéed wild mushrooms, melted Swiss cheese, garlic aioli and baby spinach.",
     storeId: "1"
   },
@@ -55,6 +59,7 @@ const products: ProductProps[] = [
     rating: 5.0,
     strains: ["Premium", "Truffle"],
     price: 6.5,
+    priceUsdt: 39.0,
     description: "Our premium burger: dry-aged beef, black truffle mayo, caramelized shallots, aged Gruyère, and fresh arugula.",
     storeId: "1"
   },
@@ -68,6 +73,7 @@ const products: ProductProps[] = [
     rating: 4.7,
     strains: ["Tomato", "Mozzarella"],
     price: 4.5,
+    priceUsdt: 27.0,
     description: "San Marzano tomato sauce, fresh fior di latte mozzarella, hand-torn basil and a drizzle of extra virgin olive oil.",
     storeId: "2"
   },
@@ -79,6 +85,7 @@ const products: ProductProps[] = [
     rating: 4.9,
     strains: ["Spicy", "Meat"],
     price: 5.2,
+    priceUsdt: 31.0,
     description: "Loaded with double pepperoni, hot honey, crushed chili flakes, and a mozzarella-provolone blend.",
     storeId: "2"
   },
@@ -90,6 +97,7 @@ const products: ProductProps[] = [
     rating: 4.6,
     strains: ["BBQ", "Chicken"],
     price: 5.5,
+    priceUsdt: 33.0,
     description: "Grilled chicken, smoky BBQ sauce base, red onion, bacon crumbles, mozzarella and a drizzle of ranch.",
     storeId: "2"
   },
@@ -101,6 +109,7 @@ const products: ProductProps[] = [
     rating: 4.8,
     strains: ["Creamy", "Cheese"],
     price: 5.8,
+    priceUsdt: 34.8,
     description: "Gorgonzola, taleggio, mozzarella and parmigiano reggiano on a white cream base.",
     storeId: "2"
   },
@@ -114,6 +123,7 @@ const products: ProductProps[] = [
     rating: 4.7,
     strains: ["Crispy", "Cheese"],
     price: 1.8,
+    priceUsdt: 10.8,
     description: "Thick-cut fries topped with melted cheddar sauce, crispy bacon bits, chives and sour cream.",
     storeId: "3"
   },
@@ -125,6 +135,7 @@ const products: ProductProps[] = [
     rating: 4.6,
     strains: ["Spicy", "Mexican"],
     price: 3.2,
+    priceUsdt: 19.2,
     description: "Three corn tortillas filled with slow-braised spicy beef, shredded cabbage, pickled onion, avocado crema and a habanero salsa.",
     storeId: "3"
   },
@@ -136,6 +147,7 @@ const products: ProductProps[] = [
     rating: 4.8,
     strains: ["Crispy", "Chicken"],
     price: 2.5,
+    priceUsdt: 15.0,
     description: "6 bone-in wings, double-fried for maximum crunch. Choose your sauce: buffalo, honey garlic, or classic BBQ.",
     storeId: "3"
   },
@@ -147,6 +159,7 @@ const products: ProductProps[] = [
     rating: 4.5,
     strains: ["Fresh", "Cold"],
     price: 0.1,
+    priceUsdt: 0.6,
     description: "House-pressed lemon juice, sparkling water, mint leaves and a hint of elderflower.",
     storeId: "3"
   },
@@ -158,6 +171,7 @@ const products: ProductProps[] = [
     rating: 4.9,
     strains: ["Sweet", "Cold"],
     price: 1.5,
+    priceUsdt: 9.0,
     description: "Hand-spun thick milkshake in your choice of: Vanilla Bean, Salted Caramel, Dark Chocolate or Mixed Berry.",
     storeId: "3"
   },

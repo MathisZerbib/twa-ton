@@ -1,64 +1,85 @@
+import React, { useState, useEffect } from "react";
 import { Button } from "@mui/material";
 import { CartItemStyled } from "../components/styled/styled";
-import products from "../shop/Products";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
 import { useCurrency } from "../providers/useCurrency";
+import { api } from "../services/api";
+
+interface CartItem {
+  id: string;
+  name: string;
+  quantity: number;
+  priceUsdt: number;
+  imageUrl?: string;
+}
+
 interface CartItemProps {
-  item: any;
-  onRemoveItem: (item: any) => void;
+  item: CartItem;
+  onRemoveItem: (id: string) => void;
 }
 
 const CartItem: React.FC<CartItemProps> = ({ item, onRemoveItem }) => {
-  const product = products.find((product) => product.id === item.id);
-  const selectedCurrency = useCurrency().selectedCurrency;
+  const { selectedCurrency } = useCurrency();
+  const [rate, setRate] = useState(6.0);
+
+  useEffect(() => {
+    api.getTonUsdRate().then((data: any) => {
+      if (data.priceUsd) setRate(data.priceUsd);
+    }).catch(console.error);
+  }, []);
+
+  const displayPrice = selectedCurrency === "TON"
+    ? (item.priceUsdt * item.quantity / rate)
+    : (item.priceUsdt * item.quantity);
 
   return (
     <CartItemStyled
-      key={
-        item.id +
-        item.quantity +
-        item.price +
-        Math.random() +
-        Date.now() +
-        Math.random()
-      }
+      key={item.id}
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
+        padding: "12px 0",
+        borderBottom: "1px solid rgba(0,0,0,0.05)"
       }}
     >
-      {product?.imageUrl && (
-        <img
-          src={product.imageUrl}
-          alt={product.name}
-          style={{
-            width: "100px",
-            height: "100px",
-          }}
-        />
-      )}
-      <p
-        style={{
-          textAlign: "center",
-        }}
-      >
-        {product?.name} -{" "}
-        <span style={{ color: "grey" }}>{item.quantity}G</span>
-      </p>
-      <p>
-        {parseFloat(item.price).toFixed(3)} {selectedCurrency}
-      </p>
-      <Button onClick={() => onRemoveItem(item)}>
-        <FontAwesomeIcon
-          icon={faCircleXmark}
-          style={{
-            color: "grey",
-            fontSize: "1.5rem",
-          }}
-        />
-      </Button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {item.imageUrl && (
+          <img
+            src={item.imageUrl}
+            alt={item.name}
+            style={{
+              width: "50px",
+              height: "50px",
+              borderRadius: '8px',
+              objectFit: 'cover'
+            }}
+          />
+        )}
+        <div>
+          <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem' }}>{item.name}</p>
+          <p style={{ margin: 0, fontSize: '0.75rem', color: '#999' }}>Qty: {item.quantity}</p>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <p style={{ margin: 0, fontWeight: 800, fontSize: '0.9rem' }}>
+          {displayPrice.toFixed(2)} {selectedCurrency}
+        </p>
+        <Button
+          onClick={() => onRemoveItem(item.id)}
+          style={{ minWidth: 'auto', padding: '4px' }}
+        >
+          <FontAwesomeIcon
+            icon={faCircleXmark}
+            style={{
+              color: "#ccc",
+              fontSize: "1.2rem",
+            }}
+          />
+        </Button>
+      </div>
     </CartItemStyled>
   );
 };

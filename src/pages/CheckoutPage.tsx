@@ -34,6 +34,7 @@ import {
 import { useTonConnect } from "../hooks/useTonConnect";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
+import { useCurrency } from "../providers/useCurrency";
 
 // ─── Default merchant address (fallback) ─────────────────────────────────────
 const DEFAULT_MERCHANT = "EQBPEDbGdwaLv1DKntg9r6SjFIVplSaSJoJ-TVLe_2rqBOmH";
@@ -332,6 +333,14 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
   const { cartItems, totalPrice, removeItem } = useCart();
   const { connected, wallet } = useTonConnect();
   const { createOrder, ready: contractReady } = useTONEatsEscrow();
+  const { selectedCurrency } = useCurrency();
+  const [rate, setRate] = useState(6.0); // Fallback rate
+
+  useEffect(() => {
+    api.getTonUsdRate().then((data) => {
+      if (data.priceUsd) setRate(data.priceUsd);
+    }).catch(console.error);
+  }, []);
 
   const [selectedAddress, setSelectedAddress] = useState("");
   const [mapDrawerOpen, setMapDrawerOpen] = useState(false);
@@ -346,13 +355,15 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
     api.getMerchant(storeId).then(setStore).catch(console.error);
   }, [storeId]);
 
-  const deliveryFee = DELIVERY_FEE_TON;
-  const protocolFee = PROTOCOL_FEE_TON;
-  const foodTotal = parseFloat(totalPrice.toFixed(4));
+  const deliveryFee = selectedCurrency === "TON" ? DELIVERY_FEE_TON : (DELIVERY_FEE_TON * rate);
+  const protocolFee = selectedCurrency === "TON" ? PROTOCOL_FEE_TON : (PROTOCOL_FEE_TON * rate);
+  const foodTotal = totalPrice; // Already converted by CartProvider
   const grandTotal = foodTotal + deliveryFee + protocolFee;
 
+  const foodTotalTon = selectedCurrency === "TON" ? foodTotal : (foodTotal / rate);
+
   const referrerWallet = sessionStorage.getItem("ton_eats_referrer") ?? undefined;
-  const referrerCashback = (protocolFee * REFERRER_CASHBACK_PERCENT).toFixed(3);
+  const referrerCashback = (protocolFee * REFERRER_CASHBACK_PERCENT).toFixed(selectedCurrency === "TON" ? 3 : 2);
 
   const canPay =
     cartItems.length > 0 &&
@@ -371,7 +382,7 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
       // Generate a deterministic orderId to use for both Escrow chain and backend API
       const orderId = String(Date.now());
       // 1. Sign on-chain escrow tx, this will now await the on-chain confirmation (which includes the balance checks as well)
-      await createOrder(orderId, foodTotal, merchantAddr, referrerWallet);
+      await createOrder(orderId, foodTotalTon, merchantAddr, referrerWallet);
       // 2. Register order in backend → broadcasts to courier feed
       await api.createOrder({
         storeId,
@@ -381,7 +392,12 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
         deliveryAddress: selectedAddress,
         items: cartItems.map((i: any) => {
           const product = store.products?.find((p: any) => p.id === i.id);
-          return { name: product?.name || i.id, qty: i.quantity ?? 1, priceTon: i.price };
+          return {
+            name: product?.name || i.id,
+            qty: i.quantity ?? 1,
+            priceUsdt: i.priceUsdt,
+            priceTon: i.priceUsdt / rate
+          };
         }),
         foodTotalTon: foodTotal,
         deliveryFeeTon: deliveryFee,
@@ -441,7 +457,7 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
               </SuccessIcon>
               <SuccessTitle>Payment Locked in Escrow!</SuccessTitle>
               <SuccessDesc>
-                Your <strong>{grandTotal.toFixed(2)} TON</strong> is securely locked in the smart contract.
+                Your <strong>{grandTotal.toFixed(2)} {selectedCurrency}</strong> is securely locked in the smart contract.
                 Re-directing to live tracker...
               </SuccessDesc>
             </SuccessPanel>
@@ -483,14 +499,14 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
                   <PriceBox>
                     <PriceLine>
                       <span>🍔 Food Subtotal</span>
-                      <PriceTag>{foodTotal.toFixed(2)} TON</PriceTag>
+                      <PriceTag>{foodTotal.toFixed(2)} {selectedCurrency}</PriceTag>
                     </PriceLine>
                     <PriceLine>
                       <span>
                         🛵 Delivery Fee
                         <InfoChip>goes to courier</InfoChip>
                       </span>
-                      <PriceTag>{deliveryFee.toFixed(2)} TON</PriceTag>
+                      <PriceTag>{deliveryFee.toFixed(2)} {selectedCurrency}</PriceTag>
                     </PriceLine>
                     <PriceLine>
                       <span>
@@ -498,17 +514,17 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
                         Protocol Fee
                         <InfoChip>MRR treasury</InfoChip>
                       </span>
-                      <PriceTag>{protocolFee.toFixed(2)} TON</PriceTag>
+                      <PriceTag>{protocolFee.toFixed(2)} {selectedCurrency}</PriceTag>
                     </PriceLine>
                     {referrerWallet && (
                       <PriceLine accent>
                         <span>🎁 Referrer Cashback</span>
-                        <PriceTag>−{referrerCashback} TON</PriceTag>
+                        <PriceTag>−{referrerCashback} {selectedCurrency}</PriceTag>
                       </PriceLine>
                     )}
                     <PriceLine bold>
                       <span>Total (locked in escrow)</span>
-                      <PriceTag>{grandTotal.toFixed(2)} TON</PriceTag>
+                      <PriceTag>{grandTotal.toFixed(2)} {selectedCurrency}</PriceTag>
                     </PriceLine>
                   </PriceBox>
 
@@ -556,7 +572,7 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
                     ) : (
                       <>
                         <FontAwesomeIcon icon={faMotorcycle} />
-                        Pay {grandTotal.toFixed(2)} TON · Place Order
+                        Pay {grandTotal.toFixed(2)} {selectedCurrency} · Place Order
                       </>
                     )}
                   </PayBtn>

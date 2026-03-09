@@ -14,14 +14,23 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
   onSelectedAddress,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstance = useRef<mapboxgl.Map | null>(null);
   const [address, setAddress] = React.useState("");
 
+  // Keep latest callback in a ref to avoid re-run of effect
+  const callbackRef = useRef(onSelectedAddress);
   useEffect(() => {
-    if (!mapRef.current) return;
+    callbackRef.current = onSelectedAddress;
+  }, [onSelectedAddress]);
+
+  useEffect(() => {
+    if (!mapRef.current || mapInstance.current) return;
 
     const FALLBACK_CENTER: [number, number] = [3.8767, 43.6116];
 
     const initMap = (center: [number, number]) => {
+      if (mapInstance.current) return;
+
       const map = new mapboxgl.Map({
         container: mapRef.current!,
         style: "mapbox://styles/mapbox/streets-v12",
@@ -29,13 +38,13 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
         zoom: 14,
       });
 
+      mapInstance.current = map;
+
       const geocoder = new MapboxGeocoder({
         accessToken: mapboxgl.accessToken!,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mapboxgl: mapboxgl as any,
         marker: false,
         placeholder: "Chercher une adresse",
-        countries: "fr",
         language: "fr",
         addressAccuracy: "street",
         types: "address,poi",
@@ -44,15 +53,14 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
 
       const geocoderContainer = document.createElement("div");
       geocoderContainer.className = "geocoder-container";
-      geocoderContainer.appendChild(geocoder.onAdd(map));
 
+      const geocoderIcon = geocoder.onAdd(map);
+      geocoderContainer.appendChild(geocoderIcon);
       map.getContainer().appendChild(geocoderContainer);
 
       map.addControl(
         new mapboxgl.GeolocateControl({
-          positionOptions: {
-            enableHighAccuracy: true,
-          },
+          positionOptions: { enableHighAccuracy: true },
           trackUserLocation: true,
           showUserHeading: true,
         }),
@@ -61,9 +69,9 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
 
       const marker = new mapboxgl.Marker({
         draggable: true,
-        color: "#00BF0A",
+        color: "#FF6B35", // Changed to match theme
       })
-        .setLngLat(map.getCenter())
+        .setLngLat(center)
         .addTo(map);
 
       const fetchAddress = (lngLat: mapboxgl.LngLat) => {
@@ -74,7 +82,7 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
             if (data.features && data.features.length > 0) {
               const place = data.features[0].place_name;
               setAddress(place);
-              onSelectedAddress(place, lngLat.lat, lngLat.lng);
+              callbackRef.current(place, lngLat.lat, lngLat.lng);
             }
           })
           .catch((error) => console.error("Error fetching address:", error));
@@ -82,18 +90,15 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
 
       const addCircle = (lngLat: mapboxgl.LngLat) => {
         const radiusInMeters = 1000;
+        const source = map.getSource("circle") as mapboxgl.GeoJSONSource;
 
-        const circleSource = map.getSource("circle") as mapboxgl.GeoJSONSource;
-        circleSource?.setData({
-          type: "Feature",
-          geometry: {
-            type: "Point",
-            coordinates: [lngLat.lng, lngLat.lat],
-          },
-          properties: {},
-        });
-
-        if (!map.getLayer("circle")) {
+        if (source) {
+          source.setData({
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [lngLat.lng, lngLat.lat] },
+            properties: {},
+          });
+        } else {
           map.addLayer({
             id: "circle",
             type: "circle",
@@ -101,34 +106,23 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
               type: "geojson",
               data: {
                 type: "Feature",
-                geometry: {
-                  type: "Point",
-                  coordinates: [lngLat.lng, lngLat.lat],
-                },
-                properties: {}, // Add an empty properties object
+                geometry: { type: "Point", coordinates: [lngLat.lng, lngLat.lat] },
+                properties: {},
               },
             },
             paint: {
               "circle-radius": {
-                stops: [
-                  [0, 0],
-                  [20, radiusInMeters / 3],
-                ],
+                stops: [[0, 0], [20, radiusInMeters / 3]],
                 base: 2,
               },
-              "circle-color": "#0089BF",
-              "circle-opacity": 0.3,
+              "circle-color": "#FF6B35", // Theme color
+              "circle-opacity": 0.15,
               "circle-stroke-width": 2,
-              "circle-stroke-color": "#00BF0A",
+              "circle-stroke-color": "#FF6B35",
             },
           });
         }
       };
-
-      marker.on("drag", () => {
-        const lngLat = marker.getLngLat();
-        addCircle(lngLat);
-      });
 
       marker.on("dragend", () => {
         const lngLat = marker.getLngLat();
@@ -138,11 +132,12 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
 
       geocoder.on("result", (event) => {
         const lngLat = event.result.geometry.coordinates as [number, number];
-        marker.setLngLat(lngLat);
-        map.flyTo({ center: lngLat });
+        const point = { lng: lngLat[0], lat: lngLat[1] } as mapboxgl.LngLat;
+        marker.setLngLat(point);
+        map.flyTo({ center: point });
         setAddress(event.result.place_name);
-        onSelectedAddress(event.result.place_name, lngLat[1], lngLat[0]);
-        addCircle(marker.getLngLat());
+        callbackRef.current(event.result.place_name, point.lat, point.lng);
+        addCircle(point);
       });
 
       map.on("click", (event: mapboxgl.MapMouseEvent) => {
@@ -155,25 +150,25 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
       map.on("load", () => {
         addCircle(map.getCenter());
       });
-
-      return () => map.remove();
     };
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          initMap([pos.coords.longitude, pos.coords.latitude]);
-        },
-        () => {
-          // Permission denied or unavailable — fall back
-          initMap(FALLBACK_CENTER);
-        },
+        (pos) => initMap([pos.coords.longitude, pos.coords.latitude]),
+        () => initMap(FALLBACK_CENTER),
         { enableHighAccuracy: true, timeout: 5000 }
       );
     } else {
       initMap(FALLBACK_CENTER);
     }
-  }, [onSelectedAddress]);
+
+    return () => {
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
+    };
+  }, []); // Run only once
 
   return (
     <>

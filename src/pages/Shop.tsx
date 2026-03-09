@@ -146,15 +146,15 @@ const StickyCartBar = styled.div<{ visible: boolean }>`
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 100;
-  padding: 16px;
-  padding-bottom: env(safe-area-inset-bottom, 16px);
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(0,0,0,0.05);
-  transform: translateY(${(p) => (p.visible ? "0" : "100%") + "px"});
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 -8px 32px rgba(0,0,0,0.08);
+  z-index: 999;
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 16px));
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(0,0,0,0.08);
+  transform: translateY(${(p) => (p.visible ? "0" : "100%")});
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.1);
 `;
 
 const CartBtn = styled.button`
@@ -199,36 +199,40 @@ const Shop: React.FC = () => {
   const { withdrawAll, contractAddress } = useTONEatsEscrow();
 
   const [store, setStore] = useState<any>(null);
-  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rate, setRate] = useState(6.0);
 
+  // 1. Load initial merchant data
   useEffect(() => {
-    async function loadData() {
+    async function loadMerchant() {
       try {
+        setLoading(true);
         const [merchantData, rateData] = await Promise.all([
           api.getMerchant(storeId),
           api.getTonUsdRate()
         ]);
-
         setStore(merchantData);
-
-        const rate = rateData.priceUsd || 6;
-        const productsMapped = (merchantData.products || []).map((p: any) => ({
-          ...p,
-          price: selectedCurrency === "TON"
-            ? parseFloat((p.priceUsdt / rate).toFixed(2))
-            : p.priceUsdt
-        }));
-
-        setFilteredProducts(productsMapped);
+        if (rateData.priceUsd) setRate(rateData.priceUsd);
       } catch (err) {
         console.error("Failed to load merchant:", err);
       } finally {
         setLoading(false);
       }
     }
-    loadData();
-  }, [storeId, selectedCurrency]);
+    loadMerchant();
+  }, [storeId]);
+
+  // 2. Compute mapped products whenever currency or rate changes
+  const mappedProducts = useMemo(() => {
+    if (!store?.products) return [];
+    return store.products.map((p: any) => ({
+      ...p,
+      price: selectedCurrency === "TON"
+        ? parseFloat((p.priceUsdt / rate).toFixed(2))
+        : p.priceUsdt
+    }));
+  }, [store, selectedCurrency, rate]);
 
   const cartCount = cartItems.length;
 
@@ -272,7 +276,7 @@ const Shop: React.FC = () => {
         </PromoBadge>
         <AppContainer>
           <FlexBoxCol>
-            <ProductsList products={filteredProducts} />
+            <ProductsList products={mappedProducts} />
           </FlexBoxCol>
 
           {/* Admin rescue button */}

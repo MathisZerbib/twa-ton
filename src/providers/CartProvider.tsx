@@ -1,16 +1,20 @@
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, createContext, useContext, useMemo, useEffect } from "react";
+import { useCurrency } from "./useCurrency";
+import { api } from "../services/api";
 
 // Define the shape of the items in the cart
 interface CartItem {
   id: string;
-  quantity?: number;
-  price: number;
+  name: string;
+  quantity: number;
+  priceUsdt: number;
+  imageUrl?: string;
 }
 
 interface CartContextType {
   cartItems: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeItem: (item: CartItem) => void;
+  removeItem: (id: string) => void;
   totalPrice: number;
 }
 
@@ -21,24 +25,37 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const { selectedCurrency } = useCurrency();
+  const [rate, setRate] = useState(6.0); // Fallback rate
 
-  // Update the addToCart function to add items to the cart array
+  useEffect(() => {
+    api.getTonUsdRate().then((data) => {
+      if (data.priceUsd) setRate(data.priceUsd);
+    }).catch(console.error);
+  }, []);
+
   const addToCart = (item: CartItem) => {
-    setCartItems((prevItems) => [...prevItems, item]);
-    setTotalPrice((prevPrice) => prevPrice + item.price);
+    setCartItems((prev) => {
+      // Check if item already exists
+      const existing = prev.find(i => i.id === item.id);
+      if (existing) {
+        return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i);
+      }
+      return [...prev, item];
+    });
   };
 
-  const removeItem = (item: CartItem) => {
-    setCartItems(
-      (prevItems) => prevItems && prevItems.filter((i) => i !== item)
-    );
-    setTotalPrice((prevPrice) => prevPrice - item.price);
+  const removeItem = (id: string) => {
+    setCartItems((prev) => prev.filter((i) => i.id !== id));
   };
 
-  // const totalGrams = cartItems.reduce((acc, item) => {
-  //   return acc + (item.quantity ?? 0);
-  // }, 0);
+  const totalPrice = useMemo(() => {
+    const totalUsdt = cartItems.reduce((acc, item) => acc + (item.priceUsdt * item.quantity), 0);
+    if (selectedCurrency === "TON") {
+      return parseFloat((totalUsdt / rate).toFixed(4));
+    }
+    return parseFloat(totalUsdt.toFixed(2));
+  }, [cartItems, selectedCurrency, rate]);
 
   return (
     <CartContext.Provider
@@ -52,14 +69,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 // Custom hook to use the CartContext
 export const useCart = () => {
   const context = useContext(CartContext);
-  //console log the total amount of items in the cart
-  // console.log(context?.cartItems.length);
-  // console.log(context?.totalPrice + " TON");
-  /// total amount of grams in the cart (every item has a grams property represented by quantity)
-  if (context && context?.totalPrice < 0.0000000001) {
-    context.totalPrice = 0;
-  }
-  console.log();
   if (!context) {
     throw new Error("useCart must be used within a CartProvider");
   }

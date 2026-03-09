@@ -9,8 +9,10 @@ export interface ProductProps {
     rating: number;
     /** Generic tag badges (e.g. ["Spicy", "Beef"]) */
     strains: string[];
-    /** Price in TON */
+    /** Price in TON (Legacy/Calculated) */
     price: number;
+    /** Base price in USDT */
+    priceUsdt: number;
     description: string;
     /** Which restaurant owns this product */
     storeId?: string;

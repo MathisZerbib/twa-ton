@@ -7,7 +7,7 @@ import { useCart } from "../providers/CartProvider";
 
 type AddToCartButtonProps = {
   amount: number;
-  item: { id: string; quantity: number; price: number };
+  item: { id: string; name: string; quantity: number; priceUsdt: number; imageUrl?: string };
 };
 
 const StyledButton = styled.button`
