@@ -65,32 +65,38 @@ const ALLOWED_ORIGINS = [
 ];
 
 // ── Security Middleware ───────────────────────────────────────────────────────
-// Helper for CORS validation - avoids passing Error (which strips headers)
+// Helper for CORS validation used by Socket.io
 function checkOrigin(origin, callback) {
-  // 1. Allow if no origin (e.g. server-to-server or local dev tools)
   if (!origin) return callback(null, true);
-
-  // 2. Check against our allowed list
   const ok = ALLOWED_ORIGINS.some(pattern =>
     typeof pattern === 'string' ? pattern === origin : pattern.test(origin)
   );
-
-  if (ok) {
-    callback(null, true);
-  } else {
-    // Deny without throwing an error to ensure proper response headers
-    callback(null, false);
-  }
+  callback(null, ok);
 }
 
-app.use(cors({
-  origin: checkOrigin,
-  credentials: true,
-  optionsSuccessStatus: 200
-}));
+// Manual CORS handler to ensure headers are ALWAYS present
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Whitelist check
+  const isAllowed = !origin || ALLOWED_ORIGINS.some(pattern =>
+    typeof pattern === 'string' ? pattern === origin : pattern.test(origin)
+  );
 
-// Robust preflight handling for ALL routes
-app.options('*', cors());
+  if (isAllowed && origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight for 24h
+  }
+
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
 
 app.use(helmet({
   contentSecurityPolicy: false,
