@@ -208,16 +208,18 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
   return (
     <>
       <div style={{ position: "relative", width: "100%", height: "90vh" }}>
-        {/* ── Geolocate Me button ── */}
+        <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
+
+        {/* ── Geolocate Me button (rendered AFTER map so it layers on top) ── */}
         <button
           onClick={handleGeolocate}
           disabled={locating}
           style={{
             position: "absolute",
-            bottom: 24,
+            bottom: 32,
             left: "50%",
             transform: "translateX(-50%)",
-            zIndex: 2,
+            zIndex: 9999,
             display: "flex",
             alignItems: "center",
             gap: 8,
@@ -232,6 +234,7 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
             boxShadow: "0 4px 16px rgba(255,107,53,0.4)",
             opacity: locating ? 0.7 : 1,
             transition: "opacity 0.2s, transform 0.15s",
+            pointerEvents: "auto",
           }}
         >
           {locating ? (
@@ -251,8 +254,6 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
             </>
           )}
         </button>
-
-        <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
       </div>
 
       <style>
