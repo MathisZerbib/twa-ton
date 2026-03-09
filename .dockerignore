@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+.gitignore
+*.md
+backend
+# Only exclude contracts source/deps — keep build/ for Tact type imports
+contracts/node_modules
+contracts/temp
+contracts/contracts
+contracts/wrappers
+contracts/tests
+contracts/scripts
+*.sh

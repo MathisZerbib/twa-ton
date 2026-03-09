@@ -23,3 +23,20 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.*
+!.env.example
+
+# ── Contracts (Blueprint / Tact) ──────────────────────────────────────────────
+contracts/temp/
+# Uncomment if you don't want to commit compiled output:
+# contracts/build/
+
+# ── Backend ───────────────────────────────────────────────────────────────────
+backend/.env
+backend/node_modules/
+backend/package-lock.json
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+# Keep docker-compose.yml committed, but never commit secrets
+*.pem
+*.key

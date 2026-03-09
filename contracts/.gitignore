@@ -1,0 +1,16 @@
+# TON Blueprint
+node_modules
+build
+temp
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Compilation traces
+*.log
+
+package-lock.json
