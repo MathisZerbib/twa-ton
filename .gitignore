@@ -41,3 +41,4 @@ backend/package-lock.json
 # Keep docker-compose.yml committed, but never commit secrets
 *.pem
 *.key
+package-lock.json
