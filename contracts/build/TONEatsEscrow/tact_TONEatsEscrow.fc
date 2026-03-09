@@ -1,0 +1,833 @@
+#pragma version =0.4.6;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+;; tact_TONEatsEscrow.headers.fc
+;;
+;; Header files for TONEatsEscrow
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_store_address_opt
+builder __tact_store_address_opt(builder b, slice address) inline;
+
+;; __tact_not_null
+forall X -> X __tact_not_null(X x) impure inline;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; __tact_context_get_sender
+slice __tact_context_get_sender() inline;
+
+;; __tact_dict_get_int_cell
+cell __tact_dict_get_int_cell(cell d, int kl, int k) inline;
+
+;; __tact_dict_set_int_cell
+(cell, ()) __tact_dict_set_int_cell(cell d, int kl, int k, cell v) inline;
+
+;; $DeployOk$_store
+builder $DeployOk$_store(builder build_0, (int) v) inline;
+
+;; $DeployOk$_store_cell
+cell $DeployOk$_store_cell((int) v, builder b) inline;
+
+;; $OrderData$_store
+builder $OrderData$_store(builder build_0, (slice, slice, slice, slice, int, int, int, int) v) inline;
+
+;; $OrderData$_store_cell
+cell $OrderData$_store_cell((slice, slice, slice, slice, int, int, int, int) v, builder b) inline;
+
+;; $OrderData$_load
+(slice, ((slice, slice, slice, slice, int, int, int, int))) $OrderData$_load(slice sc_0) inline;
+
+;; $OrderData$_as_optional
+tuple $OrderData$_as_optional((slice, slice, slice, slice, int, int, int, int) v) inline;
+
+;; $OrderData$_load_opt
+tuple $OrderData$_load_opt(cell cl) inline;
+
+;; $TONEatsEscrow$_store
+builder $TONEatsEscrow$_store(builder build_0, (slice, int, int, cell, int) v) inline;
+
+;; $TONEatsEscrow$_load
+(slice, ((slice, int, int, cell, int))) $TONEatsEscrow$_load(slice sc_0) inline;
+
+;; $Context$_get_value
+_ $Context$_get_value((int, slice, int, slice) v) inline;
+
+;; $OrderData$_get_status
+_ $OrderData$_get_status((slice, slice, slice, slice, int, int, int, int) v) inline;
+
+;; $OrderData$_not_null
+((slice, slice, slice, slice, int, int, int, int)) $OrderData$_not_null(tuple v) inline;
+
+;; $OrderData$_to_tuple
+tuple $OrderData$_to_tuple(((slice, slice, slice, slice, int, int, int, int)) v) inline;
+
+;; $OrderData$_to_opt_tuple
+tuple $OrderData$_to_opt_tuple(tuple v) inline;
+
+;; $OrderData$_to_opt_external
+tuple $OrderData$_to_opt_external(tuple v) inline;
+
+;; $TONEatsEscrow$init$_load
+(slice, ((slice))) $TONEatsEscrow$init$_load(slice sc_0) inline;
+
+;; $TONEatsEscrow$_contract_init
+(slice, int, int, cell, int) $TONEatsEscrow$_contract_init(slice $treasury) impure inline;
+
+;; $TONEatsEscrow$_contract_load
+(slice, int, int, cell, int) $TONEatsEscrow$_contract_load() impure inline;
+
+;; $TONEatsEscrow$_contract_store
+() $TONEatsEscrow$_contract_store((slice, int, int, cell, int) v) impure inline;
+
+;; $global_emit
+() $global_emit(cell $body) impure inline;
+
+;; $TONEatsEscrow$_fun_get_order_status
+((slice, int, int, cell, int), int) $TONEatsEscrow$_fun_get_order_status((slice, int, int, cell, int) $self, int $orderId) impure inline_ref;
+
+;; $TONEatsEscrow$_fun_get_order
+((slice, int, int, cell, int), tuple) $TONEatsEscrow$_fun_get_order((slice, int, int, cell, int) $self, int $orderId) impure inline_ref;
+
+;; $TONEatsEscrow$_fun_get_delivery_fee
+((slice, int, int, cell, int), int) $TONEatsEscrow$_fun_get_delivery_fee((slice, int, int, cell, int) $self) impure inline_ref;
+
+;; $TONEatsEscrow$_fun_get_protocol_fee
+((slice, int, int, cell, int), int) $TONEatsEscrow$_fun_get_protocol_fee((slice, int, int, cell, int) $self) impure inline_ref;
+
+;; $TONEatsEscrow$_fun_contract_balance
+((slice, int, int, cell, int), int) $TONEatsEscrow$_fun_contract_balance((slice, int, int, cell, int) $self) impure inline_ref;
+
+;; $MessageParameters$_constructor_bounce_to_value_mode_body
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
+
+;; $TONEatsEscrow$_fun_notify
+((slice, int, int, cell, int), ()) $TONEatsEscrow$_fun_notify((slice, int, int, cell, int) $self, cell $body) impure inline;
+
+;; $OrderData$_constructor_buyer_merchant_courier_referrer_deliveryFee_protocolFee_foodAmount_status
+((slice, slice, slice, slice, int, int, int, int)) $OrderData$_constructor_buyer_merchant_courier_referrer_deliveryFee_protocolFee_foodAmount_status(slice $buyer, slice $merchant, slice $courier, slice $referrer, int $deliveryFee, int $protocolFee, int $foodAmount, int $status) inline;
+
+;; $SendParameters$_constructor_to_value_mode
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline;
+
+;; $DeployOk$_constructor_queryId
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
+
+;; $SendParameters$_constructor_to_value_mode_body
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline;
+
+
+;; tact_TONEatsEscrow.stdlib.fc
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_child_contract_codes;
+global int __tact_randomized;
+
+(slice, slice) __tact_load_address_opt(slice cs) asm """
+
+            b{00} SDBEGINSQ
+            IF:<{
+              PUSHNULL
+            }>ELSE<{
+              LDMSGADDR
+              SWAP
+            }>
+
+""";
+
+builder __tact_store_addr_none(builder b) asm "b{00} STSLICECONST";
+
+builder __tact_store_address_opt(builder b, slice address) inline {
+    if (null?(address)) {
+        return __tact_store_addr_none(b);
+    } else {
+        return b.store_slice(address);
+    }
+}
+
+forall X -> X __tact_not_null(X x) impure inline {
+    throw_if(128, null?(x)); return x;
+}
+
+(int, slice, int, slice) __tact_context_get() inline {
+    return __tact_context;
+}
+
+slice __tact_context_get_sender() inline {
+    return __tact_context_sender;
+}
+
+forall X0, X1, X2, X3, X4, X5, X6, X7 -> tuple __tact_tuple_create_8((X0, X1, X2, X3, X4, X5, X6, X7) v) asm """
+    8 TUPLE
+""";
+
+forall X0, X1, X2, X3, X4, X5, X6, X7 -> (X0, X1, X2, X3, X4, X5, X6, X7) __tact_tuple_destroy_8(tuple v) asm """
+    8 UNTUPLE
+""";
+
+cell __tact_dict_get_int_cell(cell d, int kl, int k) inline {
+    var (r, ok) = idict_get_ref?(d, kl, k);
+    if (ok) {
+        return r;
+    } else {
+        return null();
+    }
+}
+
+(cell, ()) __tact_dict_set_int_cell(cell d, int kl, int k, cell v) inline {
+    if (null?(v)) {
+        var (r, ok) = idict_delete?(d, kl, k);
+        return (r, ());
+    } else {
+        return (idict_set_ref(d, kl, k, v), ());
+    }
+}
+
+builder $global_beginCell() impure asm """
+    NEWC
+""";
+
+int $global_myBalance() impure asm """
+    BALANCE FIRST
+""";
+
+() $global_nativeReserve(int $amount, int $mode) impure asm """
+    RAWRESERVE
+""";
+
+() $global_message((int, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+    STZEROES
+    // → Stack state
+    // s0: Builder
+    // s1: `body`
+    // s2: `mode`
+    STDICT
+    ENDC
+    SWAP
+    SENDRAWMSG
+""";
+
+() $global_send((int, cell, cell, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+    STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+    // → Stack state
+    // s0: Builder
+    // s1: `data`
+    // s2: `code`
+    // s3: `body`
+    // s4: `mode`
+
+    // Group 2: Placing the Builder after code and data, then checking those for nullability
+    s2 XCHG0
+    DUP2
+    ISNULL
+    SWAP
+    ISNULL
+    AND
+    // → Stack state
+    // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+    // s1: `code`
+    // s2: `data`
+    // s3: Builder
+    // s4: `body`
+    // s5: `mode`
+
+    // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+    <{
+        DROP2 // drop `data` and `code`, since either of those is null
+        b{0} STSLICECONST
+    }> PUSHCONT
+
+    // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+    <{
+        // _ split_depth:(Maybe (## 5))
+        //   special:(Maybe TickTock)
+        //   code:(Maybe ^Cell)
+        //   data:(Maybe ^Cell)
+        //   library:(Maybe ^Cell)
+        // = StateInit;
+        ROT                // place message Builder on top
+        b{10} STSLICECONST // store Maybe = true, Either = false
+        // Start composing inlined StateInit
+        b{00} STSLICECONST // store split_depth and special first
+        STDICT             // store code
+        STDICT             // store data
+        b{0} STSLICECONST  // store library
+    }> PUSHCONT
+
+    // Group 3: IFELSE that does the branching shown above
+    IFELSE
+    // → Stack state
+    // s0: Builder
+    // s1: null or StateInit
+    // s2: `body`
+    // s3: `mode`
+
+    // Group 4: Finalizing the message
+    STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
+    ENDC
+    // → Stack state
+    // s0: Cell
+    // s1: `mode`
+
+    // Group 5: Sending the message, with `mode` on top
+    SWAP
+    SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+""";
+
+() $global_sendRawMessage(cell $msg, int $mode) impure asm """
+    SENDRAWMSG
+""";
+
+cell $Builder$_fun_endCell(builder $self) impure asm """
+    ENDC
+""";
+
+builder $Builder$_fun_storeRef(cell $cell, builder $self) impure asm """
+    STREF
+""";
+
+() $global_emit(cell $body) impure inline {
+    cell $c = $Builder$_fun_endCell($Builder$_fun_storeRef($body, store_uint($global_beginCell(), 15211807202738752817960438464513, 104)));
+    $global_sendRawMessage($c, 0);
+}
+
+((slice, int, int, cell, int), ()) $TONEatsEscrow$_fun_notify((slice, int, int, cell, int) $self, cell $body) impure inline {
+    var (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds)) = $self;
+    slice $to = __tact_context_get_sender();
+    int $bounce = false;
+    if (false) {
+        int $balance = $global_myBalance();
+        int $balanceBeforeMessage = ($balance - $Context$_get_value(__tact_context_get()));
+        if (($balanceBeforeMessage < 0)) {
+            $global_nativeReserve(0, 0);
+            $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
+            return (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds), ());
+        }
+    }
+    $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
+    return (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds), ());
+}
+
+;; tact_TONEatsEscrow.constants.fc
+;; Cell NPYNyv7UYxbzNhkbTOP73ck14iKdquz+zziS/e//eCg=
+cell __gen_cell_cell_34f60dcafed46316f336191b4ce3fbddc935e2229daaecfecf3892fdefff7828() asm """
+    B{b5ee9c72410101010013000022000000006f726465725f63726561746564bc6f87d3} B>boc PUSHREF
+""";
+
+;; Cell UF3jYCsF4UlyykymRRcvE11z32hIvSG0hqBnr/UyoSQ=
+cell __gen_cell_cell_505de3602b05e14972ca4ca645172f135d73df6848bd21b486a067aff532a124() asm """
+    B{b5ee9c7241010101001700002a0000000064656c69766572795f6163636570746564e7585426} B>boc PUSHREF
+""";
+
+;; Cell LTzRbwjnEGa/5yU/8YA6ejPaLth1YsF69CpdLAv+m3Y=
+cell __gen_cell_cell_2d3cd16f08e71066bfe7253ff1803a7a33da2ed87562c17af42a5d2c0bfe9b76() asm """
+    B{b5ee9c7241010101001800002c0000000064656c69766572795f636f6e6669726d656428610ff6} B>boc PUSHREF
+""";
+
+;; Cell q8ywjhrOoTohF/YHuYZ2Zj/GgzmxuSKl5ZSDDcZG7vQ=
+cell __gen_cell_cell_abccb08e1acea13a2117f607b98676663fc68339b1b922a5e594830dc646eef4() asm """
+    B{b5ee9c7241010101001100001e0000000073616665207265736375651015cd72} B>boc PUSHREF
+""";
+
+;; tact_TONEatsEscrow.storage.fc
+;;
+;; Type: Context
+;; TLB: _ bounceable:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounceable, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell value:int257 to:address bounce:bool = SendParameters
+;;
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline {
+    return ($mode, null(), null(), null(), $value, $to, true);
+}
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, null(), null(), $value, $to, true);
+}
+
+;;
+;; Type: MessageParameters
+;; TLB: _ mode:int257 body:Maybe ^cell value:int257 to:address bounce:bool = MessageParameters
+;;
+
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, $value, $to, $bounce);
+}
+
+;;
+;; Type: DeployOk
+;; Header: 0xaff90f57
+;; TLB: deploy_ok#aff90f57 queryId:uint64 = DeployOk
+;;
+
+builder $DeployOk$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $DeployOk$_store_cell((int) v, builder b) inline {
+    return $DeployOk$_store(b, v).end_cell();
+}
+
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline {
+    return ($queryId);
+}
+
+;;
+;; Type: OrderData
+;; TLB: _ buyer:address merchant:address courier:address referrer:address deliveryFee:coins protocolFee:coins foodAmount:coins status:uint8 = OrderData
+;;
+
+builder $OrderData$_store(builder build_0, (slice, slice, slice, slice, int, int, int, int) v) inline {
+    var (v'buyer, v'merchant, v'courier, v'referrer, v'deliveryFee, v'protocolFee, v'foodAmount, v'status) = v;
+    build_0 = build_0.store_slice(v'buyer);
+    build_0 = build_0.store_slice(v'merchant);
+    build_0 = __tact_store_address_opt(build_0, v'courier);
+    var build_1 = begin_cell();
+    build_1 = __tact_store_address_opt(build_1, v'referrer);
+    build_1 = build_1.store_varuint16(v'deliveryFee);
+    build_1 = build_1.store_varuint16(v'protocolFee);
+    build_1 = build_1.store_varuint16(v'foodAmount);
+    build_1 = build_1.store_uint(v'status, 8);
+    build_0 = store_builder_ref(build_0, build_1);
+    return build_0;
+}
+
+cell $OrderData$_store_cell((slice, slice, slice, slice, int, int, int, int) v, builder b) inline {
+    return $OrderData$_store(b, v).end_cell();
+}
+
+(slice, ((slice, slice, slice, slice, int, int, int, int))) $OrderData$_load(slice sc_0) inline {
+    var v'buyer = sc_0~load_msg_addr();
+    var v'merchant = sc_0~load_msg_addr();
+    var v'courier = sc_0~__tact_load_address_opt();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'referrer = sc_1~__tact_load_address_opt();
+    var v'deliveryFee = sc_1~load_varuint16();
+    var v'protocolFee = sc_1~load_varuint16();
+    var v'foodAmount = sc_1~load_varuint16();
+    var v'status = sc_1~load_uint(8);
+    return (sc_0, (v'buyer, v'merchant, v'courier, v'referrer, v'deliveryFee, v'protocolFee, v'foodAmount, v'status));
+}
+
+tuple $OrderData$_as_optional((slice, slice, slice, slice, int, int, int, int) v) inline {
+    var (v'buyer, v'merchant, v'courier, v'referrer, v'deliveryFee, v'protocolFee, v'foodAmount, v'status) = v;
+    return __tact_tuple_create_8(v'buyer, v'merchant, v'courier, v'referrer, v'deliveryFee, v'protocolFee, v'foodAmount, v'status);
+}
+
+tuple $OrderData$_load_opt(cell cl) inline {
+    if (null?(cl)) {
+        return null();
+    }
+    var sc = cl.begin_parse();
+    return $OrderData$_as_optional(sc~$OrderData$_load());
+}
+
+_ $OrderData$_get_status((slice, slice, slice, slice, int, int, int, int) v) inline {
+    var (v'buyer, v'merchant, v'courier, v'referrer, v'deliveryFee, v'protocolFee, v'foodAmount, v'status) = v;
+    return v'status;
+}
+
+((slice, slice, slice, slice, int, int, int, int)) $OrderData$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (slice vvv'buyer, slice vvv'merchant, slice vvv'courier, slice vvv'referrer, int vvv'deliveryFee, int vvv'protocolFee, int vvv'foodAmount, int vvv'status) = __tact_tuple_destroy_8(v);
+    return (vvv'buyer, vvv'merchant, vvv'courier, vvv'referrer, vvv'deliveryFee, vvv'protocolFee, vvv'foodAmount, vvv'status);
+}
+
+tuple $OrderData$_to_tuple(((slice, slice, slice, slice, int, int, int, int)) v) inline {
+    var (v'buyer, v'merchant, v'courier, v'referrer, v'deliveryFee, v'protocolFee, v'foodAmount, v'status) = v;
+    return __tact_tuple_create_8(v'buyer, v'merchant, v'courier, v'referrer, v'deliveryFee, v'protocolFee, v'foodAmount, v'status);
+}
+
+tuple $OrderData$_to_opt_tuple(tuple v) inline {
+    if (null?(v)) { return null(); } 
+    return $OrderData$_to_tuple($OrderData$_not_null(v)); 
+}
+
+tuple $OrderData$_to_opt_external(tuple v) inline {
+    var loaded = $OrderData$_to_opt_tuple(v);
+    if (null?(loaded)) {
+        return null();
+    } else {
+        return (loaded);
+    }
+}
+
+((slice, slice, slice, slice, int, int, int, int)) $OrderData$_constructor_buyer_merchant_courier_referrer_deliveryFee_protocolFee_foodAmount_status(slice $buyer, slice $merchant, slice $courier, slice $referrer, int $deliveryFee, int $protocolFee, int $foodAmount, int $status) inline {
+    return ($buyer, $merchant, $courier, $referrer, $deliveryFee, $protocolFee, $foodAmount, $status);
+}
+
+;;
+;; Type: TONEatsEscrow
+;; TLB: _ treasury:address deliveryFee:coins protocolFee:coins orders:dict<int, ^OrderData{buyer:address,merchant:address,courier:address,referrer:address,deliveryFee:coins,protocolFee:coins,foodAmount:coins,status:uint8}> lockedFunds:coins = TONEatsEscrow
+;;
+
+builder $TONEatsEscrow$_store(builder build_0, (slice, int, int, cell, int) v) inline {
+    var (v'treasury, v'deliveryFee, v'protocolFee, v'orders, v'lockedFunds) = v;
+    build_0 = build_0.store_slice(v'treasury);
+    build_0 = build_0.store_varuint16(v'deliveryFee);
+    build_0 = build_0.store_varuint16(v'protocolFee);
+    build_0 = build_0.store_dict(v'orders);
+    build_0 = build_0.store_varuint16(v'lockedFunds);
+    return build_0;
+}
+
+(slice, ((slice, int, int, cell, int))) $TONEatsEscrow$_load(slice sc_0) inline {
+    var v'treasury = sc_0~load_msg_addr();
+    var v'deliveryFee = sc_0~load_varuint16();
+    var v'protocolFee = sc_0~load_varuint16();
+    var v'orders = sc_0~load_dict();
+    var v'lockedFunds = sc_0~load_varuint16();
+    return (sc_0, (v'treasury, v'deliveryFee, v'protocolFee, v'orders, v'lockedFunds));
+}
+
+(slice, ((slice))) $TONEatsEscrow$init$_load(slice sc_0) inline {
+    var v'treasury = sc_0~load_msg_addr();
+    return (sc_0, (v'treasury));
+}
+
+(slice, int, int, cell, int) $TONEatsEscrow$_contract_load() impure inline {
+    slice $sc = get_data().begin_parse();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$TONEatsEscrow$_load();
+    }
+    else {
+        (slice $treasury) = $sc~$TONEatsEscrow$init$_load();
+        $sc.end_parse();
+        return $TONEatsEscrow$_contract_init($treasury);
+    }
+}
+
+() $TONEatsEscrow$_contract_store((slice, int, int, cell, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_int(true, 1);
+    b = $TONEatsEscrow$_store(b, v);
+    set_data(b.end_cell());
+}
+
+;;
+;; Contract TONEatsEscrow functions
+;;
+
+(slice, int, int, cell, int) $TONEatsEscrow$_contract_init(slice $treasury) impure inline {
+    var (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds)) = (null(), null(), null(), null(), null());
+    $self'treasury = $treasury;
+    $self'deliveryFee = 200000000;
+    $self'protocolFee = 100000000;
+    $self'orders = null();
+    $self'lockedFunds = 0;
+    return ($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds);
+}
+
+((slice, int, int, cell, int), int) $TONEatsEscrow$_fun_get_order_status((slice, int, int, cell, int) $self, int $orderId) impure inline_ref {
+    var (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds)) = $self;
+    tuple $order = $OrderData$_load_opt(__tact_dict_get_int_cell($self'orders, 257, $orderId));
+    if (null?($order)) {
+        var $fresh$ret_0 = -1;
+        return (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds), $fresh$ret_0);
+    }
+    var $fresh$ret_1 = $OrderData$_get_status($OrderData$_not_null($order));
+    return (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds), $fresh$ret_1);
+}
+
+((slice, int, int, cell, int), tuple) $TONEatsEscrow$_fun_get_order((slice, int, int, cell, int) $self, int $orderId) impure inline_ref {
+    var (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds)) = $self;
+    var $fresh$ret_2 = $OrderData$_load_opt(__tact_dict_get_int_cell($self'orders, 257, $orderId));
+    return (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds), $fresh$ret_2);
+}
+
+((slice, int, int, cell, int), int) $TONEatsEscrow$_fun_get_delivery_fee((slice, int, int, cell, int) $self) impure inline_ref {
+    var (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds)) = $self;
+    var $fresh$ret_3 = $self'deliveryFee;
+    return (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds), $fresh$ret_3);
+}
+
+((slice, int, int, cell, int), int) $TONEatsEscrow$_fun_get_protocol_fee((slice, int, int, cell, int) $self) impure inline_ref {
+    var (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds)) = $self;
+    var $fresh$ret_4 = $self'protocolFee;
+    return (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds), $fresh$ret_4);
+}
+
+((slice, int, int, cell, int), int) $TONEatsEscrow$_fun_contract_balance((slice, int, int, cell, int) $self) impure inline_ref {
+    var (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds)) = $self;
+    var $fresh$ret_5 = $global_myBalance();
+    return (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds), $fresh$ret_5);
+}
+
+;;
+;; Get methods of a Contract TONEatsEscrow
+;;
+
+_ %get_order_status(int $orderId) method_id(73939) {
+    int $orderId = $orderId;
+    var self = $TONEatsEscrow$_contract_load();
+    var res = self~$TONEatsEscrow$_fun_get_order_status($orderId);
+    return res;
+}
+
+_ %get_order(int $orderId) method_id(82465) {
+    int $orderId = $orderId;
+    var self = $TONEatsEscrow$_contract_load();
+    var res = self~$TONEatsEscrow$_fun_get_order($orderId);
+    return $OrderData$_to_opt_external(res);
+}
+
+_ %get_delivery_fee() method_id(110207) {
+    var self = $TONEatsEscrow$_contract_load();
+    var res = self~$TONEatsEscrow$_fun_get_delivery_fee();
+    return res;
+}
+
+_ %get_protocol_fee() method_id(123435) {
+    var self = $TONEatsEscrow$_contract_load();
+    var res = self~$TONEatsEscrow$_fun_get_protocol_fee();
+    return res;
+}
+
+_ %contract_balance() method_id(66901) {
+    var self = $TONEatsEscrow$_contract_load();
+    var res = self~$TONEatsEscrow$_fun_contract_balance();
+    return res;
+}
+
+;;
+;; Routing of a Contract TONEatsEscrow
+;;
+
+;; message opcode reader utility: only binary receivers
+;; Returns 32 bit message opcode, otherwise throws the "Invalid incoming message" exit code
+(slice, int) ~load_opcode_internal(slice s) asm( -> 1 0) "32 LDUQ 130 THROWIFNOT";
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    cs~skip_bits(2);
+    var msg_bounceable = cs~load_int(1);
+    var msg_bounced = cs~load_int(1);
+    slice msg_sender_addr = cs~load_msg_addr();
+    __tact_context = (msg_bounceable, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var ($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds) = $TONEatsEscrow$_contract_load();
+    
+    ;; Handle bounced messages
+    if (msg_bounced) { return (); }
+    int op = 0;
+    int in_msg_length = slice_bits(in_msg);
+    if (in_msg_length >= 32) {
+        op = in_msg~load_uint(32);
+        ;; Receive CreateOrder message
+        if (op == 0x1) {
+            var $msg'orderId = in_msg~load_uint(64);
+            var $msg'merchant = in_msg~load_msg_addr();
+            var $msg'hasReferrer = in_msg~load_int(1);
+            var $msg'referrer = in_msg~load_msg_addr();
+            var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+            slice $buyer = $ctx'sender;
+            int $value = $ctx'value;
+            int $foodAmount = ((($value - $self'deliveryFee) - $self'protocolFee) - 20000000);
+            throw_unless(46647, ($foodAmount > 0));
+            throw_unless(26770, null?($OrderData$_load_opt(__tact_dict_get_int_cell($self'orders, 257, $msg'orderId))));
+            slice $referrer = null();
+            if ($msg'hasReferrer) {
+                $referrer = $msg'referrer;
+            }
+            $self'orders~__tact_dict_set_int_cell(257, $msg'orderId, $OrderData$_store_cell($OrderData$_constructor_buyer_merchant_courier_referrer_deliveryFee_protocolFee_foodAmount_status($buyer, $msg'merchant, null(), $referrer, $self'deliveryFee, $self'protocolFee, $foodAmount, 0), begin_cell()));
+            $self'lockedFunds = ((($self'lockedFunds + $self'deliveryFee) + $self'protocolFee) + $foodAmount);
+            $global_emit(__gen_cell_cell_34f60dcafed46316f336191b4ce3fbddc935e2229daaecfecf3892fdefff7828());
+            $TONEatsEscrow$_contract_store(($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds));
+            return ();
+        }
+        
+        ;; Receive UpdateFees message
+        if (op == 0x4) {
+            var $msg'deliveryFee = in_msg~load_varuint16();
+            var $msg'protocolFee = in_msg~load_varuint16();
+            throw_unless(35274, ( equal_slices_bits(__tact_context_get_sender(), $self'treasury) ));
+            $self'deliveryFee = $msg'deliveryFee;
+            $self'protocolFee = $msg'protocolFee;
+            $TONEatsEscrow$_contract_store(($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds));
+            return ();
+        }
+        
+        ;; Receive AcceptDelivery message
+        if (op == 0x2) {
+            var $msg'orderId = in_msg~load_uint(64);
+            tuple $order = $OrderData$_load_opt(__tact_dict_get_int_cell($self'orders, 257, $msg'orderId));
+            throw_unless(18518, (~ null?($order)));
+            var ($o'buyer, $o'merchant, $o'courier, $o'referrer, $o'deliveryFee, $o'protocolFee, $o'foodAmount, $o'status) = $OrderData$_not_null($order);
+            throw_unless(8345, ($o'status == 0));
+            $o'courier = __tact_context_get_sender();
+            $o'status = 1;
+            $self'orders~__tact_dict_set_int_cell(257, $msg'orderId, $OrderData$_store_cell(($o'buyer, $o'merchant, $o'courier, $o'referrer, $o'deliveryFee, $o'protocolFee, $o'foodAmount, $o'status), begin_cell()));
+            $global_emit(__gen_cell_cell_505de3602b05e14972ca4ca645172f135d73df6848bd21b486a067aff532a124());
+            $TONEatsEscrow$_contract_store(($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds));
+            return ();
+        }
+        
+        ;; Receive ConfirmDelivery message
+        if (op == 0x3) {
+            var $msg'orderId = in_msg~load_uint(64);
+            tuple $order = $OrderData$_load_opt(__tact_dict_get_int_cell($self'orders, 257, $msg'orderId));
+            throw_unless(18518, (~ null?($order)));
+            var ($o'buyer, $o'merchant, $o'courier, $o'referrer, $o'deliveryFee, $o'protocolFee, $o'foodAmount, $o'status) = $OrderData$_not_null($order);
+            throw_unless(33504, ($o'status == 1));
+            throw_unless(40260, ( (( equal_slices_bits(__tact_context_get_sender(), __tact_not_null($o'courier)) )) ? (true) : (( equal_slices_bits(__tact_context_get_sender(), $o'buyer) )) ));
+            $o'status = 2;
+            $self'orders~__tact_dict_set_int_cell(257, $msg'orderId, $OrderData$_store_cell(($o'buyer, $o'merchant, $o'courier, $o'referrer, $o'deliveryFee, $o'protocolFee, $o'foodAmount, $o'status), begin_cell()));
+            int $gas = 10000000;
+            $global_send($SendParameters$_constructor_to_value_mode($o'merchant, ($o'foodAmount - $gas), 2));
+            slice $c = __tact_not_null($o'courier);
+            $global_send($SendParameters$_constructor_to_value_mode($c, ($o'deliveryFee - $gas), 2));
+            slice $referrer = $o'referrer;
+            if ((~ null?($referrer))) {
+                int $half = ($o'protocolFee / 2);
+                $global_send($SendParameters$_constructor_to_value_mode(__tact_not_null($referrer), ($half - $gas), 2));
+                $global_send($SendParameters$_constructor_to_value_mode($self'treasury, (($o'protocolFee - $half) - $gas), 2));
+            } else {
+                $global_send($SendParameters$_constructor_to_value_mode($self'treasury, ($o'protocolFee - $gas), 2));
+            }
+            $self'lockedFunds = ($self'lockedFunds - (($o'deliveryFee + $o'protocolFee) + $o'foodAmount));
+            $global_emit(__gen_cell_cell_2d3cd16f08e71066bfe7253ff1803a7a33da2ed87562c17af42a5d2c0bfe9b76());
+            $TONEatsEscrow$_contract_store(($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds));
+            return ();
+        }
+        
+        ;; Receive Deploy message
+        if (op == 0x946a98b6) {
+            var $deploy'queryId = in_msg~load_uint(64);
+            ($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds)~$TONEatsEscrow$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
+            $TONEatsEscrow$_contract_store(($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds));
+            return ();
+        }
+        
+    }
+    ;; Empty Receiver and Text Receivers
+    var text_op = slice_hash(in_msg);
+    ;; Receive "withdraw_all" message
+    if (text_op == 0x90218655da49a654f5fba12f38d8bef301940dd023d9c38042e840ccd723d640) {
+        throw_unless(33035, ( equal_slices_bits(__tact_context_get_sender(), $self'treasury) ));
+        int $availableAmount = (($global_myBalance() - $self'lockedFunds) - 50000000);
+        throw_unless(62638, ($availableAmount > 0));
+        $global_send($SendParameters$_constructor_to_value_mode_body($self'treasury, $availableAmount, 2, __gen_cell_cell_abccb08e1acea13a2117f607b98676663fc68339b1b922a5e594830dc646eef4()));
+        $TONEatsEscrow$_contract_store(($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds));
+        return ();
+    }
+    ;; Throw if not handled
+    throw(130);
+}
+
+
+() __tact_selector_hack_asm() impure asm """
+@atend @ 1 {
+        execute current@ context@ current!
+        {
+            // The core idea of this function is to save gas by avoiding unnecessary dict jump, when recv_internal/recv_external is called
+            // We want to extract recv_internal/recv_external from the dict and select needed function
+            // not by jumping to the needed function by it's index, but by using usual IF statements.
+
+            }END> b> // Close previous builder, now we have a cell of previous code on top of the stack
+
+            <{ // Start of the new code builder
+                SETCP0
+                // Swap the new code builder with the previous code, now we have previous code on top of the stack
+                swap
+                // Transform cell to slice and load first ref from the previous code, now we have the dict on top of the stack
+                <s ref@
+
+                // Extract the recv_internal from the dict
+                dup 0 swap @procdictkeylen idict@ { "internal shortcut error" abort } ifnot
+                swap
+
+                // Delete the recv_internal from the dict
+                0 swap @procdictkeylen idict- drop
+                // Delete the recv_external from the dict (it's okay if it's not there)
+                -1 swap @procdictkeylen idict- drop
+                // Delete the __tact_selector_hack from the dict
+                65535 swap @procdictkeylen idict- drop
+
+                // Bring the code builder from the bottom of the stack
+                // because if recv_external extraction is optional, and the number of elements on the stack is not fixed
+                depth 1- roll
+                // Swap with the dict from which we extracted recv_internal and (maybe) recv_external
+                swap
+
+                // Check if the dict is empty
+                dup null?
+                // Store a copy of this flag in the bottom of the stack
+                dup depth 1- -roll
+                {
+                    // If the dict is empty, just drop it (it will be null if it's empty)
+                    drop
+                }
+                {
+                    // If the dict is not empty, prepare continuation to be stored in c3
+                    <{
+                        // Save this dict as first ref in this continuation, it will be pushed in runtime by DICTPUSHCONST
+                        swap @procdictkeylen DICTPUSHCONST
+                        // Jump to the needed function by it's index
+                        DICTIGETJMPZ
+                        // If such key is not found, throw 11 along with the key as an argument
+                        11 THROWARG
+                    }> PUSHCONT
+                    // Store the continuation in c3
+                    c3 POP
+                } cond
+
+                // Function id is on top of the (runtime) stack
+                DUP IFNOTJMP:<{
+                    // place recv_internal here
+                    DROP swap @addop
+                }>
+
+                // Bring back the flag, indicating if the dict is empty or not from the bottom of the stack
+                depth 1- roll
+                {
+                    // If the dict is empty, throw 11
+                    11 THROWARG
+                }
+                {
+                    // If the dict is not empty, jump to continuation from c3
+                    c3 PUSH JMPX
+                } cond
+            }> b>
+        } : }END>c
+        current@ context! current!
+    } does @atend !
+""";
+
+() __tact_selector_hack() method_id(65535) {
+    return __tact_selector_hack_asm();
+}

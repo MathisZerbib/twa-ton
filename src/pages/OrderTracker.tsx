@@ -413,6 +413,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     const [copied, setCopied] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
     const [courierPos, setCourierPos] = useState<{ lat: number; lng: number } | null>(null);
+    const [mapLoaded, setMapLoaded] = useState(false);
 
     // Map refs
     const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -467,47 +468,71 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     // ── Init Mapbox ───────────────────────────────────────────────────────────
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) return;
-        mapRef.current = new mapboxgl.Map({
+
+        const m = new mapboxgl.Map({
             container: mapContainerRef.current,
             style: "mapbox://styles/mapbox/streets-v12",
             center: [2.3522, 48.8566], // Paris default
             zoom: 13,
         });
-        mapRef.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
+
+        m.addControl(new mapboxgl.NavigationControl(), "bottom-right");
+
+        m.on('load', () => {
+            setMapLoaded(true);
+            m.resize();
+        });
+
+        mapRef.current = m;
 
         // The only robust way to fix mapbox display: none -> block issues
         const ro = new ResizeObserver(() => {
-            mapRef.current?.resize();
+            m.resize();
         });
         ro.observe(mapContainerRef.current);
 
         return () => {
             ro.disconnect();
-            mapRef.current?.remove();
+            m.remove();
             mapRef.current = null;
+            setMapLoaded(false);
         };
     }, []);
 
     const showMap = ["accepted", "picked_up"].includes(order?.status ?? "");
 
+    // ── Handle Map Resizing on show/hide ──
+    useEffect(() => {
+        if (mapRef.current && (showMap || courierPos)) {
+            setTimeout(() => {
+                mapRef.current?.resize();
+            }, 100);
+        }
+    }, [showMap, courierPos]);
+
     // ── Animate courier pin ───────────────────────────────────────────────────
     useEffect(() => {
-        if (!mapRef.current || !courierPos) return;
+        if (!mapRef.current || !mapLoaded || !courierPos) return;
         const lngLat: [number, number] = [courierPos.lng, courierPos.lat];
 
         if (!courierMarkerRef.current) {
-            // Custom emoji courier marker
             const el = document.createElement("div");
-            el.textContent = "🛵";
-            el.style.cssText = "font-size:28px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.35));";
+            el.innerHTML = `<div style="font-size:32px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3))">🛵</div>`;
             courierMarkerRef.current = new mapboxgl.Marker({ element: el })
                 .setLngLat(lngLat)
                 .addTo(mapRef.current);
         } else {
             courierMarkerRef.current.setLngLat(lngLat);
         }
-        mapRef.current.flyTo({ center: lngLat, zoom: 15, speed: 0.8 });
-    }, [courierPos]);
+
+        mapRef.current.flyTo({
+            center: lngLat,
+            zoom: 15,
+            speed: 1.2,
+            curve: 1.4,
+            essential: true
+        });
+    }, [courierPos, mapLoaded]);
 
     const handleCopyCode = () => {
         if (!order) return;

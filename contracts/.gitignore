@@ -1,6 +1,7 @@
 # TON Blueprint
 node_modules
-build
+# build (uncommented to allow Vercel/CI access to wrappers)
+# build
 temp
 .env
 .env.*

@@ -241,6 +241,8 @@ const CourierDashboard: React.FC = () => {
     const [confirmed, setConfirmed] = useState(false);
     const [error, setError] = useState<string | null>(null);
     // Real earnings from on-chain (populated via WalletTxList component)
+    // Local state for GPS status
+    const [gpsStatus, setGpsStatus] = useState<"off" | "searching" | "broadcasting" | "error">("off");
     const [deliveryCount] = useState(0);
 
     const { connected, wallet, network } = useTonConnect();
@@ -261,7 +263,28 @@ const CourierDashboard: React.FC = () => {
         }
     };
 
-    useEffect(() => { if (connected) fetchOrders(); }, [connected]);
+    useEffect(() => {
+        if (connected) {
+            fetchOrders();
+            // Load active order from storage if exists
+            const saved = localStorage.getItem("ton_eats_active_order");
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    setActiveOrder(parsed);
+                } catch (e) { console.error("Failed to load active order", e); }
+            }
+        }
+    }, [connected]);
+
+    // Save active order whenever it changes
+    useEffect(() => {
+        if (activeOrder) {
+            localStorage.setItem("ton_eats_active_order", JSON.stringify(activeOrder));
+        } else {
+            localStorage.removeItem("ton_eats_active_order");
+        }
+    }, [activeOrder]);
 
     // Auto-refresh every 30s
     useEffect(() => {
@@ -295,18 +318,31 @@ const CourierDashboard: React.FC = () => {
     useEffect(() => {
         if (!activeOrder || !socket) {
             if (gpsIntervalRef.current) clearInterval(gpsIntervalRef.current);
+            setGpsStatus("off");
             return;
         }
 
         const broadcast = () => {
-            if (!navigator.geolocation) return;
-            navigator.geolocation.getCurrentPosition(pos => {
-                socket.emit("courier:location", {
-                    orderId: activeOrder.id,
-                    lat: pos.coords.latitude,
-                    lng: pos.coords.longitude,
-                });
-            }, undefined, { enableHighAccuracy: true });
+            if (!navigator.geolocation) {
+                setGpsStatus("error");
+                return;
+            }
+            setGpsStatus("searching");
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    setGpsStatus("broadcasting");
+                    socket.emit("courier:location", {
+                        orderId: activeOrder.orderId, // Important: use the timestamp ID that buyer listens to
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude,
+                    });
+                },
+                err => {
+                    console.error("GPS Error:", err);
+                    setGpsStatus("error");
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
         };
 
         broadcast();
@@ -446,7 +482,12 @@ const CourierDashboard: React.FC = () => {
                         <ActivePanel>
                             <ActiveBanner>
                                 <ActiveTitle>🛵 Delivery in progress!</ActiveTitle>
-                                <ActiveSub>Broadcasting your GPS to the customer · every 5s</ActiveSub>
+                                <ActiveSub>
+                                    {gpsStatus === "broadcasting" && "✅ Live GPS: broadcasting location"}
+                                    {gpsStatus === "searching" && "⏳ Live GPS: finding your location..."}
+                                    {gpsStatus === "error" && "⚠️ Live GPS: error (check permissions)"}
+                                    {gpsStatus === "off" && "GPS inactive"}
+                                </ActiveSub>
                             </ActiveBanner>
 
                             {/* Step 1: Pickup */}
