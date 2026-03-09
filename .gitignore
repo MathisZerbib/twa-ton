@@ -11,8 +11,6 @@ node_modules
 dist
 dist-ssr
 *.local
-package-lock.json
-yarn.lock
 
 # Editor directories and files
 .vscode/*
@@ -36,7 +34,6 @@ contracts/temp/
 # ── Backend ───────────────────────────────────────────────────────────────────
 backend/.env
 backend/node_modules/
-backend/package-lock.json
 
 # ── Docker ────────────────────────────────────────────────────────────────────
 # Keep docker-compose.yml committed, but never commit secrets
