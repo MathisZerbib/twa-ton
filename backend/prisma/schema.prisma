@@ -47,11 +47,15 @@ model Order {
   buyerWallet     String
   merchantWallet  String
   deliveryAddress String
+  deliveryLat     Float?
+  deliveryLng     Float?
+  storeLat        Float?
+  storeLng        Float?
   items           Json     // Store items as JSON array [{name, qty, priceTon, priceUsdt}]
-  foodTotalUsdt   Float
   foodTotalTon    Float
   deliveryFeeTon  Float
   protocolFeeTon  Float
+  referrerWallet  String?
   status          String   @default("pending") // pending, accepted, picked_up, delivered
   courierWallet   String?
   courierLat      Float?

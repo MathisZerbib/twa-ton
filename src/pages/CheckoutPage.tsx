@@ -390,6 +390,10 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
         buyerWallet: wallet,
         merchantWallet: merchantAddr,
         deliveryAddress: selectedAddress,
+        deliveryLat: pendingLat ?? null,
+        deliveryLng: pendingLng ?? null,
+        storeLat: store?.lat ?? null,
+        storeLng: store?.lng ?? null,
         items: cartItems.map((i: any) => {
           const product = store.products?.find((p: any) => p.id === i.id);
           return {

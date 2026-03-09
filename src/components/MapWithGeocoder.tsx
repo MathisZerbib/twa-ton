@@ -26,7 +26,7 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
 
-    const FALLBACK_CENTER: [number, number] = [3.8767, 43.6116];
+    const FALLBACK_CENTER: [number, number] = [2.3522, 48.8566]; // Paris fallback
 
     const initMap = (center: [number, number]) => {
       if (mapInstance.current) return;
@@ -35,7 +35,7 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
         container: mapRef.current!,
         style: "mapbox://styles/mapbox/streets-v12",
         center,
-        zoom: 14,
+        zoom: 15,
       });
 
       mapInstance.current = map;
@@ -150,6 +150,8 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
       map.on("load", () => {
         map.resize();
         addCircle(map.getCenter());
+        // Auto reverse-geocode the initial center position
+        fetchAddress(map.getCenter() as unknown as mapboxgl.LngLat);
       });
 
       // Resize when container becomes visible (e.g. inside a drawer)
@@ -163,7 +165,7 @@ const MapWithGeocoder: React.FC<MapWithGeocoderProps> = ({
       navigator.geolocation.getCurrentPosition(
         (pos) => initMap([pos.coords.longitude, pos.coords.latitude]),
         () => initMap(FALLBACK_CENTER),
-        { enableHighAccuracy: true, timeout: 5000 }
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
       );
     } else {
       initMap(FALLBACK_CENTER);

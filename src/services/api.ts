@@ -23,6 +23,10 @@ export interface BackendOrder {
     buyerWallet: string;
     merchantWallet: string;
     deliveryAddress: string;
+    deliveryLat: number | null;
+    deliveryLng: number | null;
+    storeLat: number | null;
+    storeLng: number | null;
     items: OrderItem[];
     foodTotalTon: number;
     deliveryFeeTon: number;
@@ -67,6 +71,10 @@ export const api = {
         buyerWallet: string;
         merchantWallet: string;
         deliveryAddress: string;
+        deliveryLat?: number | null;
+        deliveryLng?: number | null;
+        storeLat?: number | null;
+        storeLng?: number | null;
         items: OrderItem[];
         foodTotalTon: number;
         deliveryFeeTon: number;

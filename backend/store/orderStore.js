@@ -1,97 +1,130 @@
 /**
- * TON-Eats In-Memory Order Store
+ * TON-Eats Order Store — PostgreSQL via Prisma
  *
- * Stores all orders in a Map keyed by orderId (string).
- * In production, replace with a real DB (PostgreSQL / Redis).
+ * Persistent order storage replacing the previous in-memory Map.
+ * All methods are async and return Prisma model instances.
  *
- * Order shape:
- * {
- *   id:              string           — UUID
- *   storeId:         string
- *   orderId:         string           — on-chain orderId (BigInt as string)
- *   buyerWallet:     string           — TON address of buyer
- *   merchantWallet:  string
- *   deliveryAddress: string
- *   items:           Array<{ name, qty, priceTon }>
- *   foodTotalTon:    number
- *   deliveryFeeTon:  number
- *   protocolFeeTon:  number
- *   referrerWallet:  string | null
- *   confirmCode:     string           — 4-digit delivery confirmation code
- *   status:          'pending' | 'accepted' | 'picked_up' | 'delivered'
- *   courierWallet:   string | null
- *   courierLocation: { lat, lng } | null
- *   createdAt:       number           — unix ms
- *   updatedAt:       number
- * }
+ * The `courierLocation` virtual field is computed from courierLat/courierLng
+ * so the API response shape stays identical to the old in-memory version.
  */
 
-const orders = new Map();
+const prisma = require('./db');
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function generateCode() {
   return String(Math.floor(1000 + Math.random() * 9000));
 }
 
-function createOrder({ storeId, orderId, buyerWallet, merchantWallet, deliveryAddress, items, foodTotalTon, deliveryFeeTon, protocolFeeTon, referrerWallet }) {
-  const id = orderId; // use the on-chain orderId as our primary key
-  const record = {
-    id,
-    storeId: storeId ?? '1',
-    orderId,
-    buyerWallet,
-    merchantWallet,
-    deliveryAddress,
-    items: items ?? [],
-    foodTotalTon: Number(foodTotalTon),
-    deliveryFeeTon: Number(deliveryFeeTon),
-    protocolFeeTon: Number(protocolFeeTon),
-    referrerWallet: referrerWallet ?? null,
-    confirmCode: generateCode(),
-    status: 'pending',
-    courierWallet: null,
-    courierLocation: null,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+/**
+ * Adds the virtual `courierLocation` field to keep API compatibility.
+ * Prisma stores lat/lng in separate columns; the frontend expects { lat, lng }.
+ */
+function withCourierLocation(order) {
+  if (!order) return null;
+  const { courierLat, courierLng, ...rest } = order;
+  return {
+    ...rest,
+    courierLocation:
+      courierLat != null && courierLng != null
+        ? { lat: courierLat, lng: courierLng }
+        : null,
   };
-  orders.set(id, record);
-  return record;
 }
 
-function getOrder(id) {
-  return orders.get(String(id)) ?? null;
+// ── CRUD ──────────────────────────────────────────────────────────────────────
+
+async function createOrder({
+  storeId,
+  orderId,
+  buyerWallet,
+  merchantWallet,
+  deliveryAddress,
+  deliveryLat,
+  deliveryLng,
+  storeLat,
+  storeLng,
+  items,
+  foodTotalTon,
+  deliveryFeeTon,
+  protocolFeeTon,
+  referrerWallet,
+}) {
+  const record = await prisma.order.create({
+    data: {
+      orderId: String(orderId),
+      storeId: storeId ?? '1',
+      buyerWallet,
+      merchantWallet,
+      deliveryAddress,
+      deliveryLat: deliveryLat != null ? Number(deliveryLat) : null,
+      deliveryLng: deliveryLng != null ? Number(deliveryLng) : null,
+      storeLat: storeLat != null ? Number(storeLat) : null,
+      storeLng: storeLng != null ? Number(storeLng) : null,
+      items: items ?? [],
+      foodTotalTon: Number(foodTotalTon),
+      deliveryFeeTon: Number(deliveryFeeTon),
+      protocolFeeTon: Number(protocolFeeTon),
+      referrerWallet: referrerWallet ?? null,
+      confirmCode: generateCode(),
+      status: 'pending',
+    },
+  });
+  return withCourierLocation(record);
 }
 
-function getAllOrders() {
-  return Array.from(orders.values()).sort((a, b) => b.createdAt - a.createdAt);
+async function getOrder(id) {
+  const order = await prisma.order.findUnique({
+    where: { orderId: String(id) },
+  });
+  return withCourierLocation(order);
 }
 
-function getAvailableOrders() {
-  return Array.from(orders.values())
-    .filter(o => o.status === 'pending')
-    .sort((a, b) => a.createdAt - b.createdAt);
+async function getAllOrders() {
+  const orders = await prisma.order.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
+  return orders.map(withCourierLocation);
 }
 
-function updateOrder(id, patch) {
-  const order = orders.get(String(id));
-  if (!order) return null;
-  const updated = { ...order, ...patch, updatedAt: Date.now() };
-  orders.set(String(id), updated);
-  return updated;
+async function getAvailableOrders() {
+  const orders = await prisma.order.findMany({
+    where: { status: 'pending' },
+    orderBy: { createdAt: 'asc' },
+  });
+  return orders.map(withCourierLocation);
 }
 
-function setCourierLocation(orderId, lat, lng) {
-  const order = orders.get(String(orderId));
-  if (!order) return null;
-  order.courierLocation = { lat, lng };
-  order.updatedAt = Date.now();
-  orders.set(String(orderId), order);
-  return order;
+async function updateOrder(id, patch) {
+  try {
+    const updated = await prisma.order.update({
+      where: { orderId: String(id) },
+      data: { ...patch },
+    });
+    return withCourierLocation(updated);
+  } catch {
+    return null; // Record not found
+  }
 }
 
-function getOrdersByWallet(address) {
-  return Array.from(orders.values())
-    .filter(o => o.buyerWallet === address)
-    .sort((a, b) => b.createdAt - a.createdAt);
+async function setCourierLocation(orderId, lat, lng) {
+  try {
+    const updated = await prisma.order.update({
+      where: { orderId: String(orderId) },
+      data: { courierLat: lat, courierLng: lng },
+    });
+    return withCourierLocation(updated);
+  } catch {
+    return null;
+  }
+}
+
+async function getOrdersByWallet(address) {
+  const orders = await prisma.order.findMany({
+    where: { buyerWallet: address },
+    orderBy: { createdAt: 'desc' },
+  });
+  return orders.map(withCourierLocation);
 }
 
 module.exports = {

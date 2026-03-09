@@ -423,6 +423,9 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     // Map refs
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<mapboxgl.Map | null>(null);
+    const courierMarkerRef = useRef<mapboxgl.Marker | null>(null);
+    const restaurantMarkerRef = useRef<mapboxgl.Marker | null>(null);
+    const deliveryMarkerRef = useRef<mapboxgl.Marker | null>(null);
     const prevCoordsRef = useRef<[number, number] | null>(null);
     const trailRef = useRef<[number, number][]>([]);
 
@@ -478,6 +481,105 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     const orderRef = useRef(order);
     orderRef.current = order;
 
+    // ── SVG helpers for custom map markers ────────────────────────────────────
+    const createCourierMarkerEl = useCallback((): HTMLDivElement => {
+        const el = document.createElement('div');
+        el.style.width = '44px';
+        el.style.height = '44px';
+        el.style.cursor = 'pointer';
+        el.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="44" height="44">
+            <circle cx="32" cy="32" r="30" fill="#FF6B35" stroke="#fff" stroke-width="3"/>
+            <g transform="translate(14, 14) scale(0.56)">
+              <path fill="#fff" d="M55.6 25.4c-1.8-1.8-4.3-2.4-6.6-1.8L41.2 16H34v-4h4V8H26v4h4v4h-6l-5.4 8.2C16.2 23 13.2 22.2 10.4 24c-3.8 2.4-5 7.4-2.6 11.2l5.8 9.2c.6 1 1.4 1.6 2.4 2v5.6h4V46h12v6h4v-5.6c1-.4 1.8-1 2.4-2l5.8-9.2c.8-1.4 1.2-2.8 1.2-4.4 0-2-0.8-4-2.2-5.4h-.6zM16 36c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm20 0c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/>
+            </g>
+          </svg>`;
+        return el;
+    }, []);
+
+    const createRestaurantMarkerEl = useCallback((): HTMLDivElement => {
+        const el = document.createElement('div');
+        el.style.width = '44px';
+        el.style.height = '44px';
+        el.style.cursor = 'pointer';
+        el.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="44" height="44">
+            <circle cx="32" cy="32" r="30" fill="#1a1a2e" stroke="#fff" stroke-width="3"/>
+            <g transform="translate(16, 14) scale(0.56)">
+              <path fill="#FFD23F" d="M18 3v6H8v2h10v40h4V11h10V9H22V3h-4zm14 18c-3.3 0-6 4.5-6 10 0 4 1.8 7.2 4.4 8.8L28 58h4l2.4-18.2c2.6-1.6 4.4-4.8 4.4-8.8 0-5.5-2.7-10-6-10h.2zM8 21c-3.3 0-6 4.5-6 10 0 4 1.8 7.2 4.4 8.8L4 58h4l2.4-18.2c2.6-1.6 4.4-4.8 4.4-8.8 0-5.5-2.7-10-6-10h-.8z"/>
+            </g>
+          </svg>`;
+        return el;
+    }, []);
+
+    const createDeliveryMarkerEl = useCallback((): HTMLDivElement => {
+        const el = document.createElement('div');
+        el.style.width = '44px';
+        el.style.height = '44px';
+        el.style.cursor = 'pointer';
+        el.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="44" height="44">
+            <circle cx="32" cy="32" r="30" fill="#4caf50" stroke="#fff" stroke-width="3"/>
+            <g transform="translate(18, 12) scale(0.56)">
+              <path fill="#fff" d="M24 4C17.4 4 12 9.4 12 16c0 8.6 10.4 20.4 11.2 21.4.4.4 1 .6 1.6.6s1.2-.2 1.6-.6C27.2 36.4 36 24.6 36 16c0-6.6-5.4-12-12-12zm0 16c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"/>
+              <path fill="#fff" d="M24 42c-1.4 0-2.6-.4-3.6-1.2C18 38.2 8 27 8 16 8 7.2 15.2 0 24 0s16 7.2 16 16c0 11-10 22.2-12.4 24.8-1 .8-2.2 1.2-3.6 1.2z" opacity="0.15"/>
+            </g>
+          </svg>`;
+        return el;
+    }, []);
+
+    // ── Fetch & draw route from Mapbox Directions API ─────────────────────────
+    const drawRoute = useCallback(async (
+        map: mapboxgl.Map,
+        from: [number, number],
+        to: [number, number]
+    ) => {
+        try {
+            const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${from[0]},${from[1]};${to[0]},${to[1]}?geometries=geojson&overview=full&access_token=${MAPBOX_TOKEN}`;
+            const resp = await fetch(url);
+            const data = await resp.json();
+            if (!data.routes?.[0]) return;
+
+            const geojson = data.routes[0].geometry;
+
+            const existingSource = map.getSource('route-source') as mapboxgl.GeoJSONSource;
+            if (existingSource) {
+                existingSource.setData({ type: 'Feature', geometry: geojson, properties: {} });
+            } else {
+                map.addSource('route-source', {
+                    type: 'geojson',
+                    data: { type: 'Feature', geometry: geojson, properties: {} }
+                });
+                map.addLayer({
+                    id: 'route-layer',
+                    type: 'line',
+                    source: 'route-source',
+                    layout: { 'line-join': 'round', 'line-cap': 'round' },
+                    paint: {
+                        'line-color': '#1a1a2e',
+                        'line-width': 5,
+                        'line-opacity': 0.7,
+                    }
+                });
+                // Dashed outline for depth
+                map.addLayer({
+                    id: 'route-layer-outline',
+                    type: 'line',
+                    source: 'route-source',
+                    layout: { 'line-join': 'round', 'line-cap': 'round' },
+                    paint: {
+                        'line-color': '#FF6B35',
+                        'line-width': 3,
+                        'line-dasharray': [2, 2],
+                        'line-opacity': 0.5,
+                    }
+                }, 'route-layer');
+            }
+        } catch (err) {
+            console.warn('[OrderTracker] Could not fetch route:', err);
+        }
+    }, []);
+
     useEffect(() => {
         if (loading || !orderRef.current || !mapContainerRef.current || mapRef.current) return;
 
@@ -486,10 +588,14 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
             return;
         }
 
+        const ord = orderRef.current;
+        const storeLng = ord.storeLng ?? 2.3522;
+        const storeLat = ord.storeLat ?? 48.8566;
+
         const m = new mapboxgl.Map({
             container: mapContainerRef.current,
             style: "mapbox://styles/mapbox/streets-v12",
-            center: [2.3522, 48.8566], // Paris default
+            center: [storeLng, storeLat],
             zoom: 13,
             attributionControl: false,
         });
@@ -499,27 +605,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
         m.on('load', () => {
             setMapLoaded(true);
 
-            // ── Courier Source & Layer ──
-            m.addSource('courier-source', {
-                type: 'geojson',
-                data: { type: 'FeatureCollection', features: [] }
-            });
-
-            m.addLayer({
-                id: 'courier-layer',
-                type: 'symbol',
-                source: 'courier-source',
-                layout: {
-                    'icon-image': 'rocket-15', // You can use 'car-15' or custom
-                    'icon-size': 1.6,
-                    'icon-rotate': ['get', 'bearing'],
-                    'icon-rotation-alignment': 'map',
-                    'icon-allow-overlap': true,
-                    'icon-ignore-placement': true,
-                }
-            });
-
-            // ── Path Trail Source & Layer ──
+            // ── Trail Source & Layer (courier breadcrumb) ──
             m.addSource('trail-source', {
                 type: 'geojson',
                 data: {
@@ -542,6 +628,36 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
                 }
             });
 
+            // ── Restaurant marker ──
+            restaurantMarkerRef.current = new mapboxgl.Marker({ element: createRestaurantMarkerEl() })
+                .setLngLat([storeLng, storeLat])
+                .setPopup(new mapboxgl.Popup({ offset: 25 }).setText('🍕 Restaurant'))
+                .addTo(m);
+
+            // ── Delivery destination marker ──
+            if (ord.deliveryLat && ord.deliveryLng) {
+                deliveryMarkerRef.current = new mapboxgl.Marker({ element: createDeliveryMarkerEl() })
+                    .setLngLat([ord.deliveryLng, ord.deliveryLat])
+                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setText('📍 Delivery'))
+                    .addTo(m);
+
+                // Draw route from restaurant → delivery
+                drawRoute(m, [storeLng, storeLat], [ord.deliveryLng, ord.deliveryLat]);
+
+                // Fit bounds to show both markers
+                const bounds = new mapboxgl.LngLatBounds()
+                    .extend([storeLng, storeLat])
+                    .extend([ord.deliveryLng, ord.deliveryLat]);
+                m.fitBounds(bounds, { padding: 60, maxZoom: 15 });
+            }
+
+            // ── Courier marker (if position already known) ──
+            if (ord.courierLocation) {
+                courierMarkerRef.current = new mapboxgl.Marker({ element: createCourierMarkerEl() })
+                    .setLngLat([ord.courierLocation.lng, ord.courierLocation.lat])
+                    .addTo(m);
+            }
+
             m.resize();
         });
 
@@ -557,6 +673,12 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
 
         return () => {
             ro.disconnect();
+            courierMarkerRef.current?.remove();
+            restaurantMarkerRef.current?.remove();
+            deliveryMarkerRef.current?.remove();
+            courierMarkerRef.current = null;
+            restaurantMarkerRef.current = null;
+            deliveryMarkerRef.current = null;
             m.remove();
             mapRef.current = null;
             setMapLoaded(false);
@@ -581,10 +703,9 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
         const map = mapRef.current;
         const newCoords: [number, number] = [courierPos.lng, courierPos.lat];
 
-        // 1. Calculate bearing
-        let bearing = 0;
+        // 1. Calculate bearing (for future rotation support)
         if (prevCoordsRef.current) {
-            bearing = turf.bearing(
+            turf.bearing(
                 turf.point(prevCoordsRef.current),
                 turf.point(newCoords)
             );
@@ -596,17 +717,17 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
             trailRef.current.push(newCoords);
         }
 
-        // 3. Update Map Sources
-        const courierSource = map.getSource('courier-source') as mapboxgl.GeoJSONSource;
-        const trailSource = map.getSource('trail-source') as mapboxgl.GeoJSONSource;
-
-        if (courierSource) {
-            courierSource.setData({
-                type: 'Feature',
-                geometry: { type: 'Point', coordinates: newCoords },
-                properties: { bearing }
-            });
+        // 3. Update courier HTML marker
+        if (courierMarkerRef.current) {
+            courierMarkerRef.current.setLngLat(newCoords);
+        } else {
+            courierMarkerRef.current = new mapboxgl.Marker({ element: createCourierMarkerEl() })
+                .setLngLat(newCoords)
+                .addTo(map);
         }
+
+        // 4. Update Trail Source
+        const trailSource = map.getSource('trail-source') as mapboxgl.GeoJSONSource;
 
         if (trailSource) {
             trailSource.setData({
@@ -616,16 +737,20 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
             });
         }
 
-        // 4. Smooth Camera Follow
-        map.easeTo({
-            center: newCoords,
-            zoom: 15,
+        // 5. Smooth Camera Follow — include all points of interest
+        const bounds = new mapboxgl.LngLatBounds().extend(newCoords);
+        const ord = orderRef.current;
+        if (ord?.storeLat && ord?.storeLng) bounds.extend([ord.storeLng, ord.storeLat]);
+        if (ord?.deliveryLat && ord?.deliveryLng) bounds.extend([ord.deliveryLng, ord.deliveryLat]);
+
+        map.fitBounds(bounds, {
+            padding: 60,
+            maxZoom: 16,
             duration: 1000,
-            easing: (t) => t // Linear follow for smooth tracking
         });
 
         prevCoordsRef.current = newCoords;
-    }, [courierPos, mapLoaded]);
+    }, [courierPos, mapLoaded, createCourierMarkerEl]);
 
     const handleCopyCode = () => {
         if (!order) return;

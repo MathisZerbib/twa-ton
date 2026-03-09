@@ -154,26 +154,27 @@ io.on('connection', socket => {
   console.log(`[Socket] ✅ connected  → ${socket.id}`);
 
   // Buyer or courier joins a specific order room for live updates
-  socket.on('join:order', ({ orderId }) => {
+  socket.on('join:order', async ({ orderId }) => {
     if (!orderId) return;
     const room = `order:${orderId}`;
     socket.join(room);
     console.log(`[Socket] ${socket.id} joined ${room}`);
-    const order = orderStore.getOrder(String(orderId));
+    const order = await orderStore.getOrder(String(orderId));
     if (order) socket.emit('order:state', order);
   });
 
   // Courier joins the shared feed to receive new orders
-  socket.on('join:couriers', () => {
+  socket.on('join:couriers', async () => {
     socket.join('couriers');
     console.log(`[Socket] ${socket.id} joined couriers`);
-    socket.emit('orders:available', orderStore.getAvailableOrders());
+    const available = await orderStore.getAvailableOrders();
+    socket.emit('orders:available', available);
   });
 
   // Courier broadcasts GPS position
-  socket.on('courier:location', ({ orderId, lat, lng }) => {
+  socket.on('courier:location', async ({ orderId, lat, lng }) => {
     if (!orderId || lat == null || lng == null) return;
-    orderStore.setCourierLocation(orderId, lat, lng);
+    await orderStore.setCourierLocation(orderId, lat, lng);
     io.to(`order:${orderId}`).emit('courier:location', { orderId, lat, lng });
   });
 
