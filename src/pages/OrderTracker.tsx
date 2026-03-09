@@ -438,10 +438,13 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
 
     // ── Fetch initial order state ─────────────────────────────────────────────
     useEffect(() => {
-        api.getOrder(orderId)
-            .then(o => { setOrder(o); if (o.courierLocation) setCourierPos(o.courierLocation); })
-            .catch(e => setError(e.message))
-            .finally(() => setLoading(false));
+        const minDelay = new Promise(r => setTimeout(r, 1500));
+        Promise.all([
+            api.getOrder(orderId)
+                .then(o => { setOrder(o); if (o.courierLocation) setCourierPos(o.courierLocation); })
+                .catch(e => setError(e.message)),
+            minDelay,
+        ]).finally(() => setLoading(false));
     }, [orderId]);
 
     // ── Socket.io subscriptions ───────────────────────────────────────────────

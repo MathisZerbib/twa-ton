@@ -255,7 +255,10 @@ const CourierDashboard: React.FC = () => {
     const fetchOrders = async () => {
         setError(null);
         try {
-            const data = await api.getAvailableOrders();
+            const [data] = await Promise.all([
+                api.getAvailableOrders(),
+                new Promise(r => setTimeout(r, 1500)),
+            ]);
             setOrders(data);
         } catch (e: any) {
             setError(e.message ?? "Failed to fetch orders");

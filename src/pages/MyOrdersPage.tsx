@@ -194,14 +194,17 @@ const MyOrdersPage: React.FC = () => {
       setLoading(false);
       return;
     }
-    api
-      .getOrdersByWallet(wallet)
-      .then((data) => {
-        // Only active orders (not delivered)
-        setOrders(data.filter((o) => o.status !== "delivered"));
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    const minDelay = new Promise(r => setTimeout(r, 1500));
+    Promise.all([
+      api
+        .getOrdersByWallet(wallet)
+        .then((data) => {
+          // Only active orders (not delivered)
+          setOrders(data.filter((o) => o.status !== "delivered"));
+        })
+        .catch(console.error),
+      minDelay,
+    ]).finally(() => setLoading(false));
   }, [wallet]);
 
   return (

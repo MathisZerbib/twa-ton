@@ -211,7 +211,8 @@ const Shop: React.FC = () => {
         setLoading(true);
         const [merchantData, rateData] = await Promise.all([
           api.getMerchant(storeId),
-          api.getTonUsdRate()
+          api.getTonUsdRate(),
+          new Promise(r => setTimeout(r, 1500)),
         ]);
         setStore(merchantData);
         if (rateData.priceUsd) setRate(rateData.priceUsd);
