@@ -20,6 +20,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import styled, { keyframes, css } from "styled-components";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import * as turf from "@turf/turf";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle, faMotorcycle, faUtensils, faBoxOpen, faWifi, faXmarkCircle, faCopy, faCheck, faShareNodes, faFire, faCoins, faLink } from "@fortawesome/free-solid-svg-icons";
 import { useSocket } from "../hooks/useSocket";
@@ -418,7 +419,8 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     // Map refs
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<mapboxgl.Map | null>(null);
-    const courierMarkerRef = useRef<mapboxgl.Marker | null>(null);
+    const prevCoordsRef = useRef<[number, number] | null>(null);
+    const trailRef = useRef<[number, number][]>([]);
 
     // Helper references
     const myReferralLink = `https://t.me/${BOT_NAME}/app?startapp=store_${order?.storeId ?? "1"}_ref_${wallet ?? ""}`;
@@ -480,6 +482,50 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
 
         m.on('load', () => {
             setMapLoaded(true);
+
+            // ── Courier Source & Layer ──
+            m.addSource('courier-source', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
+
+            m.addLayer({
+                id: 'courier-layer',
+                type: 'symbol',
+                source: 'courier-source',
+                layout: {
+                    'icon-image': 'rocket-15', // You can use 'car-15' or custom
+                    'icon-size': 1.6,
+                    'icon-rotate': ['get', 'bearing'],
+                    'icon-rotation-alignment': 'map',
+                    'icon-allow-overlap': true,
+                    'icon-ignore-placement': true,
+                }
+            });
+
+            // ── Path Trail Source & Layer ──
+            m.addSource('trail-source', {
+                type: 'geojson',
+                data: {
+                    type: 'Feature',
+                    geometry: { type: 'LineString', coordinates: [] },
+                    properties: {}
+                }
+            });
+
+            m.addLayer({
+                id: 'trail-layer',
+                type: 'line',
+                source: 'trail-source',
+                layout: { 'line-join': 'round', 'line-cap': 'round' },
+                paint: {
+                    'line-color': '#FF6B35',
+                    'line-width': 4,
+                    'line-opacity': 0.4,
+                    'line-dasharray': [2, 1]
+                }
+            });
+
             m.resize();
         });
 
@@ -513,25 +559,53 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     // ── Animate courier pin ───────────────────────────────────────────────────
     useEffect(() => {
         if (!mapRef.current || !mapLoaded || !courierPos) return;
-        const lngLat: [number, number] = [courierPos.lng, courierPos.lat];
+        const map = mapRef.current;
+        const newCoords: [number, number] = [courierPos.lng, courierPos.lat];
 
-        if (!courierMarkerRef.current) {
-            const el = document.createElement("div");
-            el.innerHTML = `<div style="font-size:32px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3))">🛵</div>`;
-            courierMarkerRef.current = new mapboxgl.Marker({ element: el })
-                .setLngLat(lngLat)
-                .addTo(mapRef.current);
-        } else {
-            courierMarkerRef.current.setLngLat(lngLat);
+        // 1. Calculate bearing
+        let bearing = 0;
+        if (prevCoordsRef.current) {
+            bearing = turf.bearing(
+                turf.point(prevCoordsRef.current),
+                turf.point(newCoords)
+            );
         }
 
-        mapRef.current.flyTo({
-            center: lngLat,
+        // 2. Update Trail
+        if (trailRef.current.length === 0 ||
+            trailRef.current[trailRef.current.length - 1][0] !== newCoords[0]) {
+            trailRef.current.push(newCoords);
+        }
+
+        // 3. Update Map Sources
+        const courierSource = map.getSource('courier-source') as mapboxgl.GeoJSONSource;
+        const trailSource = map.getSource('trail-source') as mapboxgl.GeoJSONSource;
+
+        if (courierSource) {
+            courierSource.setData({
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: newCoords },
+                properties: { bearing }
+            });
+        }
+
+        if (trailSource) {
+            trailSource.setData({
+                type: 'Feature',
+                geometry: { type: 'LineString', coordinates: trailRef.current },
+                properties: {}
+            });
+        }
+
+        // 4. Smooth Camera Follow
+        map.easeTo({
+            center: newCoords,
             zoom: 15,
-            speed: 1.2,
-            curve: 1.4,
-            essential: true
+            duration: 1000,
+            easing: (t) => t // Linear follow for smooth tracking
         });
+
+        prevCoordsRef.current = newCoords;
     }, [courierPos, mapLoaded]);
 
     const handleCopyCode = () => {

@@ -27,6 +27,7 @@
     "@ton/crypto": "^3.3.0",
     "@ton/ton": "^16.2.2",
     "@tonconnect/ui-react": "^2.4.2",
+    "@turf/turf": "^7.3.4",
     "@twa-dev/sdk": "^8.0.2",
     "axios": "^1.13.6",
     "buffer": "^6.0.3",
