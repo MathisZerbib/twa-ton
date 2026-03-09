@@ -59,6 +59,10 @@ async function getOrdersByWallet(address) {
   return store.getOrdersByWallet(address);
 }
 
+async function getOrdersByCourier(courierWallet) {
+  return store.getOrdersByCourier(courierWallet);
+}
+
 module.exports = {
   getAllOrders,
   getAvailableOrders,
@@ -69,4 +73,5 @@ module.exports = {
   confirmDelivery,
   setCourierLocation,
   getOrdersByWallet,
+  getOrdersByCourier,
 };

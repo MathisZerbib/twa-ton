@@ -127,4 +127,8 @@ export const api = {
     /** Get all orders for a specific buyer wallet */
     getOrdersByWallet: (address: string) =>
         req<BackendOrder[]>(`/api/orders/wallet/${address}`),
+
+    /** Get all orders a courier has accepted/delivered */
+    getCourierOrders: (courierWallet: string) =>
+        req<BackendOrder[]>(`/api/orders/courier/${courierWallet}`),
 };

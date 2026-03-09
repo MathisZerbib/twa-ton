@@ -127,12 +127,21 @@ async function getOrdersByWallet(address) {
   return orders.map(withCourierLocation);
 }
 
+async function getOrdersByCourier(courierWallet) {
+  const orders = await prisma.order.findMany({
+    where: { courierWallet },
+    orderBy: { createdAt: 'desc' },
+  });
+  return orders.map(withCourierLocation);
+}
+
 module.exports = {
   createOrder,
   getOrder,
   getAllOrders,
   getAvailableOrders,
   getOrdersByWallet,
+  getOrdersByCourier,
   updateOrder,
   setCourierLocation,
 };

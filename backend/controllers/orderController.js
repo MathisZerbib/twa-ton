@@ -89,4 +89,9 @@ async function getByWallet(req, res) {
   res.json(orders);
 }
 
-module.exports = { getAll, getAvailable, getOne, getByWallet, create, accept, pickup, confirm };
+async function getByCourier(req, res) {
+  const orders = await orderService.getOrdersByCourier(req.params.address);
+  res.json(orders);
+}
+
+module.exports = { getAll, getAvailable, getOne, getByWallet, getByCourier, create, accept, pickup, confirm };

@@ -9,6 +9,7 @@ const ctrl = require('../controllers/orderController');
 router.get('/', ctrl.getAll);
 router.get('/available', ctrl.getAvailable);
 router.get('/wallet/:address', ctrl.getByWallet);
+router.get('/courier/:address', ctrl.getByCourier);
 router.get('/:id', ctrl.getOne);
 router.post('/', ctrl.create);
 router.patch('/:id/accept', ctrl.accept);
