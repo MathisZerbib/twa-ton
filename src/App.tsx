@@ -1,163 +1,141 @@
-import React, { useContext, useState } from "react";
-import styled, {
-  ThemeProvider as StyledThemeProvider,
-} from "styled-components";
-import Header from "./components/Header";
-import Shop from "./pages/Shop";
+/**
+ * TON-Eats App.tsx
+ *
+ * Two-app routing:
+ *   /              → Customer (redirects to /store/1)
+ *   /store/:id     → Customer shop + checkout
+ *   /track/:id     → Customer live order tracker (after checkout)
+ *   /courier       → Courier dashboard (requires wallet)
+ *
+ * Deep-link startapp param formats:
+ *   "store_<id>_ref_<wallet>"  → customer referral link
+ *   "courier"                  → opens the courier app directly
+ */
+
+import React, { useEffect, useContext } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useParams, useNavigate } from "react-router-dom";
+import styled, { ThemeProvider as StyledThemeProvider } from "styled-components";
 import { ThemeContext, ThemeProvider } from "./contexts/theme";
+import Shop from "./pages/Shop";
+import CourierDashboard from "./pages/CourierDashboard";
+import OrderTracker from "./pages/OrderTracker";
+import DiscoveryPage from "./pages/DiscoveryPage";
+import MerchantOnboarding from "./pages/MerchantOnboarding";
 
-const HeroSection = styled.header`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 80vh;
-  background-color: ${(props) => props.theme["--tg-theme-bg-color"]};
-  color: ${(props) => props.theme["--tg-theme-text-color"]};
+// ─── Deep-link Parser ─────────────────────────────────────────────────────────
 
-  @media (min-width: 768px) {
-    /* Tablet and larger */
-    flex-direction: row;
-    padding: 0 50px;
-  }
+function parseStartParam(startParam: string | undefined) {
+  if (!startParam) return { storeId: null, referrerWallet: null, isCourier: false };
 
-  @media (min-width: 1024px) {
-    /* Desktop and larger */
-    padding: 0 100px;
-  }
-`;
+  const isCourier = startParam === "courier" || startParam.startsWith("courier_");
+  const storeMatch = startParam.match(/store_([^_]+)/);
+  const refMatch = startParam.match(/ref_(.+)$/);
 
-const HeroContent = styled.div`
-  max-width: 600px;
-  text-align: center;
+  return {
+    storeId: storeMatch ? storeMatch[1] : null,
+    referrerWallet: refMatch ? refMatch[1] : null,
+    isCourier,
+  };
+}
 
-  @media (min-width: 768px) {
-    /* Tablet and larger */
-    text-align: left;
-    margin-right: 50px;
-  }
+// ─── Root Router Logic ─────────────────────────────────────────────────────────
 
-  @media (min-width: 1024px) {
-    /* Desktop and larger */
-    max-width: 800px;
-  }
-`;
+function RootRouter() {
+  const tg = (window as any).Telegram?.WebApp;
+  const startParam =
+    tg?.initDataUnsafe?.start_param ||
+    new URLSearchParams(window.location.search).get("startapp") ||
+    undefined;
 
-const HeroImage = styled.div`
-  display: none; /* Hide image by default */
+  const { isCourier, storeId } = parseStartParam(startParam);
 
-  @media (min-width: 768px) {
-    /* Tablet and larger */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 50%; /* Take 50% width on tablets */
-    height: 100%;
-  }
+  if (isCourier) return <Navigate to="/courier" replace />;
+  if (storeId) return <Navigate to={`/store/${storeId}`} replace />;
 
-  @media (min-width: 1024px) {
-    /* Desktop and larger */
-    width: 40%; /* Reduce width on desktop */
-  }
+  return <DiscoveryPage />;
+}
 
-  img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-  }
-`;
+// ─── OrderTracker Route Wrapper ─────────────────────────────────────────────────
 
-const HeroTitle = styled.h1`
-  font-size: 3rem;
-  margin-bottom: 20px;
-`;
+function TrackPage() {
+  const { orderId } = useParams<{ orderId: string }>();
+  return orderId ? <OrderTracker orderId={orderId} /> : <Navigate to="/" replace />;
+}
 
-const HeroDescription = styled.p`
-  font-size: 1.2rem;
-  margin-bottom: 20px;
-`;
-
-const CtaButton = styled.button`
-  padding: 10px 20px;
-  font-size: 1.2rem;
-  background-color: ${(props) => props.theme["--tg-theme-button-color"]};
-  color: ${(props) => props.theme["--tg-theme-button-text-color"]};
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: ${(props) =>
-      props.theme.themeMode === "dark" ? "#1c8abf" : "#1c8abf"};
-  }
-`;
+// ─── Styled ───────────────────────────────────────────────────────────────────
 
 const AppContainer = styled.div`
-  background-color: var(--tg-theme-bg-color);
-  color: var(--tg-theme-text-color);
+  background-color: var(--tg-theme-bg-color, #ffffff);
+  color: var(--tg-theme-text-color, #1a1a1a);
+  min-height: 100vh;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 `;
 
-function App() {
+// ─── Inner App ───────────────────────────────────────────────────────────────
+
+function InnerApp() {
   const themeContext = useContext(ThemeContext);
   const themeMode = themeContext ? themeContext[0].themeName! : "light";
 
-  const [showShop, setShowShop] = useState(false);
-  const [showHome, setShowHome] = useState(false);
-  const handleShopClick = () => {
-    setShowShop(true);
-  };
+  useEffect(() => {
+    try {
+      const tg = (window as any).Telegram?.WebApp;
+      if (tg) { tg.ready(); tg.expand(); }
+
+      const startParam =
+        tg?.initDataUnsafe?.start_param ||
+        new URLSearchParams(window.location.search).get("startapp") ||
+        undefined;
+
+      const { storeId, referrerWallet } = parseStartParam(startParam);
+
+      if (referrerWallet) {
+        sessionStorage.setItem("ton_eats_referrer", referrerWallet);
+      }
+      if (storeId) {
+        sessionStorage.setItem("ton_eats_store_id", storeId);
+      }
+    } catch (e) {
+      console.warn("[TON-Eats] Could not initialise Telegram WebApp:", e);
+    }
+  }, []);
 
   return (
+    <StyledThemeProvider
+      theme={{
+        bgColor: themeMode === "light" ? "#f7f7f7" : "#1a1a2e",
+        textColor: themeMode === "light" ? "#1a1a1a" : "#f0f0f0",
+        buttonColor: "#FF6B35",
+        buttonText: "#ffffff",
+        darkBgColor: "#1a1a2e",
+        darkTextColor: "#f0f0f0",
+      }}
+    >
+      <AppContainer className={`app ${themeMode}`}>
+        <Routes>
+          <Route path="/" element={<RootRouter />} />
+          {/* ── Customer App ── */}
+          <Route path="/explore" element={<DiscoveryPage />} />
+          <Route path="/store/:storeId" element={<Shop />} />
+          <Route path="/track/:orderId" element={<TrackPage />} />
+          {/* ── Courier App ── */}
+          <Route path="/courier" element={<CourierDashboard />} />
+          {/* ── Merchant App ── */}
+          <Route path="/merchant/onboard" element={<MerchantOnboarding />} />
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AppContainer>
+    </StyledThemeProvider>
+  );
+}
+
+function App() {
+  return (
     <ThemeProvider>
-      <StyledThemeProvider
-        theme={{
-          "--tg-theme-bg-color": themeMode === "light" ? "#ffffff" : "#2e2e2e",
-          "--tg-theme-text-color":
-            themeMode === "light" ? "#333333" : "#ffffff",
-          "--tg-theme-button-color":
-            themeMode === "light" ? "#2eaddc" : "#1c8abf",
-          "--tg-theme-button-text-color": "#ffffff",
-        }}
-      >
-        <AppContainer className={`app ${themeMode}`}>
-          {!showShop && (
-            <>
-              <Header showConnectButton={showShop} />
-              <HeroSection>
-                <HeroContent>
-                  <HeroTitle>Welcome to the TON Shop!</HeroTitle>
-                  <HeroDescription>
-                    Discover the finest CBD products,
-                    <br />
-                    with seamless delivery and crypto payments.
-                  </HeroDescription>
-                  <CtaButton
-                    onClick={() => {
-                      handleShopClick();
-                    }}
-                  >
-                    Shop Now
-                  </CtaButton>
-                </HeroContent>
-                <HeroImage>
-                  <img
-                    src="home.jpg"
-                    alt="CBD products"
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: "500px",
-                      objectFit: "cover",
-                      borderRadius: "10px",
-                    }}
-                  />
-                </HeroImage>
-              </HeroSection>
-            </>
-          )}
-          {showShop && <Shop />}
-        </AppContainer>
-      </StyledThemeProvider>
+      <BrowserRouter>
+        <InnerApp />
+      </BrowserRouter>
     </ThemeProvider>
   );
 }

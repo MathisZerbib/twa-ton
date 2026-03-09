@@ -1,4 +1,3 @@
-import { fromNano } from "ton";
 import {
   Contract,
   ContractProvider,
@@ -8,7 +7,8 @@ import {
   contractAddress,
   beginCell,
   toNano,
-} from "ton-core";
+  fromNano,
+} from "@ton/core";
 
 export default class FaucetJettonWallet implements Contract {
   async getBalance(provider: ContractProvider) {
@@ -19,5 +19,5 @@ export default class FaucetJettonWallet implements Contract {
   constructor(
     readonly address: Address,
     readonly init?: { code: Cell; data: Cell }
-  ) {}
+  ) { }
 }

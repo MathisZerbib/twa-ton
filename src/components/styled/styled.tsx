@@ -1,6 +1,18 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import styled from "styled-components";
 
+// styled-components v6 requires explicit DefaultTheme augmentation
+declare module "styled-components" {
+  export interface DefaultTheme {
+    bgColor: string;
+    textColor: string;
+    buttonColor: string;
+    buttonText: string;
+    darkBgColor?: string;
+    darkTextColor?: string;
+  }
+}
+
 export const Card = styled.div`
   padding: 10px 20px;
   border-radius: 8px;

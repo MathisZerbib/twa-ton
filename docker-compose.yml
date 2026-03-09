@@ -1,0 +1,69 @@
+
+# ── TON-Eats — Full Stack ─────────────────────────────────────────────────────
+# Usage:
+#   docker compose up -d --build    # build & start everything
+#   docker compose logs -f          # tail all logs
+#   docker compose down             # stop & remove containers
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── PostgreSQL ───────────────────────────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: toneats
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d toneats"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Backend (Express + Socket.io + Prisma) ────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://root:password@db:5432/toneats?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── Frontend (Vite build → Nginx) ─────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      # Use relative path so Axios hits the Nginx reverse proxy mapped on the same domain
+      VITE_BACKEND_URL: ''
+    depends_on:
+      - backend
+
+  # ── Cloudflared Tunnel (Dev/Testing) ──────────────────────────────────────────
+  # Optional: only started if requested (e.g. docker compose --profile dev up -d)
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    profiles: ["dev"]
+    restart: unless-stopped
+    command: tunnel --url http://frontend:80
+    depends_on:
+      - frontend
+
+volumes:
+  db_data:
+    name: toneats_db_data

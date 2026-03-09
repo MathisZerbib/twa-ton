@@ -4,23 +4,32 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { CartProvider } from "./providers/CartProvider";
-import { ThemeProvider } from "./contexts/theme";
-// this manifest is used temporarily for development purposes
+
+/**
+ * TonConnect manifest URL.
+ *
+ * Always derived from the real origin the app is running on so the
+ * manifest URL embedded in the QR code matches what TonKeeper fetches.
+ *
+ *  - localhost:5173  → http://localhost:5173/tonconnect-manifest.json
+ *  - cloudflared URL → https://xyz.trycloudflare.com/tonconnect-manifest.json
+ *  - production      → https://your-domain.com/tonconnect-manifest.json
+ *
+ * VITE_APP_URL is only used as an explicit CI/CD override (leave unset locally).
+ */
 const manifestUrl =
-  "https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json";
+  `${import.meta.env.VITE_APP_URL ?? window.location.origin}/tonconnect-manifest.json`;
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false } },
 });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <ThemeProvider>
-    <TonConnectUIProvider manifestUrl={manifestUrl}>
-      <QueryClientProvider client={queryClient}>
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </QueryClientProvider>
-    </TonConnectUIProvider>
-  </ThemeProvider>
+  <TonConnectUIProvider manifestUrl={manifestUrl}>
+    <QueryClientProvider client={queryClient}>
+      <CartProvider>
+        <App />
+      </CartProvider>
+    </QueryClientProvider>
+  </TonConnectUIProvider>
 );

@@ -1,62 +1,75 @@
-import { useContext } from "react";
-import { ThemeContext } from "../../contexts/theme";
+import { useCurrency } from "../../providers/useCurrency";
+import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import { faRotate } from "@fortawesome/free-solid-svg-icons";
 
-const ToggleBtn = () => {
-  const contextValue = useContext(ThemeContext);
-  const [{ themeName, toggleTheme }] = contextValue!;
+const SwitcherButton = styled.button`
+  background: #f5f5f5;
+  border: 1.5px solid #eee;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 800;
+  font-size: 0.85rem;
+  outline: none;
 
-  if (themeName === undefined || toggleTheme === undefined) {
-    throw new Error(
-      "themeName and toggleTheme must be defined in the context value"
-    );
-  } else {
-    console.log("themeName and toggleTheme are defined on ", themeName);
+  &:hover {
+    background: #fff;
+    border-color: #FF6B35;
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.15);
   }
 
-  // Define theme variables
-  const darkTheme = {
-    buttonColor: "##2e2e2e",
-    buttonText: "#2e2e2e",
-    iconColor: "##2e2e2e", // Color for dark mode icon
-  };
+  &:active {
+    transform: scale(0.95);
+  }
 
-  const lightTheme = {
-    buttonColor: "#FFFFFF",
-    buttonText: "#ffffff",
-    iconColor: "#2e2e2e",
-  };
+  .icon-rotation {
+    color: #FF6B35;
+    transition: transform 0.3s;
+  }
 
-  const themeStyles = themeName === "dark" ? darkTheme : lightTheme;
+  &:hover .icon-rotation {
+    transform: rotate(180deg);
+  }
+`;
+
+const CurrencyBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const ToggleBtn = () => {
+  const { selectedCurrency, updateSelectedCurrency } = useCurrency();
+
+  const handleToggle = () => {
+    const next = selectedCurrency === "TON" ? "USDT" : "TON";
+    updateSelectedCurrency(next);
+  };
 
   return (
-    <button
+    <SwitcherButton
       type="button"
-      onClick={toggleTheme}
-      className="btn btn--icon"
-      aria-label="toggle theme"
-      style={{
-        backgroundColor: `var(--tg-theme-button-color, ${themeStyles.buttonColor})`,
-        border: "1px solid #2e2e2e",
-        color: `var(--tg-theme-button-text-color, ${themeStyles.buttonText})`,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "0.8em",
-        borderRadius: "8px",
-        outline: "none",
-        cursor: "pointer",
-        transition: "background-color 0.3s, color 0.3s",
-      }}
+      onClick={handleToggle}
+      aria-label={`Switch to ${selectedCurrency === "TON" ? "USDT" : "TON"}`}
     >
-      <FontAwesomeIcon
-        icon={themeName === "light" ? faSun : faMoon}
-        style={{
-          color: `var(--tg-theme-icon-color, ${themeStyles.iconColor})`,
-        }}
-      />
-    </button>
+      <CurrencyBadge>
+        <img
+          src={selectedCurrency.toLowerCase() + ".svg"}
+          alt={selectedCurrency}
+          style={{ width: 18, height: 18 }}
+          onError={(e) => (e.currentTarget.style.display = 'none')}
+        />
+        <span>{selectedCurrency}</span>
+      </CurrencyBadge>
+
+      <FontAwesomeIcon icon={faRotate} className="icon-rotation" />
+    </SwitcherButton>
   );
 };
 

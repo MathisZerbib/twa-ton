@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TonClient } from "ton";
+import { TonClient } from "@ton/ton";
 import { Address } from "@ton/core";
 import { useTonConnect } from "../hooks/useTonConnect";
 import { CHAIN } from "@tonconnect/protocol";

@@ -2,7 +2,7 @@ import { useAsyncInitialize } from "./useAsyncInitialize";
 import { useTonClient } from "./useTonClient";
 import { useTonConnect } from "./useTonConnect";
 import FaucetJetton from "../contracts/faucetJetton";
-import { Address, OpenedContract } from "ton-core";
+import { Address, OpenedContract } from "@ton/core";
 import FaucetJettonWallet from "../contracts/faucetJettonWallet";
 import { useQuery } from "@tanstack/react-query";
 
@@ -28,15 +28,15 @@ export function useFaucetJettonContract() {
     ) as OpenedContract<FaucetJettonWallet>;
   }, [faucetJettonContract, client]);
 
-  const { data, isFetching } = useQuery(
-    ["jetton"],
-    async () => {
+  const { data, isFetching } = useQuery<string | null>({
+    queryKey: ["jetton"],
+    queryFn: async () => {
       if (!jwContract) return null;
 
       return (await jwContract.getBalance()).toString();
     },
-    { refetchInterval: 3000 }
-  );
+    refetchInterval: 3000
+  });
 
   return {
     mint: () => {

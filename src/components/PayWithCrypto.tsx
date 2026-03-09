@@ -1,4 +1,4 @@
-import { Address, Cell, toNano } from "ton";
+import { Address, Cell, toNano } from "@ton/core";
 import { useTonConnect } from "../hooks/useTonConnect";
 import { CenterDiv, ButtonBuyTonStyled } from "./styled/styled";
 import { useCart } from "../providers/CartProvider";
@@ -22,8 +22,8 @@ export function BuyWithCrypto({
     network === CHAIN.MAINNET
       ? "kQCFEF5jY33lLFJugJmFuILYQcwg7ekHu8LVsBpV7JbIT_yE"
       : network === CHAIN.TESTNET
-      ? "kQCFEF5jY33lLFJugJmFuILYQcwg7ekHu8LVsBpV7JbIT_yE"
-      : "";
+        ? "kQCFEF5jY33lLFJugJmFuILYQcwg7ekHu8LVsBpV7JbIT_yE"
+        : "";
   const { cartItems } = useCart();
 
   // Hardcoded image sources

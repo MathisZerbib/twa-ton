@@ -7,7 +7,7 @@ import {
   contractAddress,
   beginCell,
   toNano,
-} from "ton-core";
+} from "@ton/core";
 
 export default class FaucetJetton implements Contract {
   async sendMintFromFaucet(

@@ -1,0 +1,63 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Merchant {
+  id              String    @id @default(uuid())
+  name            String
+  category        String
+  imageUrl        String    // Logo image path or URL
+  bannerUrl       String    // Hero banner image path or URL
+  rating          Float     @default(5.0)
+  deliveryTime    String?   // Will be dynamically calculated based on distance
+  lat             Float     @default(0.0)
+  lng             Float     @default(0.0)
+  description     String?
+  merchantWallet  String    @unique // TON Wallet address for payments
+  color           String?   // Accent color for UI
+  products        Product[]
+  orders          Order[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  priceUsdt   Float    // Base price in USDT
+  category    String   @default("sides") // e.g. "burgers", "pizzas", "sushi", "sides"
+  imageUrl    String?
+  storeId     String
+  merchant    Merchant @relation(fields: [storeId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id              String   @id @default(uuid())
+  orderId         String   @unique // The on-chain order ID (timestamp based)
+  storeId         String
+  buyerWallet     String
+  merchantWallet  String
+  deliveryAddress String
+  items           Json     // Store items as JSON array [{name, qty, priceTon, priceUsdt}]
+  foodTotalUsdt   Float
+  foodTotalTon    Float
+  deliveryFeeTon  Float
+  protocolFeeTon  Float
+  status          String   @default("pending") // pending, accepted, picked_up, delivered
+  courierWallet   String?
+  courierLat      Float?
+  courierLng      Float?
+  confirmCode     String
+  merchant        Merchant @relation(fields: [storeId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

@@ -1,84 +1,118 @@
 
-:root  {
-    font-family: 'Prompt', sans-serif;
-    --tg-theme-bg-color: #ffffff;
-    --tg-theme-bg-color-dark: #2e2e2e;
-    
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* ────────────────────────────────────────────────────
+   TON-Eats Design System – Global CSS
+   ──────────────────────────────────────────────────── */
+
+:root {
+  /* Telegram-native variables (fallbacks for desktop dev) */
+  --tg-theme-bg-color:           #f7f7f7;
+  --tg-theme-bg-color-dark:      #1a1a2e;
+  --tg-theme-text-color:         #1a1a1a;
+  --tg-theme-hint-color:         #999999;
+  --tg-theme-link-color:         #FF6B35;
+  --tg-theme-button-color:       #FF6B35;
+  --tg-theme-button-text-color:  #ffffff;
+  --tg-theme-secondary-bg-color: #ffffff;
+
+  /* TON-Eats palette */
+  --brand-orange:   #FF6B35;
+  --brand-yellow:   #F7931E;
+  --brand-dark:     #1a1a2e;
+  --brand-success:  #4caf50;
+  --brand-error:    #f44336;
+
+  /* Typography */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Scroll */
+  scroll-behavior: smooth;
 }
 
-h1 {
-    font-size: 3rem;
-    color: #333;
-    margin-bottom: 20px;
+/* ── Reset ─────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-h2 {
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 20px;
-}   
-
-h3 {
-    font-size: 1.5rem;
-    color: #333;
-    margin-bottom: 20px;
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
-h4 {
-    font-size: 1.2rem;
-    color: #333;
-    margin-bottom: 20px;
+body {
+  background-color: var(--tg-theme-bg-color);
+  color: var(--tg-theme-text-color);
+  overflow-x: hidden;
+}
+
+/* ── Typography ────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 800;
+  color: var(--tg-theme-text-color);
+  line-height: 1.2;
 }
 
 p {
-    font-size: 1rem;
-    color: #333;
-    margin-bottom: 20px;
+  margin: 0 0 8px;
+  color: var(--tg-theme-text-color);
 }
 
 a {
-    font-size: 1rem;
-    color: #333;
-    margin-bottom: 20px;
+  color: var(--brand-orange);
+  text-decoration: none;
 }
 
-
-/* Responsive */
-
-@media (max-width: 768px) {
-    .tg-container {
-        padding: 0 20px;
-    }
+img {
+  display: block;
+  max-width: 100%;
 }
 
+button {
+  font-family: inherit;
+}
 
+select, input, textarea {
+  font-family: inherit;
+}
+
+/* ── Utility ────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* ── Scrollbar (thin, brand-colored) ──────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 53, 0.35);
+  border-radius: 2px;
+}
+
+/* ── MUI overrides for Telegram feel ─────────────── */
+.MuiDrawer-paper {
+  border-radius: 28px 28px 0 0 !important;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
 @media (max-width: 480px) {
-    .tg-container {
-        padding: 0 10px;
-    }
+  :root { font-size: 15px; }
 }
-
-
-/* General */
-
-body {
-    font-family: 'Prompt', sans-serif;
-    background-color: var(--tg-theme-bg-color);
-    color: var(--tg-theme-text-color);
-    margin: 0;
-    padding: 0;
-}
-
-.hero {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 80px 40px;
-    background-color: #f0f0f0;
-}
-
-
-.hero-content {
-    max-width: 600px;
-}
-

@@ -1,76 +1,84 @@
 import React, { useState } from "react";
+import styled from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faCheck } from "@fortawesome/free-solid-svg-icons";
 import { useTonConnect } from "../hooks/useTonConnect";
 import { useCart } from "../providers/CartProvider";
-import { CenterDiv, AddToCartButtonCard, FlexBoxRow } from "./styled/styled";
-import { CartItemProps } from "./types";
-import { useCurrency } from "../providers/useCurrency";
 
 type AddToCartButtonProps = {
   amount: number;
-  item: CartItemProps;
+  item: { id: string; quantity: number; price: number };
 };
+
+const StyledButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+  &:hover {
+    background: #FF6B35;
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(255, 107, 53, 0.3);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+`;
+
+const SuccessOverlay = styled.div`
+  color: #4caf50;
+  font-size: 0.8rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+import { useCurrency } from "../providers/useCurrency";
 
 export function AddToCartButton({ amount, item }: AddToCartButtonProps) {
   const { connected } = useTonConnect();
   const { addToCart } = useCart();
-  const [successMessage, setSuccessMessage] = useState("");
-  const selectedCurrency = useCurrency().selectedCurrency;
+  const { selectedCurrency } = useCurrency();
+  const [added, setAdded] = useState(false);
 
-  // Hardcoded image source
-  const tonLogoUrl = "ton.svg";
-  const usdtLogoUrl = "usdt.svg";
-
-  const handleAddToCart = async () => {
-    try {
-      addToCart(item);
-      setSuccessMessage("Added to cart!");
-      setTimeout(() => setSuccessMessage(""), 3000); // Clear the message after 3 seconds
-    } catch (error) {
-      console.error("Failed to add to cart:", error);
-      setSuccessMessage("Failed to add to cart.");
-    }
+  const handleAddToCart = () => {
+    addToCart(item);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
   };
 
-  return amount > 0 ? (
-    <AddToCartButtonCard disabled={!connected} onClick={handleAddToCart}>
-      <FlexBoxRow
-        style={{
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        {amount.toFixed(2)}
+  if (added) {
+    return (
+      <SuccessOverlay>
+        <FontAwesomeIcon icon={faCheck} /> Added
+      </SuccessOverlay>
+    );
+  }
 
-        <img
-          src={selectedCurrency === "TON" ? tonLogoUrl : usdtLogoUrl}
-          alt={"Buy with" + selectedCurrency}
-          style={{
-            width: "20px",
-            height: "20px",
-          }}
-        />
-      </FlexBoxRow>
-    </AddToCartButtonCard>
-  ) : (
-    <CenterDiv>
-      {/* display button out of stock  */}
-
-      <AddToCartButtonCard disabled={true}>
-        <FlexBoxRow
-          style={{
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "12px",
-            }}
-          >
-            Out of stock
-          </span>
-        </FlexBoxRow>
-      </AddToCartButtonCard>
-    </CenterDiv>
+  return (
+    <StyledButton disabled={!connected && false /* Optional: allow adding even if limited */} onClick={handleAddToCart}>
+      <FontAwesomeIcon icon={faPlus} size="sm" />
+      {amount.toFixed(2)} {selectedCurrency}
+    </StyledButton>
   );
 }
