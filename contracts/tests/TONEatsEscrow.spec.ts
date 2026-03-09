@@ -1048,4 +1048,350 @@ describe("TONEatsEscrow", () => {
             expect(order!.foodAmount).toBe(ORDER_TOTAL - GAS_RESERVE);
         });
     });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // REALISTIC ON-CHAIN SIMULATION (matches frontend flow exactly)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    describe("Realistic On-Chain Flow (testnet simulation)", () => {
+        /**
+         * These tests simulate the exact values and order IDs that the
+         * frontend generates. The orderId is a Date.now() timestamp (uint64).
+         * The payment includes the food price + delivery + protocol + 0.05 gas.
+         */
+
+        const TIMESTAMP_ORDER_ID = 1773053492921n; // realistic Date.now()
+        const FOOD_PRICE_TON = toNano("0.5");      // 0.5 TON food subtotal
+
+        it("should handle timestamp-based orderId (uint64 range)", async () => {
+            // Frontend: const orderId = String(Date.now());
+            // Then: BigInt(orderId) → sent as uint64 to the contract
+            const totalPayment =
+                FOOD_PRICE_TON + DEFAULT_DELIVERY_FEE + DEFAULT_PROTOCOL_FEE + toNano("0.05");
+
+            const result = await escrow.send(
+                buyer.getSender(),
+                { value: totalPayment },
+                {
+                    $$type: "CreateOrder",
+                    orderId: TIMESTAMP_ORDER_ID,
+                    merchant: merchant.address,
+                    hasReferrer: false,
+                    referrer: buyer.address,
+                }
+            );
+
+            expect(result.transactions).toHaveTransaction({
+                from: buyer.address,
+                to: escrow.address,
+                success: true,
+            });
+
+            const order = await escrow.getGetOrder(TIMESTAMP_ORDER_ID);
+            expect(order).not.toBeNull();
+            expect(order!.status).toBe(0n);
+            // foodAmount = totalPayment - deliveryFee - protocolFee - 0.02 gas
+            const expectedFood =
+                totalPayment - DEFAULT_DELIVERY_FEE - DEFAULT_PROTOCOL_FEE - GAS_RESERVE;
+            expect(order!.foodAmount).toBe(expectedFood);
+        });
+
+        it("should accept delivery for a timestamp-based order", async () => {
+            // 1. Create
+            const totalPayment =
+                FOOD_PRICE_TON + DEFAULT_DELIVERY_FEE + DEFAULT_PROTOCOL_FEE + toNano("0.05");
+            await escrow.send(
+                buyer.getSender(),
+                { value: totalPayment },
+                {
+                    $$type: "CreateOrder",
+                    orderId: TIMESTAMP_ORDER_ID,
+                    merchant: merchant.address,
+                    hasReferrer: false,
+                    referrer: buyer.address,
+                }
+            );
+
+            // 2. Accept — courier sends 0.05 TON gas (same as frontend)
+            const result = await escrow.send(
+                courier.getSender(),
+                { value: toNano("0.05") },
+                { $$type: "AcceptDelivery", orderId: TIMESTAMP_ORDER_ID }
+            );
+
+            expect(result.transactions).toHaveTransaction({
+                from: courier.address,
+                to: escrow.address,
+                success: true,
+            });
+
+            const status = await escrow.getGetOrderStatus(TIMESTAMP_ORDER_ID);
+            expect(status).toBe(1n);
+        });
+
+        it("should confirm delivery for a timestamp-based order", async () => {
+            const totalPayment =
+                FOOD_PRICE_TON + DEFAULT_DELIVERY_FEE + DEFAULT_PROTOCOL_FEE + toNano("0.05");
+
+            // 1. Create
+            await escrow.send(
+                buyer.getSender(),
+                { value: totalPayment },
+                {
+                    $$type: "CreateOrder",
+                    orderId: TIMESTAMP_ORDER_ID,
+                    merchant: merchant.address,
+                    hasReferrer: true,
+                    referrer: referrer.address,
+                }
+            );
+
+            // 2. Accept
+            await escrow.send(
+                courier.getSender(),
+                { value: toNano("0.05") },
+                { $$type: "AcceptDelivery", orderId: TIMESTAMP_ORDER_ID }
+            );
+
+            // 3. Confirm
+            const result = await escrow.send(
+                courier.getSender(),
+                { value: toNano("0.05") },
+                { $$type: "ConfirmDelivery", orderId: TIMESTAMP_ORDER_ID }
+            );
+
+            expect(result.transactions).toHaveTransaction({
+                from: courier.address,
+                to: escrow.address,
+                success: true,
+            });
+
+            expect(await escrow.getGetOrderStatus(TIMESTAMP_ORDER_ID)).toBe(2n);
+
+            // Verify all recipients received funds
+            expect(result.transactions).toHaveTransaction({
+                from: escrow.address,
+                to: merchant.address,
+                success: true,
+            });
+            expect(result.transactions).toHaveTransaction({
+                from: escrow.address,
+                to: courier.address,
+                success: true,
+            });
+            expect(result.transactions).toHaveTransaction({
+                from: escrow.address,
+                to: referrer.address,
+                success: true,
+            });
+            expect(result.transactions).toHaveTransaction({
+                from: escrow.address,
+                to: treasury.address,
+                success: true,
+            });
+        });
+
+        it("should fail AcceptDelivery if the orderId doesn't match (order not found)", async () => {
+            // Create order with one ID
+            const totalPayment =
+                FOOD_PRICE_TON + DEFAULT_DELIVERY_FEE + DEFAULT_PROTOCOL_FEE + toNano("0.05");
+            await escrow.send(
+                buyer.getSender(),
+                { value: totalPayment },
+                {
+                    $$type: "CreateOrder",
+                    orderId: TIMESTAMP_ORDER_ID,
+                    merchant: merchant.address,
+                    hasReferrer: false,
+                    referrer: buyer.address,
+                }
+            );
+
+            // Try to accept with a DIFFERENT orderId — simulates the bug where
+            // the frontend passes the wrong ID (e.g. database UUID vs timestamp)
+            const wrongOrderId = 9999999999999n;
+            const result = await escrow.send(
+                courier.getSender(),
+                { value: toNano("0.05") },
+                { $$type: "AcceptDelivery", orderId: wrongOrderId }
+            );
+
+            expect(result.transactions).toHaveTransaction({
+                from: courier.address,
+                to: escrow.address,
+                success: false,
+                exitCode: 18518, // "Order not found"
+            });
+        });
+
+        it("should handle max uint64 orderId", async () => {
+            const maxUint64 = (1n << 64n) - 1n; // 18446744073709551615
+            const totalPayment =
+                FOOD_PRICE_TON + DEFAULT_DELIVERY_FEE + DEFAULT_PROTOCOL_FEE + toNano("0.05");
+
+            const result = await escrow.send(
+                buyer.getSender(),
+                { value: totalPayment },
+                {
+                    $$type: "CreateOrder",
+                    orderId: maxUint64,
+                    merchant: merchant.address,
+                    hasReferrer: false,
+                    referrer: buyer.address,
+                }
+            );
+
+            expect(result.transactions).toHaveTransaction({
+                from: buyer.address,
+                to: escrow.address,
+                success: true,
+            });
+
+            expect(await escrow.getGetOrderStatus(maxUint64)).toBe(0n);
+        });
+
+        it("should compute gas consumption within budget", async () => {
+            const totalPayment =
+                FOOD_PRICE_TON + DEFAULT_DELIVERY_FEE + DEFAULT_PROTOCOL_FEE + toNano("0.05");
+
+            // CreateOrder
+            const createResult = await escrow.send(
+                buyer.getSender(),
+                { value: totalPayment },
+                {
+                    $$type: "CreateOrder",
+                    orderId: TIMESTAMP_ORDER_ID,
+                    merchant: merchant.address,
+                    hasReferrer: true,
+                    referrer: referrer.address,
+                }
+            );
+
+            // The contract transaction should succeed and gas should be reasonable
+            const createTx = createResult.transactions.find(
+                (t) => t.inMessage?.info.type === "internal" &&
+                    t.inMessage.info.dest?.equals(escrow.address)
+            );
+            expect(createTx).toBeDefined();
+            expect(createTx!.totalFees.coins).toBeLessThan(toNano("0.03"));
+
+            // AcceptDelivery
+            const acceptResult = await escrow.send(
+                courier.getSender(),
+                { value: toNano("0.05") },
+                { $$type: "AcceptDelivery", orderId: TIMESTAMP_ORDER_ID }
+            );
+
+            const acceptTx = acceptResult.transactions.find(
+                (t) => t.inMessage?.info.type === "internal" &&
+                    t.inMessage.info.dest?.equals(escrow.address)
+            );
+            expect(acceptTx).toBeDefined();
+            expect(acceptTx!.totalFees.coins).toBeLessThan(toNano("0.02"));
+
+            // ConfirmDelivery (most expensive — 3-4 outgoing messages)
+            const confirmResult = await escrow.send(
+                courier.getSender(),
+                { value: toNano("0.05") },
+                { $$type: "ConfirmDelivery", orderId: TIMESTAMP_ORDER_ID }
+            );
+
+            const confirmTx = confirmResult.transactions.find(
+                (t) => t.inMessage?.info.type === "internal" &&
+                    t.inMessage.info.dest?.equals(escrow.address)
+            );
+            expect(confirmTx).toBeDefined();
+            // ConfirmDelivery with referrer sends 4 outgoing messages + storage
+            // Should still be under 0.03 TON
+            expect(confirmTx!.totalFees.coins).toBeLessThan(toNano("0.03"));
+        });
+
+        it("should handle the complete checkout→accept→confirm flow with exact frontend values", async () => {
+            /**
+             * This test reproduces the EXACT sequence the app performs:
+             *
+             * 1. CheckoutPage: orderId = String(Date.now())
+             *    createOrder(orderId, foodTotalTon, merchantAddr, referrerWallet?)
+             *
+             * 2. CourierDashboard: acceptDelivery(BigInt(order.orderId))
+             *
+             * 3. CourierDashboard: confirmDelivery(BigInt(activeOrder.orderId))
+             *    ⚠️ Was previously BigInt(activeOrder.id) which is a UUID → crash!
+             */
+
+            const frontendOrderId = "1741521900000"; // simulating Date.now()
+            const oid = BigInt(frontendOrderId);      // what the frontend does
+            const foodTotalTon = 0.5;                 // USDT converted to TON
+            const foodNano = toNano(foodTotalTon.toFixed(9));
+
+            // Frontend fetches fees from chain
+            const deliveryFeeNano = await escrow.getGetDeliveryFee();
+            const protocolFeeNano = await escrow.getGetProtocolFee();
+            const requiredAmount = foodNano + deliveryFeeNano + protocolFeeNano + toNano("0.05");
+
+            // ── Step 1: Buyer creates order (CheckoutPage) ────────────────
+            const createResult = await escrow.send(
+                buyer.getSender(),
+                { value: requiredAmount },
+                {
+                    $$type: "CreateOrder",
+                    orderId: oid,
+                    merchant: merchant.address,
+                    hasReferrer: false,
+                    referrer: merchant.address, // placeholder when no referrer
+                }
+            );
+            expect(createResult.transactions).toHaveTransaction({
+                from: buyer.address,
+                to: escrow.address,
+                success: true,
+            });
+            expect(await escrow.getGetOrderStatus(oid)).toBe(0n);
+
+            // ── Step 2: Courier accepts (CourierDashboard) ────────────────
+            // Frontend: acceptDelivery(BigInt(order.orderId))
+            const acceptResult = await escrow.send(
+                courier.getSender(),
+                { value: toNano("0.05") },
+                { $$type: "AcceptDelivery", orderId: oid }
+            );
+            expect(acceptResult.transactions).toHaveTransaction({
+                from: courier.address,
+                to: escrow.address,
+                success: true,
+            });
+            expect(await escrow.getGetOrderStatus(oid)).toBe(1n);
+
+            // ── Step 3: Courier confirms delivery ─────────────────────────
+            // Frontend (FIXED): confirmDelivery(BigInt(activeOrder.orderId))
+            const confirmResult = await escrow.send(
+                courier.getSender(),
+                { value: toNano("0.05") },
+                { $$type: "ConfirmDelivery", orderId: oid }
+            );
+            expect(confirmResult.transactions).toHaveTransaction({
+                from: courier.address,
+                to: escrow.address,
+                success: true,
+            });
+            expect(await escrow.getGetOrderStatus(oid)).toBe(2n);
+
+            // Verify settlement happened
+            expect(confirmResult.transactions).toHaveTransaction({
+                from: escrow.address,
+                to: merchant.address,
+                success: true,
+            });
+            expect(confirmResult.transactions).toHaveTransaction({
+                from: escrow.address,
+                to: courier.address,
+                success: true,
+            });
+            expect(confirmResult.transactions).toHaveTransaction({
+                from: escrow.address,
+                to: treasury.address,
+                success: true,
+            });
+        });
+    });
 });

@@ -390,7 +390,8 @@ const CourierDashboard: React.FC = () => {
         setConfirmError(null);
         try {
             // 1. Courier signs on-chain confirmation to release funds (0.05 TON gas)
-            await confirmDelivery(BigInt(activeOrder.id));
+            //    IMPORTANT: use orderId (timestamp) not id (UUID) for the on-chain call
+            await confirmDelivery(BigInt(activeOrder.orderId));
 
             // 2. We inform backend that the order is complete with the strict PIN
             await api.confirmDelivery(activeOrder.id, wallet, codeInput);
