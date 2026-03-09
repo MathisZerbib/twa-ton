@@ -473,8 +473,10 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
 
     // ── Init Mapbox ───────────────────────────────────────────────────────────
     useEffect(() => {
-        if (!MAPBOX_TOKEN || !mapContainerRef.current) {
-            console.error("Mapbox token or container missing!");
+        if (loading || !order || !mapContainerRef.current || mapRef.current) return;
+
+        if (!MAPBOX_TOKEN) {
+            console.error("Mapbox token missing!");
             return;
         }
 
@@ -553,7 +555,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
             mapRef.current = null;
             setMapLoaded(false);
         };
-    }, []);
+    }, [loading, order]);
 
     const showMap = ["accepted", "picked_up"].includes(order?.status ?? "");
 
