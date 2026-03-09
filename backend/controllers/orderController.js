@@ -79,4 +79,9 @@ function confirm(req, res) {
   res.json(result.data);
 }
 
-module.exports = { getAll, getAvailable, getOne, create, accept, pickup, confirm };
+function getByWallet(req, res) {
+  const orders = orderService.getOrdersByWallet(req.params.address);
+  res.json(orders);
+}
+
+module.exports = { getAll, getAvailable, getOne, getByWallet, create, accept, pickup, confirm };

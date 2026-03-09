@@ -88,11 +88,18 @@ function setCourierLocation(orderId, lat, lng) {
   return order;
 }
 
+function getOrdersByWallet(address) {
+  return Array.from(orders.values())
+    .filter(o => o.buyerWallet === address)
+    .sort((a, b) => b.createdAt - a.createdAt);
+}
+
 module.exports = {
   createOrder,
   getOrder,
   getAllOrders,
   getAvailableOrders,
+  getOrdersByWallet,
   updateOrder,
   setCourierLocation,
 };

@@ -21,6 +21,8 @@ import CourierDashboard from "./pages/CourierDashboard";
 import OrderTracker from "./pages/OrderTracker";
 import DiscoveryPage from "./pages/DiscoveryPage";
 import MerchantOnboarding from "./pages/MerchantOnboarding";
+import MyOrdersPage from "./pages/MyOrdersPage";
+import OrderHistoryPage from "./pages/OrderHistoryPage";
 
 // ─── Deep-link Parser ─────────────────────────────────────────────────────────
 
@@ -122,6 +124,9 @@ function InnerApp() {
           <Route path="/courier" element={<CourierDashboard />} />
           {/* ── Merchant App ── */}
           <Route path="/merchant/onboard" element={<MerchantOnboarding />} />
+          {/* ── User Orders ── */}
+          <Route path="/my-orders" element={<MyOrdersPage />} />
+          <Route path="/order-history" element={<OrderHistoryPage />} />
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

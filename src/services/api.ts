@@ -115,4 +115,8 @@ export const api = {
             method: "POST",
             body: JSON.stringify(data),
         }),
+
+    /** Get all orders for a specific buyer wallet */
+    getOrdersByWallet: (address: string) =>
+        req<BackendOrder[]>(`/api/orders/wallet/${address}`),
 };

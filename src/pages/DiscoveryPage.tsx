@@ -8,7 +8,6 @@ import {
   faMotorcycle,
   faMagnifyingGlass,
   faFire,
-  faStore
 } from "@fortawesome/free-solid-svg-icons";
 import Header from "../components/Header";
 import { api } from "../services/api";
@@ -65,19 +64,7 @@ const SectionTitle = styled.h2`
   gap: 8px;
 `;
 
-const AddStoreBtn = styled.button`
-  background: rgba(255, 107, 53, 0.1);
-  color: #FF6B35;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 0.85rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-`;
+
 
 const RestaurantGrid = styled.div`
   display: flex;
@@ -207,10 +194,6 @@ const DiscoveryPage: React.FC = () => {
             <FontAwesomeIcon icon={faFire} style={{ color: "#FF6B35" }} />
             Trending on TON
           </SectionTitle>
-          <AddStoreBtn onClick={() => navigate('/merchant/onboard')}>
-            <FontAwesomeIcon icon={faStore} />
-            Open Store
-          </AddStoreBtn>
         </SectionHeader>
 
         <RestaurantGrid>

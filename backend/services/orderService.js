@@ -55,6 +55,10 @@ function setCourierLocation(orderId, lat, lng) {
   return store.setCourierLocation(orderId, lat, lng);
 }
 
+function getOrdersByWallet(address) {
+  return store.getOrdersByWallet(address);
+}
+
 module.exports = {
   getAllOrders,
   getAvailableOrders,
@@ -64,4 +68,5 @@ module.exports = {
   pickupOrder,
   confirmDelivery,
   setCourierLocation,
+  getOrdersByWallet,
 };
