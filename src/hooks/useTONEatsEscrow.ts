@@ -55,6 +55,10 @@ export const PROTOCOL_FEE_TON = 0.1;
 /** Percentage of protocol fee given as referrer cashback (0.5 = 50%) */
 export const REFERRER_CASHBACK_PERCENT = 0.5;
 
+// ─── Accept Phase Type ────────────────────────────────────────────────────────
+
+export type AcceptPhase = "signing" | "confirming" | "confirmed";
+
 // ─── Return Type ──────────────────────────────────────────────────────────────
 
 export interface UseTONEatsEscrowReturn {
@@ -82,8 +86,13 @@ export interface UseTONEatsEscrowReturn {
     /**
      * Called by the courier to accept and assign themselves to the delivery.
      * @param oid  Order ID (bigint)
+     * @param onPhase  Optional callback to receive phase updates: 'signing' | 'confirming' | 'confirmed'
      */
-    acceptDelivery: (oid: bigint | string) => Promise<void>;
+    acceptDelivery: (oid: bigint | string, onPhase?: (phase: AcceptPhase) => void) => Promise<void>;
+    /**
+     * Poll the on-chain status of an order. Returns the raw bigint status.
+     */
+    getOrderStatus: (oid: bigint | string) => Promise<bigint | null>;
     /**
      * Called by the buyer/courier to confirm they received the delivery.
      * This triggers the 4-way payment split on-chain.
@@ -210,7 +219,7 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
     };
 
     // ── acceptDelivery ────────────────────────────────────────────────────────
-    const acceptDelivery = async (oidInput: bigint | string) => {
+    const acceptDelivery = async (oidInput: bigint | string, onPhase?: (phase: AcceptPhase) => void) => {
         if (!escrowContract || !sender || !client) return;
         const oid = BigInt(oidInput);
         const requiredGas = toNano("0.08"); // 0.08 TON gas for accept (single state write)
@@ -226,20 +235,44 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
         }
 
         console.log("[TON-Eats] Courier accepting delivery →", oid.toString());
+        onPhase?.("signing");
+
         await escrowContract.send(sender as any, { value: requiredGas }, {
             $$type: "AcceptDelivery",
             orderId: oid
         });
 
-        console.log("[TON-Eats] Waiting for accept Delivery to be recorded on-chain...");
+        console.log("[TON-Eats] TX sent, waiting for on-chain confirmation...");
+        onPhase?.("confirming");
+
         let attempts = 0;
-        while (attempts < 15) {
-            await new Promise(r => setTimeout(r, 3500));
-            const status = await escrowContract.getGetOrderStatus(oid).catch(() => -1n);
-            if (status === 1n || status === 2n) return;
+        while (attempts < 20) {
+            await new Promise(r => setTimeout(r, 3000));
+            try {
+                const status = await escrowContract.getGetOrderStatus(oid);
+                if (status === 1n || status === 2n) {
+                    console.log("[TON-Eats] Accept confirmed on-chain!");
+                    onPhase?.("confirmed");
+                    return;
+                }
+            } catch {}
             attempts++;
         }
-        throw new Error("On-chain acceptance timeout.");
+        // Don't throw — the tx was sent and may confirm later.
+        // Caller should handle gracefully.
+        console.warn("[TON-Eats] Polling timed out, but TX was sent successfully.");
+        onPhase?.("confirmed"); // optimistic: tx was sent to the network
+    };
+
+    // ── getOrderStatus (manual poll) ─────────────────────────────────────────
+    const getOrderStatus = async (oidInput: bigint | string): Promise<bigint | null> => {
+        if (!escrowContract) return null;
+        const oid = BigInt(oidInput);
+        try {
+            return await escrowContract.getGetOrderStatus(oid);
+        } catch {
+            return null;
+        }
     };
 
     // ── confirmDelivery ───────────────────────────────────────────────────────
@@ -327,6 +360,7 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
         acceptDelivery,
         confirmDelivery,
         withdrawAll,
+        getOrderStatus,
         contractAddress: escrowContract?.address.toString(),
     };
 }

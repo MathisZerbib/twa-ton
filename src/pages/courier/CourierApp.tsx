@@ -30,11 +30,12 @@ import {
 import { TonConnectButton } from "@tonconnect/ui-react";
 
 import { useTonConnect } from "../../hooks/useTonConnect";
-import { useTONEatsEscrow, DELIVERY_FEE_TON } from "../../hooks/useTONEatsEscrow";
+import { useTONEatsEscrow, DELIVERY_FEE_TON, AcceptPhase } from "../../hooks/useTONEatsEscrow";
 import { useSocket } from "../../hooks/useSocket";
 import { api, BackendOrder } from "../../services/api";
 
 import BottomNav, { CourierTab } from "../../components/courier/BottomNav";
+import AcceptingOverlay, { OverlayPhase } from "../../components/courier/AcceptingOverlay";
 import OrderFeed from "./OrderFeed";
 import ActiveDelivery from "./ActiveDelivery";
 import MyDeliveries from "./MyDeliveries";
@@ -215,6 +216,11 @@ const CourierApp: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [gpsStatus, setGpsStatus] = useState<string>("off");
 
+  // ── Accept flow state ───────────────────────────────────────────────
+  const [acceptPhase, setAcceptPhase] = useState<OverlayPhase | null>(null);
+  const [acceptingOrder, setAcceptingOrder] = useState<BackendOrder | null>(null);
+  const [acceptError, setAcceptError] = useState<string | null>(null);
+
   const { connected, wallet, network } = useTonConnect();
   const {
     acceptDelivery,
@@ -326,24 +332,58 @@ const CourierApp: React.FC = () => {
     };
   }, [activeOrder, socket]);
 
-  // ── Accept a delivery ─────────────────────────────────────────────────
+  // ── Accept a delivery (full-screen overlay flow) ──────────────────────
   const handleAccept = useCallback(
     async (order: BackendOrder) => {
       if (!wallet || !contractReady) return;
       setAcceptingId(order.id);
+      setAcceptingOrder(order);
+      setAcceptPhase("signing");
+      setAcceptError(null);
+
       try {
-        await acceptDelivery(BigInt(order.orderId));
+        await acceptDelivery(BigInt(order.orderId), (phase: AcceptPhase) => {
+          if (phase === "signing") setAcceptPhase("signing");
+          else if (phase === "confirming") setAcceptPhase("confirming");
+          else if (phase === "confirmed") setAcceptPhase("confirmed");
+        });
+
+        // On-chain done — update backend
         const updated = await api.acceptOrder(order.id, wallet);
-        setActiveOrder(updated);
         setOrders((prev) => prev.filter((o) => o.id !== order.id));
+
+        // Brief "confirmed" pause, then transition to GPS
+        setAcceptPhase("confirmed");
+        await new Promise((r) => setTimeout(r, 1500));
+
+        setActiveOrder(updated);
+        setAcceptPhase(null);
+        setAcceptingOrder(null);
       } catch (e: any) {
         console.error("[Courier] Accept failed:", e);
+        setAcceptPhase("error");
+        setAcceptError(e.message ?? "Transaction failed. Please try again.");
       } finally {
         setAcceptingId(null);
       }
     },
     [wallet, contractReady, acceptDelivery]
   );
+
+  // ── Retry accept (after error) ────────────────────────────────────────
+  const handleRetryAccept = useCallback(() => {
+    if (acceptingOrder) {
+      handleAccept(acceptingOrder);
+    }
+  }, [acceptingOrder, handleAccept]);
+
+  // ── Cancel accept overlay ─────────────────────────────────────────────
+  const handleCancelAccept = useCallback(() => {
+    setAcceptPhase(null);
+    setAcceptingOrder(null);
+    setAcceptingId(null);
+    setAcceptError(null);
+  }, []);
 
   // ── Mark picked up ────────────────────────────────────────────────────
   const handlePickup = useCallback(async () => {
@@ -419,6 +459,20 @@ const CourierApp: React.FC = () => {
         </FeatureList>
         <TonConnectButton />
       </Gate>
+    );
+  }
+
+  // ─── ACCEPTING OVERLAY (full-screen loader) ──────────────────────────
+  if (acceptPhase && acceptingOrder) {
+    return (
+      <AcceptingOverlay
+        phase={acceptPhase}
+        orderLabel={`Order #${acceptingOrder.orderId.slice(-6)}`}
+        earnings={acceptingOrder.deliveryFeeTon.toFixed(2)}
+        errorMessage={acceptError ?? undefined}
+        onRetry={handleRetryAccept}
+        onCancel={acceptPhase === "error" || acceptPhase === "signing" ? handleCancelAccept : undefined}
+      />
     );
   }
 
