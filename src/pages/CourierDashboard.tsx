@@ -499,8 +499,16 @@ const CourierDashboard: React.FC = () => {
                             <StepCard>
                                 <StepTitle>① Pick up from merchant</StepTitle>
                                 <StepValue>Wallet: {shortAddr(activeOrder.merchantWallet)}</StepValue>
-                                <StepValue style={{ marginTop: 4, fontSize: "0.78rem", color: "#888" }}>
-                                    {activeOrder.items.map(i => `${i.qty}× ${i.name}`).join(", ")}
+                                <StepValue style={{ marginTop: 8, fontSize: "0.85rem", color: "#666" }}>
+                                    <strong>Order Details:</strong>
+                                    <ul style={{ margin: "4px 0 0 0", paddingLeft: "20px" }}>
+                                        {activeOrder.items.map((i, idx) => (
+                                            <li key={idx}>
+                                                {i.qty}× {i.name}
+                                                {i.priceTon ? ` - ${i.priceTon} TON` : ""}
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </StepValue>
                                 {activeOrder.status === "accepted" && (
                                     <AcceptBtn
@@ -605,9 +613,16 @@ const CourierDashboard: React.FC = () => {
                                                         <FontAwesomeIcon icon={faBagShopping} />
                                                     </Icon>
                                                     <InfoVal>
-                                                        {order.items.length > 0
-                                                            ? order.items.map(it => `${it.qty}× ${it.name}`).join(", ")
-                                                            : "Items not specified"}
+                                                        {order.items.length > 0 ? (
+                                                            <ul style={{ margin: 0, paddingLeft: "20px" }}>
+                                                                {order.items.map((it, idx) => (
+                                                                    <li key={idx}>
+                                                                        {it.qty}× {it.name}
+                                                                        {it.priceTon ? ` - ${it.priceTon} TON` : ""}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        ) : "Items not specified"}
                                                     </InfoVal>
                                                 </Row>
 
