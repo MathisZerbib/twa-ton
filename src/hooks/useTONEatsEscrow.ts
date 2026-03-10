@@ -204,18 +204,25 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
         await escrowContract.send(sender as any, { value: requiredAmount }, params);
 
         // 3. Poll for on-chain state change
-        console.log("[TON-Eats] Waiting for order to be released on-chain...");
+        console.log("[TON-Eats] Waiting for order to be confirmed on-chain...");
         let attempts = 0;
+        await new Promise(r => setTimeout(r, 5000)); // initial 5s delay
         while (attempts < 20) {
-            await new Promise(r => setTimeout(r, 3500));
-            const status = await escrowContract.getGetOrderStatus(oid).catch(() => -1n);
-            if (status !== -1n) {
-                console.log("[TON-Eats] Order created successfully on-chain!");
-                return;
+            try {
+                const status = await escrowContract.getGetOrderStatus(oid);
+                console.log(`[TON-Eats] CreateOrder poll #${attempts + 1}: status = ${status}`);
+                if (status !== -1n) {
+                    console.log("[TON-Eats] Order created successfully on-chain!");
+                    return;
+                }
+            } catch (pollErr: any) {
+                console.warn(`[TON-Eats] CreateOrder poll #${attempts + 1} RPC error:`, pollErr.message?.slice(0, 80));
             }
             attempts++;
+            if (attempts < 20) await new Promise(r => setTimeout(r, 3000));
         }
-        throw new Error("Order confirmation timeout. Transaction may have failed or network is extremely congested.");
+        // Don't throw — TX was broadcast. Proceed optimistically.
+        console.warn("[TON-Eats] CreateOrder polling timed out, TX was broadcast.");
     };
 
     // ── acceptDelivery ────────────────────────────────────────────────────────
@@ -245,23 +252,42 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
         console.log("[TON-Eats] TX sent, waiting for on-chain confirmation...");
         onPhase?.("confirming");
 
+        // Poll with increasing backoff: first check after 5s (give blockchain time),
+        // then every 3s. The free-tier RPC may rate-limit, so we catch & retry.
+        let confirmed = false;
         let attempts = 0;
-        while (attempts < 20) {
-            await new Promise(r => setTimeout(r, 3000));
+        const maxAttempts = 20;
+        const initialDelay = 5000; // wait 5s before first check
+        const pollDelay = 3000;
+
+        await new Promise(r => setTimeout(r, initialDelay));
+
+        while (attempts < maxAttempts) {
             try {
                 const status = await escrowContract.getGetOrderStatus(oid);
+                console.log(`[TON-Eats] Poll #${attempts + 1}: status = ${status}`);
                 if (status === 1n || status === 2n) {
                     console.log("[TON-Eats] Accept confirmed on-chain!");
-                    onPhase?.("confirmed");
-                    return;
+                    confirmed = true;
+                    break;
                 }
-            } catch {}
+            } catch (pollErr: any) {
+                console.warn(`[TON-Eats] Poll #${attempts + 1} RPC error (will retry):`, pollErr.message?.slice(0, 80));
+            }
             attempts++;
+            if (attempts < maxAttempts) {
+                await new Promise(r => setTimeout(r, pollDelay));
+            }
         }
-        // Don't throw — the tx was sent and may confirm later.
-        // Caller should handle gracefully.
-        console.warn("[TON-Eats] Polling timed out, but TX was sent successfully.");
-        onPhase?.("confirmed"); // optimistic: tx was sent to the network
+
+        if (confirmed) {
+            onPhase?.("confirmed");
+        } else {
+            // TX was sent but polling couldn't confirm — proceed optimistically.
+            // The blockchain may still be processing or RPC was rate-limited.
+            console.warn("[TON-Eats] Polling timed out, proceeding optimistically (TX was broadcast).");
+            onPhase?.("confirmed");
+        }
     };
 
     // ── getOrderStatus (manual poll) ─────────────────────────────────────────
@@ -334,13 +360,20 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
 
         console.log("[TON-Eats] Waiting for settlement confirm to be recorded on-chain...");
         let attempts = 0;
-        while (attempts < 15) {
-            await new Promise(r => setTimeout(r, 3500));
-            const status = await escrowContract.getGetOrderStatus(oid).catch(() => -1n);
-            if (status === 2n) return;
+        await new Promise(r => setTimeout(r, 5000)); // initial 5s delay
+        while (attempts < 20) {
+            try {
+                const status = await escrowContract.getGetOrderStatus(oid);
+                console.log(`[TON-Eats] ConfirmDelivery poll #${attempts + 1}: status = ${status}`);
+                if (status === 2n) return;
+            } catch (pollErr: any) {
+                console.warn(`[TON-Eats] ConfirmDelivery poll #${attempts + 1} RPC error:`, pollErr.message?.slice(0, 80));
+            }
             attempts++;
+            if (attempts < 20) await new Promise(r => setTimeout(r, 3000));
         }
-        throw new Error("On-chain confirmation timeout.");
+        // Don't throw — TX was broadcast. Proceed optimistically.
+        console.warn("[TON-Eats] ConfirmDelivery polling timed out, TX was broadcast.");
     };
 
     // ── Admin: withdrawAll ───────────────────────────────────────────────────

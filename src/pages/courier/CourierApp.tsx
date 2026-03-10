@@ -342,13 +342,23 @@ const CourierApp: React.FC = () => {
       setAcceptError(null);
 
       try {
+        // 1. Send on-chain AcceptDelivery TX (this opens wallet, then polls)
         await acceptDelivery(BigInt(order.orderId), (phase: AcceptPhase) => {
           if (phase === "signing") setAcceptPhase("signing");
           else if (phase === "confirming") setAcceptPhase("confirming");
           else if (phase === "confirmed") setAcceptPhase("confirmed");
         });
+      } catch (e: any) {
+        // On-chain TX failed (user rejected in wallet or insufficient funds)
+        console.error("[Courier] On-chain accept failed:", e);
+        setAcceptPhase("error");
+        setAcceptError(e.message ?? "Transaction failed. Please try again.");
+        setAcceptingId(null);
+        return;
+      }
 
-        // On-chain done — update backend
+      // 2. On-chain succeeded — update backend
+      try {
         const updated = await api.acceptOrder(order.orderId, wallet);
         setOrders((prev) => prev.filter((o) => o.id !== order.id));
 
@@ -359,10 +369,49 @@ const CourierApp: React.FC = () => {
         setActiveOrder(updated);
         setAcceptPhase(null);
         setAcceptingOrder(null);
-      } catch (e: any) {
-        console.error("[Courier] Accept failed:", e);
-        setAcceptPhase("error");
-        setAcceptError(e.message ?? "Transaction failed. Please try again.");
+      } catch (backendErr: any) {
+        console.warn("[Courier] Backend accept error:", backendErr.message);
+
+        // If backend says "already accepted" (409), treat as success — the
+        // on-chain TX went through, so the courier IS the assigned driver.
+        if (
+          backendErr.message?.includes("already") ||
+          backendErr.message?.includes("409")
+        ) {
+          // Fetch the latest order data regardless
+          try {
+            const latest = await api.getOrder(order.orderId);
+            setOrders((prev) => prev.filter((o) => o.id !== order.id));
+            setAcceptPhase("confirmed");
+            await new Promise((r) => setTimeout(r, 1500));
+            setActiveOrder(latest);
+            setAcceptPhase(null);
+            setAcceptingOrder(null);
+          } catch {
+            // Even if fetch fails, proceed with existing order data
+            const fallbackOrder = { ...order, status: "accepted" as const, courierWallet: wallet };
+            setOrders((prev) => prev.filter((o) => o.id !== order.id));
+            setAcceptPhase("confirmed");
+            await new Promise((r) => setTimeout(r, 1500));
+            setActiveOrder(fallbackOrder);
+            setAcceptPhase(null);
+            setAcceptingOrder(null);
+          }
+        } else if (backendErr.message?.includes("not found")) {
+          // Backend doesn't have this order (e.g., backend registration failed during checkout).
+          // Still proceed since on-chain TX succeeded.
+          console.warn("[Courier] Order not in backend, using local data with on-chain acceptance.");
+          const fallbackOrder = { ...order, status: "accepted" as const, courierWallet: wallet };
+          setOrders((prev) => prev.filter((o) => o.id !== order.id));
+          setAcceptPhase("confirmed");
+          await new Promise((r) => setTimeout(r, 1500));
+          setActiveOrder(fallbackOrder);
+          setAcceptPhase(null);
+          setAcceptingOrder(null);
+        } else {
+          setAcceptPhase("error");
+          setAcceptError(backendErr.message ?? "Backend update failed.");
+        }
       } finally {
         setAcceptingId(null);
       }
