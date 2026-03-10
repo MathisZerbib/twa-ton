@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMotorcycle,
@@ -60,7 +60,7 @@ const StepDot = styled.div<{ $state: "done" | "active" | "pending" }>`
       ? "linear-gradient(135deg, #FF6B35, #F7931E)"
       : "#e0e0e0"};
   color: ${(p) => (p.$state === "pending" ? "#999" : "#fff")};
-  ${(p) => p.$state === "active" && `animation: ${pulse} 2s ease-in-out infinite;`}
+  ${(p) => p.$state === "active" && css`animation: ${pulse} 2s ease-in-out infinite;`}
 `;
 
 const Connector = styled.div<{ $done: boolean }>`
