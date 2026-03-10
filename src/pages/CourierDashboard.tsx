@@ -364,7 +364,7 @@ const CourierDashboard: React.FC = () => {
             // 1. Sign on-chain accept_delivery tx
             await acceptDelivery(BigInt(order.orderId));
             // 2. Register with backend → emits order:accepted to buyer
-            const updated = await api.acceptOrder(order.id, wallet);
+            const updated = await api.acceptOrder(order.orderId, wallet);
             setActiveOrder(updated);
             setOrders(prev => prev.filter(o => o.id !== order.id));
         } catch (e: any) {
@@ -378,7 +378,7 @@ const CourierDashboard: React.FC = () => {
     const handlePickup = async () => {
         if (!activeOrder || !wallet) return;
         try {
-            const updated = await api.pickupOrder(activeOrder.id, wallet);
+            const updated = await api.pickupOrder(activeOrder.orderId, wallet);
             setActiveOrder(updated);
         } catch (e) { console.error(e); }
     };
@@ -394,7 +394,7 @@ const CourierDashboard: React.FC = () => {
             await confirmDelivery(BigInt(activeOrder.orderId));
 
             // 2. We inform backend that the order is complete with the strict PIN
-            await api.confirmDelivery(activeOrder.id, wallet, codeInput);
+            await api.confirmDelivery(activeOrder.orderId, wallet, codeInput);
 
             setConfirmed(true);
             setActiveOrder(null);

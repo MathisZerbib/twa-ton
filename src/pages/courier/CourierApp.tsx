@@ -349,7 +349,7 @@ const CourierApp: React.FC = () => {
         });
 
         // On-chain done — update backend
-        const updated = await api.acceptOrder(order.id, wallet);
+        const updated = await api.acceptOrder(order.orderId, wallet);
         setOrders((prev) => prev.filter((o) => o.id !== order.id));
 
         // Brief "confirmed" pause, then transition to GPS
@@ -388,7 +388,7 @@ const CourierApp: React.FC = () => {
   // ── Mark picked up ────────────────────────────────────────────────────
   const handlePickup = useCallback(async () => {
     if (!activeOrder || !wallet) return;
-    const updated = await api.pickupOrder(activeOrder.id, wallet);
+    const updated = await api.pickupOrder(activeOrder.orderId, wallet);
     setActiveOrder(updated);
   }, [activeOrder, wallet]);
 
@@ -397,7 +397,7 @@ const CourierApp: React.FC = () => {
     async (code: string) => {
       if (!activeOrder || !wallet) return;
       await confirmDelivery(BigInt(activeOrder.orderId));
-      await api.confirmDelivery(activeOrder.id, wallet, code);
+      await api.confirmDelivery(activeOrder.orderId, wallet, code);
     },
     [activeOrder, wallet, confirmDelivery]
   );
