@@ -213,12 +213,12 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
     const acceptDelivery = async (oidInput: bigint | string) => {
         if (!escrowContract || !sender || !client) return;
         const oid = BigInt(oidInput);
-        const requiredGas = toNano("0.05");
+        const requiredGas = toNano("0.08"); // 0.08 TON gas for accept (single state write)
 
         if (wallet) {
             try {
                 const balanceNano = await client.getBalance(Address.parse(wallet));
-                if (balanceNano < requiredGas) throw new Error("Insufficient funds to pay for gas fees (0.05 TON).");
+                if (balanceNano < requiredGas) throw new Error("Insufficient funds to pay for gas fees (0.08 TON).");
             } catch (err: any) {
                 if (err.message.includes("Insufficient funds")) throw err;
                 console.warn("[TON-Eats] Could not fetch balance (RPC network error), proceeding anyway...", err);
@@ -246,12 +246,47 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
     const confirmDelivery = async (oidInput: bigint | string) => {
         if (!escrowContract || !sender || !client) return;
         const oid = BigInt(oidInput);
-        const requiredGas = toNano("0.05");
+
+        // ── Dynamically compute gas based on the order's on-chain state ──────
+        // The contract dispatches:
+        //   • 1 send  → merchant  (food)
+        //   • 1 send  → courier   (deliveryFee)
+        //   • 1 send  → treasury  (protocolFee)          — no referrer
+        //   • 2 sends → treasury + referrer (protocolFee) — with referrer
+        // Each outbound message costs ~0.015 TON in forwarding fees.
+        // Contract execution itself costs ~0.02–0.03 TON.
+        const BASE_EXECUTION_GAS = toNano("0.03");
+        const PER_SEND_FWD_FEE   = toNano("0.02");  // conservative per-message overhead
+        const SAFETY_MARGIN       = toNano("0.02");
+
+        let numSends = 3; // minimum: merchant + courier + treasury
+        try {
+            const orderData = await escrowContract.getGetOrder(oid);
+            if (orderData && orderData.referrer) {
+                numSends = 4; // extra send for referrer split
+            }
+        } catch {
+            numSends = 4; // assume worst case on error
+        }
+
+        const requiredGas =
+            BASE_EXECUTION_GAS +
+            PER_SEND_FWD_FEE * BigInt(numSends) +
+            SAFETY_MARGIN;
+
+        const gasDisplay = (Number(requiredGas) / 1e9).toFixed(3);
+        console.log(
+            `[TON-Eats] confirmDelivery gas: ${gasDisplay} TON (${numSends} outbound sends)`
+        );
 
         if (wallet) {
             try {
                 const balanceNano = await client.getBalance(Address.parse(wallet));
-                if (balanceNano < requiredGas) throw new Error("Insufficient funds to pay for gas fees (0.05 TON).");
+                if (balanceNano < requiredGas) {
+                    throw new Error(
+                        `Insufficient funds to pay for gas fees (${gasDisplay} TON).`
+                    );
+                }
             } catch (err: any) {
                 if (err.message.includes("Insufficient funds")) throw err;
                 console.warn("[TON-Eats] Could not fetch balance (RPC network error), proceeding anyway...", err);
