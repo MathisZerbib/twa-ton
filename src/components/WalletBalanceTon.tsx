@@ -12,8 +12,7 @@ const WalletBalanceTon: React.FC<WalletBalanceTonProps> = ({
   walletAddress,
 }) => {
   const { network } = useTonConnect();
-  const [balance, setBalance] = useState<string>("Loading...");
-  console.log("walletAddress", walletAddress);
+  const [balance, setBalance] = useState<string>("Checking balance...");
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -28,15 +27,15 @@ const WalletBalanceTon: React.FC<WalletBalanceTonProps> = ({
         const address = Address.parse(walletAddress);
         const balance = await client.getBalance(address);
         const finalbalance = parseFloat(balance.toString()) / 1e9;
-        setBalance(`${finalbalance.toFixed(3)}`);
+        setBalance(`${finalbalance.toFixed(3)} TON`);
       } catch (error) {
         console.error("Failed to fetch balance:", error);
-        setBalance("Error fetching balance");
+        setBalance("Couldn't load balance");
       }
     };
 
     fetchBalance();
-  }, [walletAddress]);
+  }, [walletAddress, network]);
 
   return (
     <div

@@ -34,6 +34,7 @@ COPY --from=prisma /app/node_modules/@prisma ./node_modules/@prisma
 
 # Copy application source
 COPY index.js ./
+COPY seed.js ./
 COPY routes ./routes
 COPY controllers ./controllers
 COPY services ./services

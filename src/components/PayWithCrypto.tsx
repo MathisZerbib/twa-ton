@@ -25,6 +25,30 @@ export function BuyWithCrypto({
         ? "kQCFEF5jY33lLFJugJmFuILYQcwg7ekHu8LVsBpV7JbIT_yE"
         : "";
   const { cartItems } = useCart();
+  const isDisabled =
+    !connected ||
+    !sender ||
+    amount === undefined ||
+    amount === null ||
+    amount === "" ||
+    cartItems.length === 0 ||
+    isNaN(parseFloat(amount)) ||
+    parseFloat(amount) <= 0 ||
+    tonRecipient === "" ||
+    tonRecipient === undefined ||
+    tonRecipient === null ||
+    currency === "" ||
+    currency === undefined ||
+    currency === null ||
+    !enabled;
+
+  const disabledReason = !connected || !sender
+    ? "Connect your wallet to continue"
+    : cartItems.length === 0
+      ? "Add items to your cart to continue"
+      : !enabled
+        ? "Select your delivery address to continue"
+        : "Check payment details and try again";
 
   // Hardcoded image sources
   const tonLogoUrl = "ton.svg";
@@ -34,36 +58,20 @@ export function BuyWithCrypto({
   return (
     <CenterDiv>
       <ButtonBuyTonStyled
-        disabled={
-          !connected ||
-          !sender ||
-          amount === undefined ||
-          amount === null ||
-          amount === "" ||
-          cartItems.length === 0 ||
-          isNaN(parseFloat(amount)) ||
-          parseFloat(amount) <= 0 ||
-          tonRecipient === "" ||
-          tonRecipient === undefined ||
-          tonRecipient === null ||
-          currency === "" ||
-          currency === undefined ||
-          currency === null ||
-          !enabled
-        }
+        disabled={isDisabled}
+        title={isDisabled ? disabledReason : undefined}
         onClick={async () => {
           onClick();
           if (currency === "TON") {
             /// TODO If ok then empty the cart and send the payment snackbar
             try {
               const amountNano = toNano(amount);
-              const message = await sender.send({
+              await sender.send({
                 to: Address.parse(tonRecipient),
                 value: amountNano,
               });
-              console.log("Transaction sent", message);
             } catch (error) {
-              console.log("Transaction failed", error);
+              console.error("Transaction failed", error);
             }
 
             // show snackbar
@@ -85,7 +93,7 @@ export function BuyWithCrypto({
             height: "20px",
           }}
         />
-        Payer {parseFloat(amount).toFixed(2)} {currency}
+        Pay {parseFloat(amount).toFixed(2)} {currency}
       </ButtonBuyTonStyled>
     </CenterDiv>
   );

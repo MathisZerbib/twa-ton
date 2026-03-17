@@ -47,6 +47,7 @@ const TabBtn = styled.button<{ $active: boolean }>`
   align-items: center;
   gap: 3px;
   padding: 10px 0 8px;
+  min-height: 44px;
   border: none;
   background: transparent;
   cursor: pointer;
@@ -55,6 +56,11 @@ const TabBtn = styled.button<{ $active: boolean }>`
   font-weight: ${(p) => (p.$active ? "700" : "500")};
   transition: color 0.2s;
   position: relative;
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
 
   .icon {
     font-size: 1.15rem;

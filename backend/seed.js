@@ -13,8 +13,8 @@ const restaurants = [
     category: 'American',
     description: 'The best gourmet burgers in town, flame-grilled to perfection.',
     merchantWallet: WALLETS[0],
-    lat: 48.8566,
-    lng: 2.3522,
+    lat: 45.916672,
+    lng: 6.86667,
     imageUrl: '/assets/photos/burger.png',
     bannerUrl: '/assets/photos/burger_palace.png',
     products: [
@@ -33,8 +33,8 @@ const restaurants = [
     category: 'Japanese',
     description: 'Fresh, authentic sushi and sashimi prepared by master chefs.',
     merchantWallet: WALLETS[1],
-    lat: 48.8606,
-    lng: 2.3376,
+    lat: 45.916172,
+    lng: 6.86617,
     imageUrl: '/assets/photos/sushi.png',
     bannerUrl: '/assets/photos/sushi_zen.png',
     products: [
@@ -50,8 +50,8 @@ const restaurants = [
     category: 'Italian',
     description: 'Wood-fired Neapolitan pizza made with imported Italian ingredients.',
     merchantWallet: WALLETS[2],
-    lat: 48.8529,
-    lng: 2.3499,
+    lat: 45.916142,
+    lng: 6.86627,
     imageUrl: '/assets/photos/pizza.png',
     bannerUrl: '/assets/photos/pizza_paradiso.png',
     products: [

@@ -26,15 +26,37 @@ const spin = keyframes`to{transform:rotate(360deg)}`;
 // ─── Styled ───────────────────────────────────────────────────────────────────
 
 const Page = styled.div`
-  background: #f7f7f7;
+  background: var(--bg-primary);
   min-height: 100vh;
   padding-bottom: 40px;
 `;
 
 const Content = styled.div`
-  max-width: 600px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 20px 16px;
+  width: 100%;
+
+  /* Full width on mobile */
+  @media (max-width: 480px) {
+    padding: 16px 12px;
+  }
+
+  /* Better padding on larger screens */
+  @media (min-width: 768px) {
+    padding: 24px 20px;
+  }
+`;
+
+const OrdersGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+
+  @media (min-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
 `;
 
 const Title = styled.h1`
@@ -44,7 +66,7 @@ const Title = styled.h1`
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #1a1a1a;
+  color: var(--text-primary);
 `;
 
 const Loader = styled.div`
@@ -52,7 +74,7 @@ const Loader = styled.div`
   justify-content: center;
   align-items: center;
   padding: 60px 0;
-  color: #aaa;
+  color: var(--text-hint);
   font-size: 1.5rem;
 
   svg {
@@ -63,21 +85,21 @@ const Loader = styled.div`
 const EmptyState = styled.div`
   text-align: center;
   padding: 60px 20px;
-  color: #999;
+  color: var(--text-hint);
   animation: ${fadeUp} 0.4s ease;
 `;
 
 const EmptyIcon = styled.div`
   font-size: 3rem;
   margin-bottom: 16px;
-  color: #ddd;
+  color: var(--bg-tertiary);
 `;
 
 const OrderCard = styled.div<{ $delay: number }>`
-  background: #fff;
+  background: var(--bg-secondary);
   border-radius: 18px;
   padding: 18px 20px;
-  margin-bottom: 14px;
+  margin-bottom: 0;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   animation: ${fadeUp} 0.4s ease ${(p) => p.$delay * 0.08}s both;
 `;
@@ -92,7 +114,7 @@ const CardTop = styled.div`
 const OrderId = styled.span`
   font-weight: 800;
   font-size: 0.9rem;
-  color: #1a1a1a;
+  color: var(--text-primary);
 `;
 
 const DeliveredBadge = styled.span`
@@ -102,8 +124,8 @@ const DeliveredBadge = styled.span`
   letter-spacing: 0.5px;
   padding: 4px 10px;
   border-radius: 8px;
-  background: rgba(76, 175, 80, 0.12);
-  color: #2e7d32;
+  background: hsla(var(--hue-success),var(--sat-success),var(--light-success),0.12);
+  color: var(--success-dark);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -111,7 +133,7 @@ const DeliveredBadge = styled.span`
 
 const ItemsList = styled.div`
   font-size: 0.85rem;
-  color: #555;
+  color: var(--text-hint);
   margin-bottom: 10px;
   line-height: 1.5;
 `;
@@ -120,23 +142,29 @@ const CardBottom = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  @media (max-width: 380px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 `;
 
 const TotalPrice = styled.span`
   font-weight: 800;
   font-size: 0.95rem;
-  color: #1a1a1a;
+  color: var(--text-primary);
 `;
 
 const DateLabel = styled.span`
   font-size: 0.78rem;
-  color: #999;
+  color: var(--text-hint);
   font-weight: 600;
 `;
 
 const ReorderBtn = styled.button`
-  background: rgba(255, 107, 53, 0.1);
-  color: #ff6b35;
+  background: hsla(var(--hue-brand),var(--sat-brand),var(--light-brand),0.1);
+  color: var(--accent);
   border: none;
   padding: 8px 14px;
   border-radius: 10px;
@@ -149,7 +177,7 @@ const ReorderBtn = styled.button`
   transition: background 0.15s;
 
   &:hover {
-    background: rgba(255, 107, 53, 0.18);
+    background: hsla(var(--hue-brand),var(--sat-brand),var(--light-brand),0.18);
   }
 `;
 
@@ -177,17 +205,14 @@ const OrderHistoryPage: React.FC = () => {
       setLoading(false);
       return;
     }
-    const minDelay = new Promise(r => setTimeout(r, 1500));
-    Promise.all([
-      api
-        .getOrdersByWallet(wallet)
-        .then((data) => {
-          // Only delivered orders
-          setOrders(data.filter((o) => o.status === "delivered"));
-        })
-        .catch(console.error),
-      minDelay,
-    ]).finally(() => setLoading(false));
+    api
+      .getOrdersByWallet(wallet)
+      .then((data) => {
+        // Only delivered orders
+        setOrders(data.filter((o) => o.status === "delivered"));
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, [wallet]);
 
   return (
@@ -197,9 +222,9 @@ const OrderHistoryPage: React.FC = () => {
         <Title>
           <FontAwesomeIcon
             icon={faClockRotateLeft}
-            style={{ color: "#FF6B35" }}
+            style={{ color: "var(--accent)" }}
           />
-          Order History
+          Past Orders
         </Title>
 
         {loading && (
@@ -211,11 +236,11 @@ const OrderHistoryPage: React.FC = () => {
             <EmptyIcon>
               <FontAwesomeIcon icon={faInbox} />
             </EmptyIcon>
-            <p style={{ fontWeight: 700, fontSize: "1.05rem", color: "#666" }}>
+            <p style={{ fontWeight: 700, fontSize: "1.05rem", color: "var(--text-hint)" }}>
               Connect your wallet
             </p>
             <p style={{ fontSize: "0.85rem" }}>
-              to see your order history
+              to see your past orders.
             </p>
           </EmptyState>
         )}
@@ -225,50 +250,52 @@ const OrderHistoryPage: React.FC = () => {
             <EmptyIcon>
               <FontAwesomeIcon icon={faInbox} />
             </EmptyIcon>
-            <p style={{ fontWeight: 700, fontSize: "1.05rem", color: "#666" }}>
+            <p style={{ fontWeight: 700, fontSize: "1.05rem", color: "var(--text-hint)" }}>
               No past orders yet
             </p>
             <p style={{ fontSize: "0.85rem" }}>
-              Completed orders will appear here
+              Delivered orders will appear here.
             </p>
           </EmptyState>
         )}
 
-        {orders.map((order, i) => (
-          <OrderCard key={order.id} $delay={i}>
-            <CardTop>
-              <OrderId>Order #{order.orderId.slice(-6)}</OrderId>
-              <DeliveredBadge>
-                <FontAwesomeIcon icon={faCheckCircle} />
-                Delivered
-              </DeliveredBadge>
-            </CardTop>
+        <OrdersGrid>
+          {orders.map((order, i) => (
+            <OrderCard key={order.id} $delay={i}>
+              <CardTop>
+                <OrderId>Order #{order.orderId.slice(-6)}</OrderId>
+                <DeliveredBadge>
+                  <FontAwesomeIcon icon={faCheckCircle} />
+                  Delivered
+                </DeliveredBadge>
+              </CardTop>
 
-            <ItemsList>
-              {order.items.map((item, idx) => (
-                <div key={idx}>
-                  {item.qty}× {item.name}
+              <ItemsList>
+                {order.items.map((item, idx) => (
+                  <div key={idx}>
+                    {item.qty}× {item.name}
+                  </div>
+                ))}
+              </ItemsList>
+
+              <CardBottom>
+                <div>
+                  <TotalPrice>
+                    {(order.foodTotalTon + order.deliveryFeeTon).toFixed(2)} TON
+                  </TotalPrice>
+                  <br />
+                  <DateLabel>{formatDate(order.createdAt)}</DateLabel>
                 </div>
-              ))}
-            </ItemsList>
-
-            <CardBottom>
-              <div>
-                <TotalPrice>
-                  {(order.foodTotalTon + order.deliveryFeeTon).toFixed(2)} TON
-                </TotalPrice>
-                <br />
-                <DateLabel>{formatDate(order.createdAt)}</DateLabel>
-              </div>
-              <ReorderBtn
-                onClick={() => navigate(`/store/${order.storeId}`)}
-              >
-                <FontAwesomeIcon icon={faRotateRight} />
-                Reorder
-              </ReorderBtn>
-            </CardBottom>
-          </OrderCard>
-        ))}
+                <ReorderBtn
+                  onClick={() => navigate(`/store/${order.storeId}`)}
+                >
+                  <FontAwesomeIcon icon={faRotateRight} />
+                  Order Again
+                </ReorderBtn>
+              </CardBottom>
+            </OrderCard>
+          ))}
+        </OrdersGrid>
       </Content>
     </Page>
   );

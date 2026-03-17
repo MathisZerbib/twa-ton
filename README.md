@@ -56,9 +56,9 @@ docker compose --profile dev up -d
 ```
 Check the logs of the `tunnel` container to find your temporary public URL:
 ```bash
-docker compose logs tunnel
-```
+docker logs twa-ton-tunnel-1 2>&1 | grep "trycloudflare.com"
 
+```
 ---
 
 ## 📂 Project Structure

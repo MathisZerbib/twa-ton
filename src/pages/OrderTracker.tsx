@@ -22,7 +22,21 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import * as turf from "@turf/turf";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckCircle, faMotorcycle, faUtensils, faBoxOpen, faWifi, faXmarkCircle, faCopy, faCheck, faShareNodes, faFire, faCoins, faLink } from "@fortawesome/free-solid-svg-icons";
+import { 
+  faCheckCircle, 
+  faMotorcycle, 
+  faUtensils, 
+  faBoxOpen, 
+  faWifi, 
+  faXmarkCircle, 
+  faCopy, 
+  faCheck, 
+  faShareNodes, 
+  faFire, 
+  faCoins, 
+  faLink 
+} from "@fortawesome/free-solid-svg-icons";
+import { SkeletonLine, SkeletonBase } from "../components/Skeleton";
 import LoadingAnimation from "../components/LoadingAnimation";
 import { useSocket } from "../hooks/useSocket";
 import { api, BackendOrder } from "../services/api";
@@ -30,7 +44,6 @@ import { useTONEatsEscrow, PROTOCOL_FEE_TON, REFERRER_CASHBACK_PERCENT } from ".
 import { useTonConnect } from "../hooks/useTonConnect";
 
 const BOT_NAME = import.meta.env.VITE_BOT_NAME ?? "YourTONEatsBot";
-
 const MAPBOX_TOKEN = (import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || "") as string;
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
@@ -44,44 +57,63 @@ const bounce = keyframes`0%,100%{transform:translateY(0)}50%{transform:translate
 // ─── Styled ───────────────────────────────────────────────────────────────────
 
 const Page = styled.div`
-  background: #f4f4f4;
+  background: var(--bg-primary);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: background var(--transition-base);
 `;
 
 // ── Status Header ─────────────────────────────────────────────────────────────
 
 const StatusHeader = styled.div<{ $status: string }>`
   background: ${p =>
-        p.$status === 'delivered'
-            ? 'linear-gradient(135deg,#2e7d32,#43a047)'
-            : p.$status === 'picked_up'
-                ? 'linear-gradient(135deg,#1565c0,#1976d2)'
-                : p.$status === 'accepted'
-                    ? 'linear-gradient(135deg,#e65100,#FF6B35)'
-                    : 'linear-gradient(135deg,#1a1a2e,#16213e)'};
+    p.$status === 'delivered'
+        ? 'linear-gradient(135deg, var(--success), #059669)'
+        : p.$status === 'picked_up'
+            ? 'linear-gradient(135deg, #3b82f6, #2563eb)'
+            : p.$status === 'accepted'
+                ? 'linear-gradient(135deg, #f97316, var(--accent))'
+                : 'linear-gradient(135deg, var(--bg-secondary), var(--bg-primary))'};
   color: #fff;
-  padding: 20px 20px 28px;
-  transition: background 0.8s ease;
+  padding: 40px 24px 48px;
+  transition: background 0.8s var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
 `;
 
 const StatusEmoji = styled.div`
-  font-size: 2.4rem;
-  margin-bottom: 8px;
-  animation: ${bounce} 1.5s ease-in-out infinite;
+  font-size: 3.5rem;
+  margin-bottom: 16px;
+  animation: ${bounce} 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
 `;
 
 const StatusTitle = styled.h1`
-  font-size: 1.5rem;
-  font-weight: 900;
-  margin: 0 0 4px;
+  font-size: 2rem;
+  font-weight: 950;
+  margin: 0 0 8px;
+  letter-spacing: -0.04em;
+  color: #fff;
 `;
 
 const StatusSubtitle = styled.p`
-  font-size: 0.88rem;
-  color: rgba(255,255,255,0.75);
+  font-size: 1rem;
+  color: rgba(255,255,255,0.85);
   margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 `;
 
 // ── Steps ─────────────────────────────────────────────────────────────────────
@@ -90,57 +122,112 @@ const StepsRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
-  background: #fff;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  padding: 20px 24px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--bg-tertiary);
+  margin-top: -24px;
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -8px 24px rgba(0,0,0,0.08);
+  position: relative;
+  z-index: 10;
 `;
 
 const StepItem = styled.div<{ $done: boolean; $active: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 10px;
   flex: 1;
 `;
 
 const StepDot = styled.div<{ $done: boolean; $active: boolean }>`
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
-  background: ${p => p.$done ? '#4caf50' : p.$active ? '#FF6B35' : '#e0e0e0'};
-  color: ${p => (p.$done || p.$active) ? '#fff' : '#aaa'};
-  transition: background 0.4s;
-  ${p => p.$active && css`animation: ${pulse} 1.2s ease-in-out infinite;`}
+  font-size: 1rem;
+  background: ${p => p.$done ? 'var(--success)' : p.$active ? 'var(--accent)' : 'var(--bg-tertiary)'};
+  color: ${p => (p.$done || p.$active) ? '#fff' : 'var(--text-hint)'};
+  transition: all var(--transition-base);
+  box-shadow: ${p => (p.$done || p.$active) ? '0 6px 16px hsla(0,0%,0%,0.15)' : 'none'};
+  ${p => p.$active && css`animation: ${pulse} 1.5s var(--transition-smooth) infinite;`}
 `;
 
 const StepLabel = styled.span<{ $done: boolean; $active: boolean }>`
-  font-size: 0.62rem;
-  font-weight: ${p => p.$active ? '700' : '500'};
-  color: ${p => p.$done ? '#4caf50' : p.$active ? '#FF6B35' : '#aaa'};
+  font-size: 0.725rem;
+  font-weight: 900;
+  color: ${p => p.$done ? 'var(--success)' : p.$active ? 'var(--accent)' : 'var(--text-hint)'};
   text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 `;
 
 const StepLine = styled.div<{ $done: boolean }>`
-  flex: 0.5;
+  flex: 0.4;
   height: 2px;
-  background: ${p => p.$done ? '#4caf50' : '#e0e0e0'};
-  transition: background 0.5s;
+  background: ${p => p.$done ? 'var(--success)' : 'var(--bg-tertiary)'};
+  transition: background 0.5s var(--transition-base);
 `;
 
 // ── Map ───────────────────────────────────────────────────────────────────────
 
 const MapContainer = styled.div`
   width: 100%;
-  height: 350px;
+  height: 38vh;
   position: relative;
-  background: #eee;
-  border-top: 1px solid rgba(0,0,0,0.05);
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  background: var(--bg-tertiary);
   overflow: hidden;
+`;
+
+const PendingDispatchState = styled.div`
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+    padding: 28px;
+    background:
+        radial-gradient(circle at top right, hsla(var(--hue-brand), var(--sat-brand), var(--light-brand), 0.12), transparent 48%),
+        linear-gradient(160deg, var(--bg-secondary), var(--bg-primary));
+`;
+
+const DispatchSpinner = styled.div`
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 4px solid var(--accent-soft);
+    border-top-color: var(--accent);
+    animation: ${spin} 1s linear infinite;
+`;
+
+const DispatchTitle = styled.h3`
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+`;
+
+const DispatchSubtitle = styled.p`
+    margin: 0;
+    max-width: 360px;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    font-weight: 600;
+`;
+
+const DispatchHint = styled.p`
+    margin: 4px 0 0;
+    font-size: 0.78rem;
+    color: var(--text-hint);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 `;
 
 const MapInner = styled.div`
@@ -150,107 +237,119 @@ const MapInner = styled.div`
 
 const MapOverlay = styled.div`
   position: absolute;
-  top: 12px;
-  left: 12px;
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(8px);
-  border-radius: 14px;
-  padding: 8px 14px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #1a1a1a;
+  top: 16px;
+  left: 16px;
+  background: hsla(230, 20%, 12%, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 12px 18px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #fff;
   display: flex;
   align-items: center;
-  gap: 6px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-  z-index: 1;
+  gap: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  z-index: 10;
+  border: 1px solid rgba(255,255,255,0.1);
 `;
 
 const LiveDot = styled.div`
-  width: 8px; height: 8px;
+  width: 10px; height: 10px;
   border-radius: 50%;
-  background: #4caf50;
-  animation: ${pulse} 1s ease-in-out infinite;
+  background: var(--success);
+  box-shadow: 0 0 10px var(--success);
+  animation: ${pulse} 1s var(--transition-smooth) infinite;
 `;
 
 // ── Info Panel ────────────────────────────────────────────────────────────────
 
 const InfoPanel = styled.div`
-  background: #fff;
-  padding: 18px 20px;
-  border-top: 1px solid rgba(0,0,0,0.06);
+  background: var(--bg-secondary);
+  padding: 24px;
+  border-top: 1px solid var(--bg-tertiary);
+  flex-grow: 1;
 `;
 
 const ConfirmCodeCard = styled.div`
-  background: linear-gradient(135deg, #1a1a2e, #0f3460);
-  border-radius: 18px;
-  padding: 16px 20px;
-  margin-bottom: 14px;
+  background: radial-gradient(circle at top left, #1a1a2e, #09090b);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  animation: ${fadeUp} 0.4s ease;
+  animation: ${fadeUp} 0.6s var(--transition-smooth);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
 `;
 
 const ConfirmCodeLabel = styled.p`
   font-size: 0.75rem;
-  color: rgba(255,255,255,0.6);
-  margin: 0 0 4px;
+  color: rgba(255,255,255,0.4);
+  margin: 0 0 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 `;
 
 const ConfirmCode = styled.p`
-  font-size: 2rem;
-  font-weight: 900;
-  color: #FFD23F;
+  font-size: 2.4rem;
+  font-weight: 950;
+  color: var(--warning);
   margin: 0;
   letter-spacing: 0.2em;
-  font-family: 'SF Mono', monospace;
+  font-family: 'SF Mono', 'Fira Mono', monospace;
+  text-shadow: 0 0 20px hsla(var(--hue-warning),var(--sat-warning),var(--light-warning),0.4);
 `;
 
 const CopyBtn = styled.button<{ $copied: boolean }>`
-  background: ${p => p.$copied ? 'rgba(76,175,80,0.2)' : 'rgba(255,255,255,0.1)'};
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 10px;
-  padding: 8px 14px;
-  color: ${p => p.$copied ? '#81c784' : 'rgba(255,255,255,0.7)'};
-  font-size: 0.8rem;
-  font-weight: 700;
+  background: ${p => p.$copied ? 'hsla(var(--hue-success),var(--sat-success),var(--light-success),0.15)' : 'rgba(255,255,255,0.05)'};
+  border: 1px solid ${p => p.$copied ? 'hsla(var(--hue-success),var(--sat-success),var(--light-success),0.3)' : 'rgba(255,255,255,0.1)'};
+  border-radius: 14px;
+  padding: 12px 20px;
+  color: ${p => p.$copied ? 'var(--success)' : '#fff'};
+  font-size: 0.9rem;
+  font-weight: 900;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
+  gap: 10px;
+  transition: all var(--transition-base);
+  &:active { transform: scale(0.92); }
 `;
 
 const OrderSummaryRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.85rem;
-  color: #555;
-  padding: 4px 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  padding: 6px 0;
+  font-weight: 600;
 `;
 
 const Divider = styled.hr`
   border: none;
-  border-top: 1px solid rgba(0,0,0,0.07);
-  margin: 10px 0;
+  border-top: 1px solid var(--bg-tertiary);
+  margin: 16px 0;
 `;
 
 // ── Share Card ────────────────────────────────────────────────────────────────
 
 const ShareCard = styled.div`
   position: relative;
-  background: linear-gradient(135deg, #0f0c29, #1a1040, #24243e);
+  background: linear-gradient(135deg, #09090b, #181825);
   color: #fff;
-  border-radius: 24px;
-  padding: 22px;
-  margin-top: 20px;
+  border-radius: 32px;
+  padding: 28px;
+  margin-top: 28px;
   width: 100%;
   text-align: left;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
 
   &::before {
     content: '';
@@ -259,103 +358,113 @@ const ShareCard = styled.div`
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(255, 107, 53, 0.07) 30%,
-      rgba(247, 147, 30, 0.07) 50%,
-      rgba(255, 215, 0, 0.07) 70%,
+      hsla(var(--hue-brand), var(--sat-brand), var(--light-brand), 0.05) 50%,
       transparent 100%
     );
     background-size: 200% 100%;
-    animation: ${shimmer} 3s linear infinite;
+    animation: ${shimmer} 4s linear infinite;
     pointer-events: none;
   }
 `;
 
 const ShareCardGlow = styled.div`
   position: absolute;
-  top: -40px;
-  right: -40px;
-  width: 140px;
-  height: 140px;
-  background: radial-gradient(circle, rgba(255, 107, 53, 0.25) 0%, transparent 70%);
+  top: -80px;
+  right: -80px;
+  /* Responsive glow size: 180px on mobile, 240px on desktop */
+  width: clamp(180px, 60vw, 240px);
+  height: clamp(180px, 60vw, 240px);
+  background: radial-gradient(circle, hsla(var(--hue-brand), var(--sat-brand), var(--light-brand), 0.15) 0%, transparent 70%);
   pointer-events: none;
+
+  @media (max-width: 480px) {
+    width: 200px;
+    height: 200px;
+  }
 `;
 
 const ShareCardHeader = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
 `;
 
 const ShareTitle = styled.p`
-  font-size: 1.05rem;
-  font-weight: 900;
+  font-size: 1.4rem;
+  font-weight: 950;
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  color: #fff;
 `;
 
 const ShareDesc = styled.p`
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   color: rgba(255,255,255,0.65);
-  margin: 0 0 16px;
-  line-height: 1.55;
+  margin: 0 0 24px;
+  line-height: 1.6;
+  font-weight: 500;
 `;
 
 const CashbackBadge = styled.span`
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: linear-gradient(90deg, #FFD700, #FF6B35);
-  color: #fff;
-  font-size: 0.68rem;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--warning), #d97706);
+  color: #000;
+  font-size: 0.75rem;
   font-weight: 900;
   border-radius: 20px;
-  padding: 3px 10px;
-  animation: ${bounce} 2.5s ease-in-out infinite;
+  padding: 5px 14px;
+  animation: ${bounce} 3s var(--transition-smooth) infinite;
   white-space: nowrap;
+  box-shadow: 0 6px 18px hsla(var(--hue-warning),var(--sat-warning),var(--light-warning),0.4);
 `;
 
 const EarningsPill = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 215, 0, 0.1);
-  border: 1px solid rgba(255, 215, 0, 0.25);
-  border-radius: 12px;
-  padding: 8px 12px;
-  margin-bottom: 14px;
-  font-size: 0.8rem;
-  color: rgba(255,255,255,0.85);
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.9);
+  font-weight: 600;
 `;
 
 const EarningsStat = styled.span`
-  font-size: 1rem;
-  font-weight: 900;
-  color: #FFD700;
-  font-family: 'SF Mono', 'Fira Mono', monospace;
+  font-size: 1.2rem;
+  font-weight: 950;
+  color: var(--warning);
+  font-family: 'SF Mono', monospace;
 `;
 
 const ShareBtnRow = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 14px;
 `;
 
 const ShareBtn = styled.button`
   flex: 1;
-  padding: 14px 10px;
-  border-radius: 14px;
+  padding: 18px;
+  border-radius: 18px;
   border: none;
-  background: linear-gradient(135deg, #FF6B35, #F7931E);
+  background: var(--accent);
   color: #fff;
-  font-weight: 800;
-  font-size: 0.9rem;
+  font-weight: 950;
+  font-size: 1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  transition: transform 0.15s, box-shadow 0.15s;
-  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.45);
+  gap: 10px;
+  transition: all var(--transition-base);
+  box-shadow: 0 12px 32px hsla(var(--hue-brand), var(--sat-brand), var(--light-brand), 0.4);
+  letter-spacing: -0.01em;
   &:active { transform: scale(0.96); box-shadow: none; }
 `;
 
@@ -379,15 +488,15 @@ const SpinIcon = styled(FontAwesomeIcon)`animation: ${spin} 1s linear infinite;`
 // ─── Status config ────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<string, { emoji: string; title: string; subtitle: string }> = {
-    pending: { emoji: "👨‍🍳", title: "Preparing your order", subtitle: "The restaurant has received your order" },
-    accepted: { emoji: "🛵", title: "Courier on the way!", subtitle: "Your courier is heading to the restaurant" },
-    picked_up: { emoji: "💨", title: "On the way to you!", subtitle: "Your food is on its way" },
-    delivered: { emoji: "🎉", title: "Delivered!", subtitle: "Enjoy your meal! Funds released on-chain" },
+    pending: { emoji: "👨‍🍳", title: "Preparing your order", subtitle: "The restaurant is preparing your food" },
+    accepted: { emoji: "🛵", title: "Courier assigned", subtitle: "Your courier is heading to the restaurant" },
+    picked_up: { emoji: "💨", title: "On the way", subtitle: "Your courier is on the way to your address" },
+    delivered: { emoji: "🎉", title: "Delivered", subtitle: "Your order was delivered successfully" },
 };
 
 const STEPS = [
     { key: "preparing", label: "Preparing", icon: faUtensils, statuses: ["pending"] },
-    { key: "on_the_way", label: "On the way", icon: faMotorcycle, statuses: ["accepted", "picked_up"] },
+    { key: "on_the_way", label: "On the Way", icon: faMotorcycle, statuses: ["accepted", "picked_up"] },
     { key: "delivered", label: "Delivered", icon: faCheckCircle, statuses: ["delivered"] },
 ];
 
@@ -400,6 +509,19 @@ function stepState(stepStatuses: string[], currentStatus: string) {
     return { done, active };
 }
 
+function deriveEffectiveStatus(status: string, chainStatus: bigint | null): string {
+    const hasOnchainAcceptance = chainStatus !== null && chainStatus >= 1n;
+    const hasOnchainDelivery = chainStatus !== null && chainStatus >= 2n;
+
+    if (["accepted", "picked_up", "delivered"].includes(status) && !hasOnchainAcceptance) {
+        return "pending";
+    }
+    if (status === "delivered" && !hasOnchainDelivery) {
+        return "picked_up";
+    }
+    return status;
+}
+
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface OrderTrackerProps {
@@ -410,7 +532,7 @@ interface OrderTrackerProps {
 
 const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     const { socket } = useSocket();
-    const { confirmDelivery } = useTONEatsEscrow();
+    const { confirmDelivery, getOrderStatus } = useTONEatsEscrow();
     const { wallet } = useTonConnect();
 
     const [order, setOrder] = useState<BackendOrder | null>(null);
@@ -420,6 +542,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     const [copiedLink, setCopiedLink] = useState(false);
     const [courierPos, setCourierPos] = useState<{ lat: number; lng: number } | null>(null);
     const [mapLoaded, setMapLoaded] = useState(false);
+    const [onchainStatus, setOnchainStatus] = useState<bigint | null>(null);
 
     // Map refs
     const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -438,14 +561,40 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
 
     // ── Fetch initial order state ─────────────────────────────────────────────
     useEffect(() => {
-        const minDelay = new Promise(r => setTimeout(r, 1500));
-        Promise.all([
-            api.getOrder(orderId)
-                .then(o => { setOrder(o); if (o.courierLocation) setCourierPos(o.courierLocation); })
-                .catch(e => setError(e.message)),
-            minDelay,
-        ]).finally(() => setLoading(false));
+        setLoading(true);
+        api.getOrder(orderId)
+            .then(o => { 
+                setOrder(o); 
+                if (o.courierLocation) setCourierPos(o.courierLocation); 
+                setLoading(false);
+            })
+            .catch(e => {
+                setError(e.message);
+                setLoading(false);
+            });
     }, [orderId]);
+
+    // ── Poll on-chain escrow status to gate UI progression ─────────────────
+    useEffect(() => {
+        if (!order?.orderId) return;
+
+        let cancelled = false;
+
+        const poll = async () => {
+            const status = await getOrderStatus(order.orderId);
+            if (!cancelled && status !== null) {
+                setOnchainStatus(status);
+            }
+        };
+
+        poll();
+        const id = setInterval(poll, 4000);
+
+        return () => {
+            cancelled = true;
+            clearInterval(id);
+        };
+    }, [order?.orderId]);
 
     // ── Socket.io subscriptions ───────────────────────────────────────────────
     useEffect(() => {
@@ -560,7 +709,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
                     source: 'route-source',
                     layout: { 'line-join': 'round', 'line-cap': 'round' },
                     paint: {
-                        'line-color': '#1a1a2e',
+                        'line-color': 'var(--text-primary)',
                         'line-width': 5,
                         'line-opacity': 0.7,
                     }
@@ -572,7 +721,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
                     source: 'route-source',
                     layout: { 'line-join': 'round', 'line-cap': 'round' },
                     paint: {
-                        'line-color': '#FF6B35',
+                        'line-color': 'var(--accent)',
                         'line-width': 3,
                         'line-dasharray': [2, 2],
                         'line-opacity': 0.5,
@@ -625,7 +774,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
                 source: 'trail-source',
                 layout: { 'line-join': 'round', 'line-cap': 'round' },
                 paint: {
-                    'line-color': '#FF6B35',
+                    'line-color': 'var(--accent)',
                     'line-width': 4,
                     'line-opacity': 0.4,
                     'line-dasharray': [2, 1]
@@ -690,7 +839,8 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading]);
 
-    const showMap = ["accepted", "picked_up"].includes(order?.status ?? "");
+    const effectiveStatusForMap = deriveEffectiveStatus(order?.status ?? "pending", onchainStatus);
+    const showMap = ["accepted", "picked_up"].includes(effectiveStatusForMap);
 
     // ── Handle Map Resizing on show/hide ──
     useEffect(() => {
@@ -759,6 +909,8 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     const handleCopyCode = () => {
         if (!order) return;
         navigator.clipboard?.writeText(order.confirmCode).then(() => {
+            const tg = (window as any).Telegram?.WebApp;
+            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         });
@@ -800,17 +952,19 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
     );
     if (error || !order) return (
         <Centered>
-            <FontAwesomeIcon icon={faXmarkCircle} style={{ fontSize: "2.5rem", color: "#f44336" }} />
-            <p>{error ?? "Order not found"}</p>
+            <FontAwesomeIcon icon={faXmarkCircle} style={{ fontSize: "2.5rem", color: "var(--error, #f44336)" }} />
+            <p>{error ?? "We couldn't find this order"}</p>
         </Centered>
     );
 
-    const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending;
+    const effectiveStatus = deriveEffectiveStatus(order.status, onchainStatus);
+
+    const cfg = STATUS_CONFIG[effectiveStatus] ?? STATUS_CONFIG.pending;
 
     return (
         <Page>
             {/* ── Status Header ── */}
-            <StatusHeader $status={order.status}>
+            <StatusHeader $status={effectiveStatus}>
                 <StatusEmoji>{cfg.emoji}</StatusEmoji>
                 <StatusTitle>{cfg.title}</StatusTitle>
                 <StatusSubtitle>{cfg.subtitle}</StatusSubtitle>
@@ -819,7 +973,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
             {/* ── Progress Steps ── */}
             <StepsRow>
                 {STEPS.map((step, i) => {
-                    const { done, active } = stepState(step.statuses, order.status);
+                    const { done, active } = stepState(step.statuses, effectiveStatus);
                     return (
                         <React.Fragment key={step.key}>
                             <StepItem $done={done} $active={active}>
@@ -836,29 +990,42 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
                 })}
             </StepsRow>
 
-            {/* ── Live Map ── */}
+            {/* ── Live Map / Pending Dispatch State ── */}
             <MapContainer style={{ display: order ? "block" : "none" }}>
-                {!mapboxgl.accessToken && (
-                    <div style={{ position: 'absolute', inset: 0, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontSize: '0.8rem', padding: 20, textAlign: 'center', zIndex: 10 }}>
-                        ⚠️ Mapbox Token Missing. Please check VITE_MAPBOX_ACCESS_TOKEN.
-                    </div>
+                {effectiveStatus === "pending" ? (
+                    <PendingDispatchState>
+                        <DispatchSpinner />
+                        <DispatchTitle>Finding your courier</DispatchTitle>
+                        <DispatchSubtitle>
+                            Your order is being prepared and nearby couriers are receiving this request now.
+                        </DispatchSubtitle>
+                        <DispatchHint>
+                            Live tracking starts after courier acceptance is confirmed on TON
+                        </DispatchHint>
+                    </PendingDispatchState>
+                ) : (
+                    <>
+                        {!mapboxgl.accessToken && (
+                            <div style={{ position: 'absolute', inset: 0, background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '0.8rem', padding: 20, textAlign: 'center', zIndex: 10 }}>
+                                ⚠️ Mapbox Token Missing. Please check VITE_MAPBOX_ACCESS_TOKEN.
+                            </div>
+                        )}
+                        <MapInner ref={mapContainerRef} />
+                        <MapOverlay>
+                            {effectiveStatus === 'delivered' ? (
+                                <><FontAwesomeIcon icon={faCheckCircle} style={{ color: '#4caf50' }} /> Order delivered successfully</>
+                            ) : effectiveStatus === 'accepted' || effectiveStatus === 'picked_up' ? (
+                                courierPos ? (
+                                    <><LiveDot /> Courier location · live</>
+                                ) : (
+                                    <><FontAwesomeIcon icon={faWifi} /> Finding your courier location...</>
+                                )
+                            ) : (
+                                <><FontAwesomeIcon icon={faWifi} /> Waiting for order updates...</>
+                            )}
+                        </MapOverlay>
+                    </>
                 )}
-                <MapInner ref={mapContainerRef} />
-                <MapOverlay>
-                    {order?.status === 'delivered' ? (
-                        <><FontAwesomeIcon icon={faCheckCircle} style={{ color: '#4caf50' }} /> Order delivered successfully</>
-                    ) : order?.status === 'pending' ? (
-                        <><FontAwesomeIcon icon={faUtensils} style={{ color: '#FF6B35' }} /> Restaurant is preparing your food</>
-                    ) : order?.status === 'accepted' || order?.status === 'picked_up' ? (
-                        courierPos ? (
-                            <><LiveDot /> Courier location · live</>
-                        ) : (
-                            <><FontAwesomeIcon icon={faWifi} /> Finding courier location...</>
-                        )
-                    ) : (
-                        <><FontAwesomeIcon icon={faWifi} /> Waiting for update...</>
-                    )}
-                </MapOverlay>
             </MapContainer>
 
             {/* ── Info Panel ── */}
@@ -874,7 +1041,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
                     </div>
                     <CopyBtn $copied={copied} onClick={handleCopyCode}>
                         <FontAwesomeIcon icon={copied ? faCheck : faCopy} />
-                        {copied ? "Copied" : "Copy"}
+                        {copied ? "Copied" : "Copy Code"}
                     </CopyBtn>
                 </ConfirmCodeCard>
 
@@ -897,7 +1064,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
                 ))}
                 <Divider />
                 <OrderSummaryRow>
-                    <span style={{ color: "#aaa", fontSize: "0.78rem" }}>
+                    <span style={{ color: "var(--text-hint)", fontSize: "0.78rem" }}>
                         🔒 Payment locked in escrow — released on delivery confirmation
                     </span>
                 </OrderSummaryRow>
@@ -905,7 +1072,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
                 <ShareCard>
                     <ShareCardGlow />
                     <ShareCardHeader>
-                        <ShareTitle>💸 Earn Crypto with every share</ShareTitle>
+                        <ShareTitle>💸 Earn TON when you share</ShareTitle>
                         <CashbackBadge>
                             <FontAwesomeIcon icon={faFire} />
                             5% CASHBACK
@@ -913,9 +1080,8 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
                     </ShareCardHeader>
 
                     <ShareDesc>
-                        Send your link to friends. Every time they place an order,
-                        <strong style={{ color: '#FFD700' }}> {referrerCashback} TON</strong> lands
-                        directly in your wallet — on-chain, automatic, trustless.
+                        Share your link with friends. Each delivered order earns you
+                        <strong style={{ color: '#FFD700' }}> {referrerCashback} TON</strong> directly in your wallet.
                     </ShareDesc>
 
                     {referralCount > 0 && (
@@ -935,7 +1101,7 @@ const OrderTracker: React.FC<OrderTrackerProps> = ({ orderId }) => {
                         </ShareBtn>
                         <CopyBtn $copied={copiedLink} onClick={handleCopyLink} style={{ flex: "0.4" }}>
                             <FontAwesomeIcon icon={copiedLink ? faCheck : faCopy} />
-                            {copiedLink ? "Copied" : "Copy"}
+                            {copiedLink ? "Copied" : "Copy Link"}
                         </CopyBtn>
                     </ShareBtnRow>
                 </ShareCard>

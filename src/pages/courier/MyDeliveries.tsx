@@ -30,8 +30,24 @@ const fadeUp = keyframes`from{opacity:0;transform:translateY(12px)}to{opacity:1;
 const spin = keyframes`to{transform:rotate(360deg)}`;
 
 const Container = styled.div`
+  max-width: 1080px;
+  margin: 0 auto;
+  width: 100%;
   padding: 14px;
   padding-bottom: 100px;
+
+  @media (max-width: 480px) {
+    padding: 12px;
+    padding-bottom: 96px;
+  }
+
+  @media (min-width: 768px) {
+    padding: 18px 20px 110px;
+  }
+`;
+
+const Section = styled.section`
+  margin-bottom: 18px;
 `;
 
 const SectionLabel = styled.div`
@@ -47,9 +63,20 @@ const Card = styled.div<{ $delay: number }>`
   background: #fff;
   border-radius: 16px;
   padding: 14px 16px;
-  margin-bottom: 10px;
+  margin-bottom: 0;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   animation: ${fadeUp} 0.3s ease ${(p) => p.$delay * 0.05}s both;
+`;
+
+const CardsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+
+  @media (min-width: 860px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
 `;
 
 const CardRow = styled.div`
@@ -93,6 +120,7 @@ const ResumeBtn = styled.button`
   border: none;
   color: #fff;
   padding: 8px 14px;
+  min-height: 44px;
   border-radius: 10px;
   font-size: 0.78rem;
   font-weight: 700;
@@ -102,6 +130,12 @@ const ResumeBtn = styled.button`
   align-items: center;
   gap: 5px;
   box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
   &:active {
     transform: scale(0.96);
   }
@@ -181,15 +215,19 @@ function statusLabel(status: string): string {
 const MyDeliveries: React.FC<Props> = ({ courierWallet, onResumeDelivery }) => {
   const [orders, setOrders] = useState<BackendOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
+        setLoadError(null);
         const data = await api.getCourierOrders(courierWallet);
         if (!cancelled) setOrders(data);
       } catch (e) {
-        console.error("Failed to fetch courier orders:", e);
+        if (!cancelled) {
+          setLoadError("Could not load your deliveries right now. Pull to refresh or try again shortly.");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -204,6 +242,16 @@ const MyDeliveries: React.FC<Props> = ({ courierWallet, onResumeDelivery }) => {
       <Center>
         <SpinIcon icon={faSpinner} />
         <p style={{ fontSize: "0.85rem", margin: 0 }}>Loading your deliveries…</p>
+      </Center>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <Center>
+        <FontAwesomeIcon icon={faClock} style={{ fontSize: "2rem", opacity: 0.35 }} />
+        <p style={{ fontWeight: 700, fontSize: "0.95rem", margin: 0 }}>Delivery history unavailable</p>
+        <p style={{ maxWidth: 320, lineHeight: 1.5, margin: 0, fontSize: "0.82rem" }}>{loadError}</p>
       </Center>
     );
   }
@@ -236,69 +284,73 @@ const MyDeliveries: React.FC<Props> = ({ courierWallet, onResumeDelivery }) => {
     <Container>
       {/* Active */}
       {active.length > 0 && (
-        <>
+        <Section>
           <SectionLabel>
             <FontAwesomeIcon icon={faMotorcycle} style={{ marginRight: 6 }} />
             Active ({active.length})
           </SectionLabel>
-          {active.map((order, i) => (
-            <Card key={order.id} $delay={i}>
-              <CardRow>
-                <OrderInfo>
-                  <OrderTitle>Order #{order.orderId.slice(-6)}</OrderTitle>
-                  <OrderSub>
-                    <FontAwesomeIcon icon={faLocationDot} style={{ marginRight: 4 }} />
-                    {order.deliveryAddress}
-                  </OrderSub>
-                </OrderInfo>
-                <StatusBadge $color={statusColor(order.status)}>
-                  {statusLabel(order.status)}
-                </StatusBadge>
-              </CardRow>
-              <EarnChip>
-                +{order.deliveryFeeTon.toFixed(3)} TON
-              </EarnChip>
-              <ResumeBtn onClick={() => onResumeDelivery(order)}>
-                <FontAwesomeIcon icon={faArrowRight} />
-                Resume delivery
-              </ResumeBtn>
-            </Card>
-          ))}
-        </>
+          <CardsGrid>
+            {active.map((order, i) => (
+              <Card key={order.id} $delay={i}>
+                <CardRow>
+                  <OrderInfo>
+                    <OrderTitle>Order #{order.orderId.slice(-6)}</OrderTitle>
+                    <OrderSub>
+                      <FontAwesomeIcon icon={faLocationDot} style={{ marginRight: 4 }} />
+                      {order.deliveryAddress}
+                    </OrderSub>
+                  </OrderInfo>
+                  <StatusBadge $color={statusColor(order.status)}>
+                    {statusLabel(order.status)}
+                  </StatusBadge>
+                </CardRow>
+                <EarnChip>
+                  +{order.deliveryFeeTon.toFixed(3)} TON
+                </EarnChip>
+                <ResumeBtn onClick={() => onResumeDelivery(order)}>
+                  <FontAwesomeIcon icon={faArrowRight} />
+                  Resume delivery
+                </ResumeBtn>
+              </Card>
+            ))}
+          </CardsGrid>
+        </Section>
       )}
 
       {/* Completed */}
       {completed.length > 0 && (
-        <>
+        <Section>
           <SectionLabel>
             <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: 6 }} />
             Completed ({completed.length})
           </SectionLabel>
-          {completed.map((order, i) => (
-            <Card key={order.id} $delay={i + active.length}>
-              <CardRow>
-                <OrderInfo>
-                  <OrderTitle>Order #{order.orderId.slice(-6)}</OrderTitle>
-                  <OrderSub>
-                    <FontAwesomeIcon icon={faLocationDot} style={{ marginRight: 4 }} />
-                    {order.deliveryAddress}
-                  </OrderSub>
-                  <OrderSub>
-                    <FontAwesomeIcon icon={faClock} style={{ marginRight: 4 }} />
-                    {formatTime(order.updatedAt)}
-                  </OrderSub>
-                </OrderInfo>
-                <StatusBadge $color={statusColor(order.status)}>
-                  {statusLabel(order.status)}
-                </StatusBadge>
-              </CardRow>
-              <EarnChip>
-                {order.status === "delivered" ? "+" : ""}
-                {order.deliveryFeeTon.toFixed(3)} TON
-              </EarnChip>
-            </Card>
-          ))}
-        </>
+          <CardsGrid>
+            {completed.map((order, i) => (
+              <Card key={order.id} $delay={i + active.length}>
+                <CardRow>
+                  <OrderInfo>
+                    <OrderTitle>Order #{order.orderId.slice(-6)}</OrderTitle>
+                    <OrderSub>
+                      <FontAwesomeIcon icon={faLocationDot} style={{ marginRight: 4 }} />
+                      {order.deliveryAddress}
+                    </OrderSub>
+                    <OrderSub>
+                      <FontAwesomeIcon icon={faClock} style={{ marginRight: 4 }} />
+                      {formatTime(order.updatedAt)}
+                    </OrderSub>
+                  </OrderInfo>
+                  <StatusBadge $color={statusColor(order.status)}>
+                    {statusLabel(order.status)}
+                  </StatusBadge>
+                </CardRow>
+                <EarnChip>
+                  {order.status === "delivered" ? "+" : ""}
+                  {order.deliveryFeeTon.toFixed(3)} TON
+                </EarnChip>
+              </Card>
+            ))}
+          </CardsGrid>
+        </Section>
       )}
     </Container>
   );

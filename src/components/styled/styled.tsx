@@ -14,26 +14,24 @@ declare module "styled-components" {
 }
 
 export const Card = styled.div`
-  padding: 10px 20px;
-  border-radius: 8px;
-  background-color: var(--tg-theme-text-color);
-
-  @media (prefers-color-scheme: dark) {
-    background-color: #111;
-  }
+  padding: 16px 24px;
+  border-radius: var(--card-radius);
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
 `;
 
 export const FlexBoxRow = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
 `;
 
 export const FlexBoxRowSpaceBetween = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
 `;
@@ -41,19 +39,40 @@ export const FlexBoxRowSpaceBetween = styled.div`
 export const FlexBoxCol = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 `;
 
 export const Button = styled.button`
-  background-color: ${(props) =>
-    props.disabled ? "#6e6e6e" : "var(--tg-theme-button-color)"};
+  background: ${(props) =>
+    props.disabled ? "var(--text-hint)" : "var(--accent)"};
   border: 0;
-  border-radius: 8px;
-  padding: 10px 20px;
-  color: var(--tg-theme-button-text-color);
+  border-radius: var(--btn-radius);
+  padding: 12px 24px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
   font-weight: 700;
   cursor: pointer;
+  transition: all var(--transition-fast);
   pointer-events: ${(props) => (props.disabled ? "none" : "inherit")};
+  
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  
+  &:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    &:active:not(:disabled) {
+      transform: none;
+    }
+  }
 `;
 
 export const Ellipsis = styled.div`
@@ -63,13 +82,33 @@ export const Ellipsis = styled.div`
 `;
 
 export const Input = styled("input")`
-  padding: 10px 20px;
-  border-radius: 10px;
+  padding: 12px 20px;
+  border-radius: 12px;
   width: 100%;
-  border: 1px solid #c2c2c2;
-
-  @media (prefers-color-scheme: dark) {
-    border: 1px solid #fefefe;
+  border: 1.5px solid var(--bg-tertiary);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: border-color var(--transition-fast);
+  font-family: inherit;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-color: var(--accent);
+  }
+  
+  &:invalid {
+    border-color: var(--error);
+  }
+  
+  &[aria-invalid="true"] {
+    border-color: var(--error);
   }
 `;
 
@@ -79,37 +118,35 @@ export const AddToCartButtonCard = styled(Button)`
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 10px 20px;
-  background-color: #000;
+  padding: 12px 20px;
+  min-height: 44px;
+  background-color: var(--accent);
   color: #fff;
   border: none;
   border-radius: 10px;
   cursor: pointer;
   font-size: 16px;
+  font-weight: 700;
   transition: all 0.3s;
-  &:hover {
-    background-color: #333;
-    &::after {
-      content: "Add to Cart";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: rgba(255, 255, 255, 0.9);
-      color: #000;
-      font-size: 14px;
-    }
+  
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  
+  &:hover:not(:disabled) {
+    background-color: var(--accent-dark);
   }
 
   &:disabled {
-    background-color: #ccc;
+    background-color: var(--bg-tertiary);
     cursor: not-allowed;
+    opacity: 0.6;
   }
-  animation: fadeIn 0.5s;
+  
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 export const HeaderWrapper = styled.div`
@@ -174,20 +211,30 @@ export const ButtonBuyTonStyled = styled(Button)`
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 10px 20px;
-  background-color: #000;
+  padding: 12px 20px;
+  background-color: var(--accent);
   color: #fff;
   border: none;
   border-radius: 10px;
   cursor: pointer;
   font-size: 16px;
+  font-weight: 700;
   transition: all 0.3s;
+  
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
 
   &:disabled {
-    background-color: #ccc;
+    background-color: var(--bg-tertiary);
     cursor: not-allowed;
+    opacity: 0.6;
   }
-  animation: fadeIn 0.5s;
+  
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 export const Chip = styled.span`
@@ -290,14 +337,35 @@ export const CartItemStyled = styled.div`
 `;
 
 export const CheckoutButton = styled.button`
-  padding: 10px 20px;
+  padding: 12px 20px;
+  min-height: 44px;
   margin-top: 20px;
   background-color: var(--tg-theme-button-color);
   color: var(--tg-theme-button-text-color);
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  &:hover {
+  font-weight: 700;
+  transition: all var(--transition-fast);
+  
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  
+  &:hover:not(:disabled) {
     background-color: #0056b3;
+    transform: translateY(-2px);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    &:hover:not(:disabled) {
+      transform: none;
+    }
   }
 `;

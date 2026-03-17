@@ -12,18 +12,21 @@
  *   "courier"                  → opens the courier app directly
  */
 
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useParams, useNavigate } from "react-router-dom";
 import styled, { ThemeProvider as StyledThemeProvider } from "styled-components";
 import { ThemeContext, ThemeProvider } from "./contexts/theme";
-import Shop from "./pages/Shop";
-import CourierApp from "./pages/courier/CourierApp";
-import OrderTracker from "./pages/OrderTracker";
-import DiscoveryPage from "./pages/DiscoveryPage";
-import MerchantOnboarding from "./pages/MerchantOnboarding";
-import MyOrdersPage from "./pages/MyOrdersPage";
-import OrderHistoryPage from "./pages/OrderHistoryPage";
-import SuperAdminDashboard from "./pages/SuperAdminDashboard";
+import LoadingAnimation from "./components/LoadingAnimation";
+import ErrorBoundary from "./components/ErrorBoundary";
+
+const Shop = lazy(() => import("./pages/Shop"));
+const CourierApp = lazy(() => import("./pages/courier/CourierApp"));
+const OrderTracker = lazy(() => import("./pages/OrderTracker"));
+const DiscoveryPage = lazy(() => import("./pages/DiscoveryPage"));
+const MerchantOnboarding = lazy(() => import("./pages/MerchantOnboarding"));
+const MyOrdersPage = lazy(() => import("./pages/MyOrdersPage"));
+const OrderHistoryPage = lazy(() => import("./pages/OrderHistoryPage"));
+const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 
 // ─── Deep-link Parser ─────────────────────────────────────────────────────────
 
@@ -106,33 +109,37 @@ function InnerApp() {
   return (
     <StyledThemeProvider
       theme={{
-        bgColor: themeMode === "light" ? "#f7f7f7" : "#1a1a2e",
-        textColor: themeMode === "light" ? "#1a1a1a" : "#f0f0f0",
-        buttonColor: "#FF6B35",
+        bgColor: "var(--bg-primary)",
+        textColor: "var(--text-primary)",
+        buttonColor: "var(--accent)",
         buttonText: "#ffffff",
-        darkBgColor: "#1a1a2e",
-        darkTextColor: "#f0f0f0",
+        darkBgColor: "var(--bg-primary)",
+        darkTextColor: "var(--text-primary)",
       }}
     >
       <AppContainer className={`app ${themeMode}`}>
-        <Routes>
-          <Route path="/" element={<RootRouter />} />
-          {/* ── Customer App ── */}
-          <Route path="/explore" element={<DiscoveryPage />} />
-          <Route path="/store/:storeId" element={<Shop />} />
-          <Route path="/track/:orderId" element={<TrackPage />} />
-          {/* ── Courier App ── */}
-          <Route path="/courier" element={<CourierApp />} />
-          {/* ── Merchant App ── */}
-          <Route path="/merchant/onboard" element={<MerchantOnboarding />} />
-          {/* ── User Orders ── */}
-          <Route path="/my-orders" element={<MyOrdersPage />} />
-          <Route path="/order-history" element={<OrderHistoryPage />} />
-          {/* ── Admin ── */}
-          <Route path="/admin" element={<SuperAdminDashboard />} />
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingAnimation />}>
+            <Routes>
+            <Route path="/" element={<RootRouter />} />
+            {/* ── Customer App ── */}
+            <Route path="/explore" element={<DiscoveryPage />} />
+            <Route path="/store/:storeId" element={<Shop />} />
+            <Route path="/track/:orderId" element={<TrackPage />} />
+            {/* ── Courier App ── */}
+            <Route path="/courier" element={<CourierApp />} />
+            {/* ── Merchant App ── */}
+            <Route path="/merchant/onboard" element={<MerchantOnboarding />} />
+            {/* ── User Orders ── */}
+            <Route path="/my-orders" element={<MyOrdersPage />} />
+            <Route path="/order-history" element={<OrderHistoryPage />} />
+            {/* ── Admin ── */}
+            <Route path="/admin" element={<SuperAdminDashboard />} />
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </AppContainer>
     </StyledThemeProvider>
   );

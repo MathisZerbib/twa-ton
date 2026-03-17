@@ -91,8 +91,8 @@ const TopBar = styled.div`
 `;
 
 const BackBtn = styled.button`
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.92);
@@ -104,6 +104,14 @@ const BackBtn = styled.button`
   font-size: 0.95rem;
   color: #1a1a1a;
   cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
   &:active {
     transform: scale(0.92);
   }
@@ -215,6 +223,7 @@ const NavBtn = styled.button`
   border: none;
   color: #fff;
   padding: 8px 14px;
+  min-height: 44px;
   border-radius: 10px;
   font-size: 0.78rem;
   font-weight: 700;
@@ -224,6 +233,12 @@ const NavBtn = styled.button`
   gap: 5px;
   box-shadow: 0 2px 8px rgba(66, 133, 244, 0.35);
   flex-shrink: 0;
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
   &:active {
     transform: scale(0.95);
   }
@@ -381,6 +396,7 @@ const ActiveDelivery: React.FC<Props> = ({
   const [codeInput, setCodeInput] = useState("");
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState<string | null>(null);
+  const [pickupError, setPickupError] = useState<string | null>(null);
   const [delivered, setDelivered] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
@@ -423,10 +439,11 @@ const ActiveDelivery: React.FC<Props> = ({
   // Pickup swipe handler
   const handlePickupSwipe = useCallback(async () => {
     setPickingUp(true);
+    setPickupError(null);
     try {
       await onPickup();
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      setPickupError(e.message ?? "Could not mark pickup. Please try again.");
     } finally {
       setPickingUp(false);
     }
@@ -577,6 +594,7 @@ const ActiveDelivery: React.FC<Props> = ({
                 loading={pickingUp}
                 icon={faBagShopping}
               />
+              {pickupError && <ErrorMsg>❌ {pickupError}</ErrorMsg>}
             </Section>
 
             {/* Expandable order details */}
@@ -638,6 +656,7 @@ const ActiveDelivery: React.FC<Props> = ({
                   type="number"
                   inputMode="numeric"
                   maxLength={4}
+                  aria-label="Customer delivery confirmation code"
                   placeholder="• • • •"
                   value={codeInput}
                   onChange={(e) => {

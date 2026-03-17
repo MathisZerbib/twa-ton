@@ -25,20 +25,41 @@ import { useTonConnect } from "../hooks/useTonConnect";
 
 // ─── Animations ───────────────────────────────────────────────────────────────
 const fadeUp = keyframes`from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}`;
-const spin = keyframes`to{transform:rotate(360deg)}`;
 
 // ─── Styled ───────────────────────────────────────────────────────────────────
 
 const Page = styled.div`
-  background: #f7f7f7;
+  background: var(--bg-primary);
   min-height: 100vh;
   padding-bottom: 40px;
 `;
 
 const Content = styled.div`
-  max-width: 600px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 20px 16px;
+  width: 100%;
+
+  /* Full width on mobile */
+  @media (max-width: 480px) {
+    padding: 16px 12px;
+  }
+
+  /* Better padding on larger screens */
+  @media (min-width: 768px) {
+    padding: 24px 20px;
+  }
+`;
+
+const OrdersGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+
+  @media (min-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
 `;
 
 const Title = styled.h1`
@@ -48,40 +69,27 @@ const Title = styled.h1`
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #1a1a1a;
-`;
-
-const Loader = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 60px 0;
-  color: #aaa;
-  font-size: 1.5rem;
-
-  svg {
-    animation: ${spin} 1s linear infinite;
-  }
+  color: var(--text-primary);
 `;
 
 const EmptyState = styled.div`
   text-align: center;
   padding: 60px 20px;
-  color: #999;
+  color: var(--text-hint);
   animation: ${fadeUp} 0.4s ease;
 `;
 
 const EmptyIcon = styled.div`
   font-size: 3rem;
   margin-bottom: 16px;
-  color: #ddd;
+  color: var(--bg-tertiary);
 `;
 
 const OrderCard = styled.div<{ $delay: number }>`
-  background: #fff;
+  background: var(--bg-secondary);
   border-radius: 18px;
   padding: 18px 20px;
-  margin-bottom: 14px;
+  margin-bottom: 0;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   cursor: pointer;
   animation: ${fadeUp} 0.4s ease ${(p) => p.$delay * 0.08}s both;
@@ -103,7 +111,12 @@ const CardTop = styled.div`
 const OrderId = styled.span`
   font-weight: 800;
   font-size: 0.9rem;
-  color: #1a1a1a;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+  display: inline-block;
 `;
 
 const StatusBadge = styled.span<{ $status: string }>`
@@ -111,7 +124,7 @@ const StatusBadge = styled.span<{ $status: string }>`
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 8px;
   background: ${(p) =>
     p.$status === "pending"
@@ -121,33 +134,52 @@ const StatusBadge = styled.span<{ $status: string }>`
         : "rgba(76,175,80,0.12)"};
   color: ${(p) =>
     p.$status === "pending"
-      ? "#e65100"
+      ? "var(--accent-dark)"
       : p.$status === "accepted"
-        ? "#1565c0"
-        : "#2e7d32"};
+        ? "var(--info-dark)"
+        : "var(--success-dark)"};
+  border: 1px solid ${(p) =>
+    p.$status === "pending"
+      ? "rgba(255,152,0,0.2)"
+      : p.$status === "accepted"
+        ? "rgba(33,150,243,0.2)"
+        : "rgba(76,175,80,0.2)"};
+  white-space: nowrap;
+  flex-shrink: 0;
 `;
 
 const ItemsList = styled.div`
   font-size: 0.85rem;
-  color: #555;
+  color: var(--text-secondary);
   margin-bottom: 10px;
   line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
 `;
 
 const CardBottom = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  @media (max-width: 380px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 `;
 
 const TotalPrice = styled.span`
   font-weight: 800;
   font-size: 0.95rem;
-  color: #1a1a1a;
+  color: var(--text-primary);
 `;
 
 const TrackBtn = styled.span`
-  color: #ff6b35;
+  color: var(--accent);
   font-weight: 700;
   font-size: 0.85rem;
   display: flex;
@@ -175,7 +207,7 @@ const statusLabel = (status: string) => {
     case "accepted":
       return "Courier assigned";
     case "picked_up":
-      return "On the way";
+      return "Out for delivery";
     default:
       return status;
   }
@@ -194,17 +226,14 @@ const MyOrdersPage: React.FC = () => {
       setLoading(false);
       return;
     }
-    const minDelay = new Promise(r => setTimeout(r, 1500));
-    Promise.all([
-      api
-        .getOrdersByWallet(wallet)
-        .then((data) => {
-          // Only active orders (not delivered)
-          setOrders(data.filter((o) => o.status !== "delivered"));
-        })
-        .catch(console.error),
-      minDelay,
-    ]).finally(() => setLoading(false));
+    api
+      .getOrdersByWallet(wallet)
+      .then((data) => {
+        // Only active orders (not delivered)
+        setOrders(data.filter((o) => o.status !== "delivered"));
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, [wallet]);
 
   return (
@@ -212,8 +241,8 @@ const MyOrdersPage: React.FC = () => {
       <Header showConnectButton />
       <Content>
         <Title>
-          <FontAwesomeIcon icon={faReceipt} style={{ color: "#FF6B35" }} />
-          My Orders
+          <FontAwesomeIcon icon={faReceipt} style={{ color: "var(--accent)" }} />
+          Active Orders
         </Title>
 
         {loading && (
@@ -225,11 +254,11 @@ const MyOrdersPage: React.FC = () => {
             <EmptyIcon>
               <FontAwesomeIcon icon={faInbox} />
             </EmptyIcon>
-            <p style={{ fontWeight: 700, fontSize: "1.05rem", color: "#666" }}>
+            <p style={{ fontWeight: 700, fontSize: "1.05rem", color: "var(--text-secondary)" }}>
               Connect your wallet
             </p>
             <p style={{ fontSize: "0.85rem" }}>
-              to see your active orders
+              to see your active orders.
             </p>
           </EmptyState>
         )}
@@ -239,52 +268,54 @@ const MyOrdersPage: React.FC = () => {
             <EmptyIcon>
               <FontAwesomeIcon icon={faInbox} />
             </EmptyIcon>
-            <p style={{ fontWeight: 700, fontSize: "1.05rem", color: "#666" }}>
+            <p style={{ fontWeight: 700, fontSize: "1.05rem", color: "var(--text-secondary)" }}>
               No active orders
             </p>
             <p style={{ fontSize: "0.85rem" }}>
-              Your current orders will appear here
+              Your active deliveries will appear here.
             </p>
           </EmptyState>
         )}
 
-        {orders.map((order, i) => (
-          <OrderCard
-            key={order.id}
-            $delay={i}
-            onClick={() => navigate(`/track/${order.id}`)}
-          >
-            <CardTop>
-              <OrderId>
-                <FontAwesomeIcon
-                  icon={statusIcon(order.status)}
-                  style={{ marginRight: 8, color: "#FF6B35" }}
-                />
-                Order #{order.orderId.slice(-6)}
-              </OrderId>
-              <StatusBadge $status={order.status}>
-                {statusLabel(order.status)}
-              </StatusBadge>
-            </CardTop>
+        <OrdersGrid>
+          {orders.map((order, i) => (
+            <OrderCard
+              key={order.id}
+              $delay={i}
+              onClick={() => navigate(`/track/${order.id}`)}
+            >
+              <CardTop>
+                <OrderId>
+                  <FontAwesomeIcon
+                    icon={statusIcon(order.status)}
+                    style={{ marginRight: 8, color: "var(--accent)" }}
+                  />
+                  Order #{order.orderId.slice(-6)}
+                </OrderId>
+                <StatusBadge $status={order.status}>
+                  {statusLabel(order.status)}
+                </StatusBadge>
+              </CardTop>
 
-            <ItemsList>
-              {order.items.map((item, idx) => (
-                <div key={idx}>
-                  {item.qty}× {item.name}
-                </div>
-              ))}
-            </ItemsList>
+              <ItemsList>
+                {order.items.map((item, idx) => (
+                  <div key={idx}>
+                    {item.qty}× {item.name}
+                  </div>
+                ))}
+              </ItemsList>
 
-            <CardBottom>
-              <TotalPrice>
-                {(order.foodTotalTon + order.deliveryFeeTon).toFixed(2)} TON
-              </TotalPrice>
-              <TrackBtn>
-                Track <FontAwesomeIcon icon={faArrowRight} />
-              </TrackBtn>
-            </CardBottom>
-          </OrderCard>
-        ))}
+              <CardBottom>
+                <TotalPrice>
+                  {(order.foodTotalTon + order.deliveryFeeTon).toFixed(2)} TON
+                </TotalPrice>
+                <TrackBtn>
+                  Track order <FontAwesomeIcon icon={faArrowRight} />
+                </TrackBtn>
+              </CardBottom>
+            </OrderCard>
+          ))}
+        </OrdersGrid>
       </Content>
     </Page>
   );

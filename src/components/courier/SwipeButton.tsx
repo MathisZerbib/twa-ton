@@ -52,6 +52,11 @@ const Track = styled.div<{ $color: string; $disabled: boolean }>`
   box-shadow: ${(p) =>
     p.$disabled ? "none" : `0 4px 18px ${p.$color}55`};
   transition: box-shadow 0.3s;
+
+  &:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+  }
 `;
 
 const Label = styled.span<{ $visible: boolean }>`
@@ -165,6 +170,14 @@ const SwipeButton: React.FC<Props> = ({
     }
   }, [disabled, loading, completed, offsetX, onSwipeComplete]);
 
+  const handleKeyboardConfirm = useCallback(() => {
+    if (disabled || loading || completed) return;
+    const max = getMaxOffset();
+    setCompleted(true);
+    setOffsetX(max);
+    onSwipeComplete();
+  }, [disabled, loading, completed, getMaxOffset, onSwipeComplete]);
+
   // Touch handlers
   const onTouchStart = (e: React.TouchEvent) =>
     handleStart(e.touches[0].clientX);
@@ -190,7 +203,24 @@ const SwipeButton: React.FC<Props> = ({
     : 0;
 
   return (
-    <Track ref={trackRef} $color={color} $disabled={disabled || loading}>
+    <Track
+      ref={trackRef}
+      $color={color}
+      $disabled={disabled || loading}
+      role="slider"
+      tabIndex={disabled || loading ? -1 : 0}
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(progress * 100)}
+      aria-disabled={disabled || loading}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleKeyboardConfirm();
+        }
+      }}
+    >
       <Label $visible={progress < 0.3}>{label}</Label>
       <Thumb
         $color={color}

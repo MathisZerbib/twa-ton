@@ -46,95 +46,113 @@ const scaleIn = keyframes`from{opacity:0;transform:scale(0.96)}to{opacity:1;tran
 // ─── Styled ───────────────────────────────────────────────────────────────────
 
 const Page = styled.div`
-  background: #0f0f1a;
+  background: var(--bg-primary);
   min-height: 100vh;
-  color: #f0f0f0;
+    color: var(--text-primary);
 `;
 
 const TopBar = styled.div`
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  padding: 20px 24px;
+    background: var(--bg-secondary);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid var(--bg-tertiary);
+    box-shadow: var(--shadow-sm);
 `;
-const TopLeft = styled.div`display: flex; align-items: center; gap: 14px;`;
+const TopLeft = styled.div`display: flex; align-items: center; gap: 16px;`;
 const BackBtn = styled.button`
-  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 10px; width: 36px; height: 36px; color: #fff;
+    background: var(--bg-primary);
+    border: 1px solid var(--bg-tertiary);
+    border-radius: 12px; width: 40px; height: 40px; color: var(--text-primary);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  &:active { transform: scale(0.95); }
+  transition: all var(--transition-fast);
+  &:active { transform: scale(0.9); }
 `;
-const Title = styled.h1`font-size: 1.3rem; font-weight: 900; margin: 0; color: #fff;`;
-const SubTitle = styled.p`font-size: 0.72rem; color: rgba(255,255,255,0.5); margin: 2px 0 0;`;
+const Title = styled.h1`font-size: 1.4rem; font-weight: 900; margin: 0; color: var(--text-primary); letter-spacing: -0.02em;`;
+const SubTitle = styled.p`font-size: 0.75rem; color: var(--text-hint); margin: 4px 0 0; font-weight: 500;`;
 const RefreshBtn = styled.button<{ $spinning?: boolean }>`
-  background: rgba(255,107,53,0.15); border: 1px solid rgba(255,107,53,0.3);
-  border-radius: 10px; padding: 8px 14px; color: #FF6B35;
-  font-size: 0.78rem; font-weight: 700; cursor: pointer;
-  display: flex; align-items: center; gap: 6px;
-  &:active { transform: scale(0.96); }
+  background: hsla(var(--hue-brand), var(--sat-brand), var(--light-brand), 0.15); 
+  border: 1px solid hsla(var(--hue-brand), var(--sat-brand), var(--light-brand), 0.3);
+  border-radius: 12px; padding: 10px 18px; color: var(--accent);
+  font-size: 0.85rem; font-weight: 800; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  transition: all var(--transition-base);
+  &:active { transform: scale(0.95); }
 `;
 
 // ── Stat Cards ────────────────────────────────────────────────────────────────
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-  padding: 16px 16px 0;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 24px 24px 0;
 `;
 const StatCard = styled.div<{ $delay?: number; $accent?: string }>`
-  background: linear-gradient(145deg, #1e1e30, #252540);
-  border: 1px solid ${p => p.$accent ? p.$accent + '30' : 'rgba(255,255,255,0.06)'};
-  border-radius: 16px;
-  padding: 16px;
-  animation: ${fadeUp} 0.35s ease ${p => (p.$delay ?? 0) * 0.06}s both;
+    background: var(--bg-secondary);
+  backdrop-filter: blur(8px);
+    border: 1px solid ${p => p.$accent ? p.$accent + '2e' : 'var(--bg-tertiary)'};
+  border-radius: 20px;
+  padding: 20px;
+  animation: ${fadeUp} 0.5s var(--transition-smooth) ${p => (p.$delay ?? 0) * 0.08}s both;
+  transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+  &:hover {
+        background: var(--bg-primary);
+    transform: translateY(-4px);
+        border-color: ${p => p.$accent ? p.$accent + '66' : 'var(--accent-soft)'};
+  }
 `;
 const StatIcon = styled.div<{ $bg: string }>`
-  width: 32px; height: 32px; border-radius: 10px;
+  width: 38px; height: 38px; border-radius: 11px;
   background: ${p => p.$bg};
   display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 0.8rem; margin-bottom: 10px;
+  color: #fff; font-size: 0.95rem; margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 `;
-const StatValue = styled.div`font-size: 1.4rem; font-weight: 900; color: #fff;`;
-const StatLabel = styled.div`font-size: 0.68rem; color: rgba(255,255,255,0.45); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;`;
+const StatValue = styled.div`font-size: 1.6rem; font-weight: 900; color: var(--text-primary); letter-spacing: -0.01em;`;
+const StatLabel = styled.div`font-size: 0.7rem; color: var(--text-hint); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800;`;
 
 // ── Section ───────────────────────────────────────────────────────────────────
 
-const Section = styled.div`padding: 16px; animation: ${fadeUp} 0.4s ease;`;
+const Section = styled.div`padding: 24px; animation: ${fadeUp} 0.5s ease;`;
 const SectionHeader = styled.div`
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 `;
-const SectionTitle = styled.h2`font-size: 1rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 8px;`;
+const SectionTitle = styled.h2`font-size: 1.1rem; font-weight: 900; margin: 0; display: flex; align-items: center; gap: 10px; color: var(--text-primary); letter-spacing: -0.01em;`;
 
 // ── Search & Filters ──────────────────────────────────────────────────────────
 
 const FiltersRow = styled.div`
-  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px;
 `;
 const SearchBox = styled.div`
-  flex: 1; min-width: 200px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-  display: flex; align-items: center; gap: 8px;
-  padding: 0 12px;
+  flex: 1; min-width: 250px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--bg-tertiary);
+  border-radius: 14px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px;
+  transition: all var(--transition-fast);
+    &:focus-within { border-color: var(--accent); background: var(--bg-secondary); }
 `;
 const SearchInput = styled.input`
   background: transparent; border: none; outline: none;
-  color: #fff; font-size: 0.85rem; padding: 10px 0; flex: 1;
-  &::placeholder { color: rgba(255,255,255,0.3); }
+    color: var(--text-primary); font-size: 0.9rem; padding: 12px 0; flex: 1;
+    &::placeholder { color: var(--text-hint); }
 `;
 const FilterChip = styled.button<{ $active: boolean }>`
-  padding: 8px 14px; border-radius: 10px; border: none;
-  font-size: 0.72rem; font-weight: 700; cursor: pointer;
-  background: ${p => p.$active ? 'rgba(255,107,53,0.2)' : 'rgba(255,255,255,0.06)'};
-  color: ${p => p.$active ? '#FF6B35' : 'rgba(255,255,255,0.5)'};
-  border: 1px solid ${p => p.$active ? 'rgba(255,107,53,0.4)' : 'rgba(255,255,255,0.08)'};
-  transition: all 0.2s;
-  &:active { transform: scale(0.96); }
+  padding: 10px 18px; border-radius: 12px; border: none;
+  font-size: 0.78rem; font-weight: 800; cursor: pointer;
+    background: ${p => p.$active ? 'var(--accent-soft)' : 'var(--bg-secondary)'};
+    color: ${p => p.$active ? 'var(--accent-dark)' : 'var(--text-secondary)'};
+    border: 1px solid ${p => p.$active ? 'hsla(var(--hue-brand), var(--sat-brand), var(--light-brand), 0.35)' : 'var(--bg-tertiary)'};
+  transition: all var(--transition-fast);
+  &:active { transform: scale(0.95); }
 `;
 
 // ── Order Table ───────────────────────────────────────────────────────────────
@@ -142,108 +160,121 @@ const FilterChip = styled.button<{ $active: boolean }>`
 const OrderTable = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 `;
 const OrderRow = styled.div<{ $delay?: number }>`
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 14px;
-  padding: 14px 16px;
-  animation: ${fadeUp} 0.3s ease ${p => (p.$delay ?? 0) * 0.04}s both;
-  transition: background 0.2s;
-  &:hover { background: rgba(255,255,255,0.07); }
+    background: var(--bg-secondary);
+    border: 1px solid var(--bg-tertiary);
+  border-radius: 18px;
+  padding: 18px 20px;
+  animation: ${fadeUp} 0.4s var(--transition-smooth) ${p => (p.$delay ?? 0) * 0.05}s both;
+  transition: all var(--transition-base);
+    &:hover { background: var(--bg-primary); border-color: var(--accent-soft); }
 `;
-const OrderRowHeader = styled.div`display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;`;
-const OrderIdText = styled.span`font-weight: 800; font-size: 0.82rem; font-family: 'SF Mono', monospace; color: #fff;`;
-const OrderMeta = styled.div`display: flex; gap: 6px; align-items: center;`;
+const OrderRowHeader = styled.div`display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;`;
+const OrderIdText = styled.span`font-weight: 900; font-size: 0.85rem; font-family: 'SF Mono', 'Fira Mono', monospace; color: var(--text-primary); border-bottom: 1px dashed var(--bg-tertiary);`;
+const OrderMeta = styled.div`display: flex; gap: 8px; align-items: center;`;
 const StatusBadge = styled.span<{ $color: string }>`
-  background: ${p => p.$color}20; color: ${p => p.$color};
-  font-size: 0.65rem; font-weight: 700; padding: 3px 10px;
-  border-radius: 8px; border: 1px solid ${p => p.$color}40;
+  background: ${p => p.$color}15; color: ${p => p.$color};
+  font-size: 0.65rem; font-weight: 800; padding: 4px 12px;
+  border-radius: 10px; border: 1px solid ${p => p.$color}30;
+  text-transform: uppercase; letter-spacing: 0.05em;
 `;
 const OrderDetails = styled.div`
-  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
-  font-size: 0.76rem; color: rgba(255,255,255,0.5);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
+    font-size: 0.8rem; color: var(--text-secondary);
+  line-height: 1.5;
 `;
-const DetailLabel = styled.span`color: rgba(255,255,255,0.3);`;
-const OrderActions = styled.div`display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end;`;
+const DetailLabel = styled.span`color: var(--text-hint); font-weight: 600; text-transform: uppercase; font-size: 0.6rem; letter-spacing: 0.05em; display: block; margin-bottom: 2px;`;
+const OrderActions = styled.div`display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; border-top: 1px solid var(--bg-tertiary); padding-top: 14px;`;
 const CancelBtn = styled.button<{ $disabled?: boolean }>`
-  padding: 7px 14px; border-radius: 10px; border: none;
-  background: ${p => p.$disabled ? 'rgba(255,255,255,0.05)' : 'rgba(244,67,54,0.15)'};
-  color: ${p => p.$disabled ? 'rgba(255,255,255,0.2)' : '#f44336'};
-  font-size: 0.75rem; font-weight: 700; cursor: ${p => p.$disabled ? 'not-allowed' : 'pointer'};
-  border: 1px solid ${p => p.$disabled ? 'transparent' : 'rgba(244,67,54,0.3)'};
-  display: flex; align-items: center; gap: 5px;
+  padding: 8px 16px; border-radius: 12px; border: none;
+    background: ${p => p.$disabled ? 'var(--bg-tertiary)' : 'rgba(239, 68, 68, 0.12)'};
+    color: ${p => p.$disabled ? 'var(--text-hint)' : 'var(--error)'};
+  font-size: 0.78rem; font-weight: 800; cursor: ${p => p.$disabled ? 'not-allowed' : 'pointer'};
+    border: 1px solid ${p => p.$disabled ? 'var(--bg-tertiary)' : 'rgba(239, 68, 68, 0.25)'};
+  display: flex; align-items: center; gap: 8px;
+  transition: all var(--transition-fast);
   &:active:not(:disabled) { transform: scale(0.96); }
 `;
 
 // ── Pagination ────────────────────────────────────────────────────────────────
 
 const PaginationRow = styled.div`
-  display: flex; align-items: center; justify-content: center; gap: 14px;
-  padding: 14px 0;
+  display: flex; align-items: center; justify-content: center; gap: 18px;
+  padding: 24px 0;
 `;
 const PageBtn = styled.button<{ $disabled?: boolean }>`
-  padding: 8px 14px; border-radius: 10px; border: none;
-  background: ${p => p.$disabled ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)'};
-  color: ${p => p.$disabled ? 'rgba(255,255,255,0.2)' : '#fff'};
-  font-size: 0.78rem; font-weight: 700; cursor: ${p => p.$disabled ? 'default' : 'pointer'};
-  display: flex; align-items: center; gap: 5px;
+  padding: 10px 20px; border-radius: 14px; border: none;
+    background: ${p => p.$disabled ? 'var(--bg-tertiary)' : 'var(--bg-secondary)'};
+    color: ${p => p.$disabled ? 'var(--text-hint)' : 'var(--text-primary)'};
+  font-size: 0.85rem; font-weight: 800; cursor: ${p => p.$disabled ? 'default' : 'pointer'};
+  display: flex; align-items: center; gap: 8px;
+    border: 1px solid ${p => p.$disabled ? 'var(--bg-tertiary)' : 'var(--bg-tertiary)'};
+  transition: all var(--transition-fast);
+    &:active:not(:disabled) { background: var(--bg-primary); }
 `;
-const PageInfo = styled.span`font-size: 0.75rem; color: rgba(255,255,255,0.4);`;
+const PageInfo = styled.span`font-size: 0.85rem; color: var(--text-hint); font-weight: 600;`;
 
 // ── Merchants ─────────────────────────────────────────────────────────────────
 
 const MerchantCard = styled.div<{ $delay?: number }>`
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 14px;
-  padding: 14px 16px;
-  animation: ${fadeUp} 0.3s ease ${p => (p.$delay ?? 0) * 0.06}s both;
-  display: flex; align-items: center; gap: 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--bg-tertiary);
+  border-radius: 18px;
+  padding: 16px 20px;
+  animation: ${fadeUp} 0.4s var(--transition-smooth) ${p => (p.$delay ?? 0) * 0.08}s both;
+  display: flex; align-items: center; gap: 18px;
+  transition: all var(--transition-base);
+    &:hover { background: var(--bg-primary); border-color: var(--accent-soft); }
 `;
 const MerchantAvatar = styled.div`
-  width: 44px; height: 44px; border-radius: 12px;
-  background: linear-gradient(135deg, #FF6B35, #F7931E);
+  width: 50px; height: 50px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent), #F7931E);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem; flex-shrink: 0;
+  font-size: 1.4rem; font-weight: 900; color: #fff; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 `;
 const MerchantInfo = styled.div`flex: 1;`;
-const MerchantName = styled.div`font-weight: 800; font-size: 0.88rem;`;
-const MerchantMeta = styled.div`font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 2px;`;
-const MerchantStat = styled.div`text-align: right;`;
-const MerchantStatVal = styled.div`font-weight: 800; font-size: 0.95rem; color: #FFD23F;`;
-const MerchantStatLbl = styled.div`font-size: 0.62rem; color: rgba(255,255,255,0.3);`;
+const MerchantName = styled.div`font-weight: 900; font-size: 1rem; color: var(--text-primary); letter-spacing: -0.01em;`;
+const MerchantMeta = styled.div`font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px; font-weight: 500;`;
+const MerchantStat = styled.div`text-align: right; margin-left: 12px;`;
+const MerchantStatVal = styled.div`font-weight: 900; font-size: 1.1rem; color: #FFD23F;`;
+const MerchantStatLbl = styled.div`font-size: 0.65rem; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;`;
 
 // ── Utility ───────────────────────────────────────────────────────────────────
 
 const Center = styled.div`
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 48px 24px; gap: 14px; text-align: center;
+  padding: 64px 24px; gap: 20px; text-align: center;
 `;
 const SpinIcon = styled(FontAwesomeIcon)`animation: ${spin} 1s linear infinite;`;
 
 // ── Confirm Modal ─────────────────────────────────────────────────────────────
 
 const Overlay = styled.div`
-  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 500; display: flex; align-items: center; justify-content: center;
-  animation: ${scaleIn} 0.2s ease;
+  animation: ${scaleIn} 0.3s var(--transition-smooth);
 `;
 const Modal = styled.div`
-  background: #1e1e30; border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 20px; padding: 24px; max-width: 340px; width: 90%;
+    background: var(--bg-secondary); border: 1px solid var(--bg-tertiary);
+  border-radius: 28px; padding: 32px; max-width: 380px; width: 90%;
   text-align: center;
+    box-shadow: var(--shadow-lg);
 `;
-const ModalTitle = styled.h3`font-size: 1.05rem; font-weight: 800; margin: 0 0 8px; color: #fff;`;
-const ModalText = styled.p`font-size: 0.82rem; color: rgba(255,255,255,0.5); margin: 0 0 20px; line-height: 1.5;`;
-const ModalActions = styled.div`display: flex; gap: 10px;`;
+const ModalTitle = styled.h3`font-size: 1.3rem; font-weight: 900; margin: 0 0 12px; color: var(--text-primary); letter-spacing: -0.02em;`;
+const ModalText = styled.p`font-size: 0.9rem; color: var(--text-secondary); margin: 0 0 28px; line-height: 1.6; font-weight: 500;`;
+const ModalActions = styled.div`display: flex; gap: 12px;`;
 const ModalBtn = styled.button<{ $danger?: boolean }>`
-  flex: 1; padding: 12px; border-radius: 12px; border: none;
-  font-weight: 800; font-size: 0.88rem; cursor: pointer;
-  background: ${p => p.$danger ? 'linear-gradient(135deg,#f44336,#d32f2f)' : 'rgba(255,255,255,0.08)'};
-  color: ${p => p.$danger ? '#fff' : 'rgba(255,255,255,0.6)'};
-  &:active { transform: scale(0.97); }
+  flex: 1; padding: 14px; border-radius: 16px; border: none;
+  font-weight: 800; font-size: 0.95rem; cursor: pointer;
+    background: ${p => p.$danger ? 'linear-gradient(135deg, #ef4444, #b91c1c)' : 'var(--bg-tertiary)'};
+    color: ${p => p.$danger ? '#fff' : 'var(--text-secondary)'};
+  transition: all var(--transition-fast);
+  &:active { transform: scale(0.96); }
 `;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -284,6 +315,7 @@ const SuperAdminDashboard: React.FC = () => {
     const [merchants, setMerchants] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     // Filters
     const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -301,6 +333,7 @@ const SuperAdminDashboard: React.FC = () => {
     const fetchAll = useCallback(async (showLoader = false) => {
         if (showLoader) setLoading(true);
         setRefreshing(true);
+        setErrorMessage(null);
         try {
             const [statsData, ordersData, merchantsData] = await Promise.all([
                 api.getAdminStats(),
@@ -317,7 +350,7 @@ const SuperAdminDashboard: React.FC = () => {
             setTotalOrders(ordersData.total);
             setMerchants(merchantsData);
         } catch (e) {
-            console.error("Admin fetch failed:", e);
+            setErrorMessage("Could not load the latest admin data. Please try again.");
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -339,12 +372,13 @@ const SuperAdminDashboard: React.FC = () => {
     const handleCancel = async () => {
         if (!cancelTarget) return;
         setCancelling(true);
+        setErrorMessage(null);
         try {
             await api.cancelOrder(cancelTarget.id);
             setCancelTarget(null);
             fetchAll(false);
         } catch (e) {
-            console.error("Cancel failed:", e);
+            setErrorMessage("Order cancellation failed. Please retry in a moment.");
         } finally {
             setCancelling(false);
         }
@@ -356,7 +390,7 @@ const SuperAdminDashboard: React.FC = () => {
             <Page>
                 <Center style={{ minHeight: "100vh" }}>
                     <SpinIcon icon={faSpinner} style={{ fontSize: "2rem", color: "#FF6B35" }} />
-                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.85rem" }}>Loading admin panel…</p>
+                    <p style={{ color: "var(--text-hint)", fontSize: "0.85rem" }}>Loading admin panel…</p>
                 </Center>
             </Page>
         );
@@ -385,6 +419,12 @@ const SuperAdminDashboard: React.FC = () => {
                     Refresh
                 </RefreshBtn>
             </TopBar>
+
+            {errorMessage && (
+                <div style={{ padding: "16px 24px 0" }}>
+                    <div role="alert">{errorMessage}</div>
+                </div>
+            )}
 
             {/* ── Stats Grid ── */}
             {stats && (
@@ -467,7 +507,7 @@ const SuperAdminDashboard: React.FC = () => {
                         <SectionTitle>
                             <FontAwesomeIcon icon={faChartLine} style={{ color: "#FF6B35" }} />
                             All Orders
-                            <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.3)", fontWeight: 500, marginLeft: 4 }}>
+                            <span style={{ fontSize: "0.72rem", color: "var(--text-hint)", fontWeight: 500, marginLeft: 4 }}>
                                 ({totalOrders})
                             </span>
                         </SectionTitle>
@@ -476,7 +516,7 @@ const SuperAdminDashboard: React.FC = () => {
                     {/* Search & Filters */}
                     <FiltersRow>
                         <SearchBox>
-                            <FontAwesomeIcon icon={faSearch} style={{ color: "rgba(255,255,255,0.3)" }} />
+                            <FontAwesomeIcon icon={faSearch} style={{ color: "var(--text-hint)" }} />
                             <SearchInput
                                 placeholder="Search by order ID, wallet, address..."
                                 value={searchQuery}
@@ -497,7 +537,7 @@ const SuperAdminDashboard: React.FC = () => {
                         {orders.length === 0 ? (
                             <Center>
                                 <FontAwesomeIcon icon={faBoxOpen} style={{ fontSize: "1.5rem", opacity: 0.3 }} />
-                                <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.82rem" }}>No orders found</p>
+                                <p style={{ color: "var(--text-hint)", fontSize: "0.82rem" }}>No orders found</p>
                             </Center>
                         ) : (
                             orders.map((order, i) => {
@@ -512,7 +552,7 @@ const SuperAdminDashboard: React.FC = () => {
                                                     <FontAwesomeIcon icon={info.icon} style={{ marginRight: 4 }} />
                                                     {info.label}
                                                 </StatusBadge>
-                                                <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.3)" }}>
+                                                <span style={{ fontSize: "0.65rem", color: "var(--text-hint)" }}>
                                                     {formatDate(order.createdAt)}
                                                 </span>
                                             </OrderMeta>
@@ -563,7 +603,7 @@ const SuperAdminDashboard: React.FC = () => {
                         <SectionTitle>
                             <FontAwesomeIcon icon={faStore} style={{ color: "#FF6B35" }} />
                             Merchants
-                            <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.3)", fontWeight: 500, marginLeft: 4 }}>
+                            <span style={{ fontSize: "0.72rem", color: "var(--text-hint)", fontWeight: 500, marginLeft: 4 }}>
                                 ({merchants.length})
                             </span>
                         </SectionTitle>
@@ -572,7 +612,7 @@ const SuperAdminDashboard: React.FC = () => {
                     {merchants.length === 0 ? (
                         <Center>
                             <FontAwesomeIcon icon={faStore} style={{ fontSize: "1.5rem", opacity: 0.3 }} />
-                            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.82rem" }}>No merchants yet</p>
+                            <p style={{ color: "var(--text-hint)", fontSize: "0.82rem" }}>No merchants yet</p>
                         </Center>
                     ) : (
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

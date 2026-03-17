@@ -44,165 +44,295 @@ import Header from "../../components/Header";
 
 // ─── Animations ─────────────────────────────────────────────────────────────
 
-const scaleIn = keyframes`from{opacity:0;transform:scale(0.94)}to{opacity:1;transform:scale(1)}`;
-const pulseDot = keyframes`0%,100%{opacity:1}50%{opacity:0.3}`;
+const scaleIn = keyframes`
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+`;
+const pulseDot = keyframes`0%,100%{opacity:1}50%{opacity:0.4}`;
 
 // ─── Gate Styled ────────────────────────────────────────────────────────────
 
 const Gate = styled.div`
   min-height: 100vh;
-  background: linear-gradient(160deg, #0f0c29 0%, #1a1040 60%, #24243e 100%);
+  background: radial-gradient(circle at top right, #1e1e2e, #09090b);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 24px;
+  padding: 40px 24px;
   text-align: center;
-  gap: 20px;
-  animation: ${scaleIn} 0.4s ease;
+  gap: 24px;
+  animation: ${scaleIn} 0.5s var(--transition-smooth) both;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url('/assets/grid-pattern.svg') repeat;
+    opacity: 0.05;
+    pointer-events: none;
+  }
 `;
 
 const GateIcon = styled.div`
-  font-size: 4rem;
+  font-size: 5rem;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+  margin-bottom: 8px;
 `;
+
 const GateTitle = styled.h1`
-  font-size: 1.7rem;
+  font-size: 2.2rem;
   font-weight: 900;
   color: #fff;
   margin: 0;
+  letter-spacing: -0.04em;
 `;
+
 const GateSubtitle = styled.p`
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.6);
-  max-width: 270px;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  max-width: 280px;
   line-height: 1.6;
   margin: 0;
+  font-weight: 500;
 `;
 
 const FeatureList = styled.ul`
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 12px 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
 `;
+
 const FeatureItem = styled.li`
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  padding: 12px 16px;
-  font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.8);
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 14px 18px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
   text-align: left;
+  font-weight: 600;
+  transition: transform var(--transition-fast);
+
+  &:hover { transform: translateX(8px); }
 `;
+
 const FeatureIcon = styled.div<{ bg?: string }>`
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: ${(p) => p.bg ?? "linear-gradient(135deg,#FF6B35,#F7931E)"};
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: ${(p) => p.bg ?? "var(--accent)"};
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   color: #fff;
-  font-size: 0.85rem;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 `;
 
 // ─── Page Styled ────────────────────────────────────────────────────────────
 
 const Page = styled.div`
-  background: #f4f4f4;
+  background: var(--bg-primary);
   min-height: 100vh;
+  transition: background var(--transition-base);
 `;
 
 const HeroBar = styled.div`
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%);
-  padding: 16px 20px 20px;
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(255, 149, 0, 0.2) 0%, transparent 45%),
+    radial-gradient(100% 120% at 100% 100%, rgba(255, 149, 0, 0.12) 0%, transparent 40%),
+    linear-gradient(160deg, #0d0f16 0%, #101522 55%, #151b2c 100%);
+  padding: 26px 20px 34px;
   color: #fff;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 25%, rgba(255,255,255,0.04) 45%, transparent 65%);
+    opacity: 0.45;
+    pointer-events: none;
+  }
 `;
 
 const HeroTop = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
+`;
+
+const LiveBadge = styled.p`
+  margin: 0;
+  font-size: 0.74rem;
+  color: rgba(255,255,255,0.72);
+  font-weight: 700;
+  letter-spacing: 0.03em;
 `;
 
 const StatusDot = styled.span<{ $on: boolean }>`
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  margin-right: 6px;
-  background: ${(p) => (p.$on ? "#4caf50" : "#ff5252")};
+  margin-right: 8px;
+  background: ${(p) => (p.$on ? "var(--success)" : "#ff4b4b")};
   animation: ${pulseDot} 1.5s ease infinite;
   vertical-align: middle;
+  box-shadow: 0 0 10px ${(p) => (p.$on ? "var(--success)" : "#ff4b4b")};
 `;
 
 const HeroTitle = styled.h1`
-  font-size: 1.3rem;
+  font-size: clamp(1.5rem, 5vw, 2.35rem);
   font-weight: 900;
-  margin: 0 0 2px;
+  margin: 0 0 8px;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
 `;
 
 const HeroSub = styled.p`
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.55);
-  margin: 0 0 12px;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0;
+  font-weight: 600;
+  max-width: 520px;
 `;
 
-const WalletChip = styled.div`
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.65);
-  font-family: "SF Mono", monospace;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 150px;
+const HeroMain = styled.div`
+  display: grid;
+  grid-template-columns: 1.35fr 0.9fr;
+  gap: 12px;
+  margin-bottom: 14px;
+
+  @media (max-width: 820px) {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 `;
 
-const QuickStats = styled.div`
-  display: flex;
+const HeroKicker = styled.div`
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
-`;
-
-const QS = styled.div`
-  flex: 1;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  padding: 10px;
-  text-align: center;
-`;
-
-const QSValue = styled.div`
-  font-size: 1.05rem;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  padding: 6px 12px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
   font-weight: 800;
+  color: rgba(255,255,255,0.9);
+`;
+
+const HeroRateCard = styled.div`
+  border-radius: 18px;
+  padding: 14px 14px 12px;
+  background: linear-gradient(140deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.16);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 108px;
+`;
+
+const RateLabel = styled.div`
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.68);
+  font-weight: 700;
+`;
+
+const RateValue = styled.div`
+  margin-top: 4px;
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
   color: #ffd23f;
 `;
 
-const QSLabel = styled.div`
-  font-size: 0.62rem;
-  color: rgba(255, 255, 255, 0.55);
+const RateSub = styled.div`
   margin-top: 2px;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.76);
+  font-weight: 600;
+`;
+
+const WalletChip = styled.div`
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: "SF Mono", "Fira Mono", monospace;
+  font-weight: 700;
+`;
+
+const QuickStats = styled.div`
+  display: grid;
+  grid-template-columns: 1.25fr 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const QS = styled.div<{ $featured?: boolean }>`
+  background: ${(p) =>
+    p.$featured
+      ? "linear-gradient(140deg, rgba(255,149,0,0.28), rgba(255,149,0,0.12))"
+      : "rgba(255, 255, 255, 0.05)"};
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid ${(p) => (p.$featured ? "rgba(255, 199, 94, 0.45)" : "rgba(255, 255, 255, 0.08)")};
+  border-radius: 18px;
+  padding: ${(p) => (p.$featured ? "16px 14px" : "14px 12px")};
+  text-align: left;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  &:active { transform: scale(0.96); }
+  box-shadow: ${(p) => (p.$featured ? "0 12px 32px rgba(255,149,0,0.22)" : "none")};
+`;
+
+const QSValue = styled.div`
+  font-size: clamp(1.15rem, 3vw, 1.45rem);
+  font-weight: 900;
+  color: #ffd23f;
+  letter-spacing: -0.02em;
+`;
+
+const QSLabel = styled.div`
+  font-size: 0.66rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 `;
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function shortAddr(a: string) {
-  if (!a || a.length < 12) return a;
-  return `${a.slice(0, 6)}…${a.slice(-4)}`;
+  if (!a) return a;
+  const normalized = a.startsWith("0:") ? a.slice(2) : a;
+  if (normalized.length < 12) return normalized;
+  return `${normalized.slice(0, 6)}…${normalized.slice(-4)}`;
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -350,7 +480,6 @@ const CourierApp: React.FC = () => {
         });
       } catch (e: any) {
         // On-chain TX failed (user rejected in wallet or insufficient funds)
-        console.error("[Courier] On-chain accept failed:", e);
         setAcceptPhase("error");
         setAcceptError(e.message ?? "Transaction failed. Please try again.");
         setAcceptingId(null);
@@ -370,13 +499,13 @@ const CourierApp: React.FC = () => {
         setAcceptPhase(null);
         setAcceptingOrder(null);
       } catch (backendErr: any) {
-        console.warn("[Courier] Backend accept error:", backendErr.message);
+        const backendMessage = backendErr.message ?? "Backend update failed.";
 
         // If backend says "already accepted" (409), treat as success — the
         // on-chain TX went through, so the courier IS the assigned driver.
         if (
-          backendErr.message?.includes("already") ||
-          backendErr.message?.includes("409")
+          backendMessage.includes("already") ||
+          backendMessage.includes("409")
         ) {
           // Fetch the latest order data regardless
           try {
@@ -397,10 +526,10 @@ const CourierApp: React.FC = () => {
             setAcceptPhase(null);
             setAcceptingOrder(null);
           }
-        } else if (backendErr.message?.includes("not found")) {
+        } else if (backendMessage.includes("not found")) {
           // Backend doesn't have this order (e.g., backend registration failed during checkout).
           // Still proceed since on-chain TX succeeded.
-          console.warn("[Courier] Order not in backend, using local data with on-chain acceptance.");
+          setAcceptError("On-chain accept confirmed. We are syncing this order with the backend.");
           const fallbackOrder = { ...order, status: "accepted" as const, courierWallet: wallet };
           setOrders((prev) => prev.filter((o) => o.id !== order.id));
           setAcceptPhase("confirmed");
@@ -410,7 +539,7 @@ const CourierApp: React.FC = () => {
           setAcceptingOrder(null);
         } else {
           setAcceptPhase("error");
-          setAcceptError(backendErr.message ?? "Backend update failed.");
+          setAcceptError(backendMessage);
         }
       } finally {
         setAcceptingId(null);
@@ -547,32 +676,41 @@ const CourierApp: React.FC = () => {
       {/* Hero bar */}
       <HeroBar>
         <HeroTop>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "0.73rem",
-              color: "rgba(255,255,255,0.55)",
-            }}
-          >
+          <LiveBadge>
             <StatusDot $on={socketConnected} />
-            {socketConnected ? "Online · Live feed" : "Connecting…"}
-          </p>
+            {socketConnected ? "Live feed online" : "Reconnecting live feed…"}
+          </LiveBadge>
           {wallet && <WalletChip title={wallet}>{shortAddr(wallet)}</WalletChip>}
         </HeroTop>
-        <HeroTitle>Courier Dashboard</HeroTitle>
-        <HeroSub>Accept orders · Navigate · Earn TON</HeroSub>
+
+        <HeroMain>
+          <div>
+            <HeroKicker>
+              <FontAwesomeIcon icon={faMotorcycle} />
+              Courier mode
+            </HeroKicker>
+            <HeroTitle>Ready to pick your next delivery</HeroTitle>
+            <HeroSub>Accept live orders, lock confirmation on-chain, and complete each route with confidence.</HeroSub>
+          </div>
+          <HeroRateCard>
+            <RateLabel>Payout per completed route</RateLabel>
+            <RateValue>{DELIVERY_FEE_TON.toFixed(1)} TON</RateValue>
+            <RateSub>Escrow-backed settlement</RateSub>
+          </HeroRateCard>
+        </HeroMain>
+
         <QuickStats>
-          <QS>
+          <QS $featured>
             <QSValue>{orders.length}</QSValue>
-            <QSLabel>Available</QSLabel>
+            <QSLabel>Open Orders</QSLabel>
           </QS>
           <QS>
             <QSValue>{DELIVERY_FEE_TON.toFixed(1)}</QSValue>
-            <QSLabel>TON / delivery</QSLabel>
+            <QSLabel>TON per route</QSLabel>
           </QS>
           <QS>
             <QSValue>{activeOrder ? "1" : "0"}</QSValue>
-            <QSLabel>Active</QSLabel>
+            <QSLabel>Active Route</QSLabel>
           </QS>
         </QuickStats>
       </HeroBar>

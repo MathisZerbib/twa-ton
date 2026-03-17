@@ -198,21 +198,16 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
             referrer: referrerAddr ? Address.parse(referrerAddr) : Address.parse(merchantAddr),
         };
 
-        console.log("[TON-Eats] Creating order →", { oid: oid.toString(), requiredAmount });
-
         // 2. Transact
         await escrowContract.send(sender as any, { value: requiredAmount }, params);
 
         // 3. Poll for on-chain state change
-        console.log("[TON-Eats] Waiting for order to be confirmed on-chain...");
         let attempts = 0;
         await new Promise(r => setTimeout(r, 5000)); // initial 5s delay
         while (attempts < 20) {
             try {
                 const status = await escrowContract.getGetOrderStatus(oid);
-                console.log(`[TON-Eats] CreateOrder poll #${attempts + 1}: status = ${status}`);
                 if (status !== -1n) {
-                    console.log("[TON-Eats] Order created successfully on-chain!");
                     return;
                 }
             } catch (pollErr: any) {
@@ -241,7 +236,6 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
             }
         }
 
-        console.log("[TON-Eats] Courier accepting delivery →", oid.toString());
         onPhase?.("signing");
 
         await escrowContract.send(sender as any, { value: requiredGas }, {
@@ -249,7 +243,6 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
             orderId: oid
         });
 
-        console.log("[TON-Eats] TX sent, waiting for on-chain confirmation...");
         onPhase?.("confirming");
 
         // Poll with increasing backoff: first check after 5s (give blockchain time),
@@ -265,9 +258,7 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
         while (attempts < maxAttempts) {
             try {
                 const status = await escrowContract.getGetOrderStatus(oid);
-                console.log(`[TON-Eats] Poll #${attempts + 1}: status = ${status}`);
                 if (status === 1n || status === 2n) {
-                    console.log("[TON-Eats] Accept confirmed on-chain!");
                     confirmed = true;
                     break;
                 }
@@ -332,11 +323,7 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
             BASE_EXECUTION_GAS +
             PER_SEND_FWD_FEE * BigInt(numSends) +
             SAFETY_MARGIN;
-
         const gasDisplay = (Number(requiredGas) / 1e9).toFixed(3);
-        console.log(
-            `[TON-Eats] confirmDelivery gas: ${gasDisplay} TON (${numSends} outbound sends)`
-        );
 
         if (wallet) {
             try {
@@ -352,34 +339,65 @@ export function useTONEatsEscrow(): UseTONEatsEscrowReturn {
             }
         }
 
-        console.log("[TON-Eats] Confirming delivery (Settlement) →", oid.toString());
         await escrowContract.send(sender as any, { value: requiredGas }, {
             $$type: "ConfirmDelivery",
             orderId: oid
         });
 
-        console.log("[TON-Eats] Waiting for settlement confirm to be recorded on-chain...");
         let attempts = 0;
-        await new Promise(r => setTimeout(r, 5000)); // initial 5s delay
-        while (attempts < 20) {
+        let lastError: any = null;
+        const maxAttempts = 25; // increased from 20
+        const pollDelays = [5000, 3000, 3000, 2000, 2000, 2000, 2000, 2000, 2000, 1000]; // progressive backoff
+        
+        while (attempts < maxAttempts) {
             try {
                 const status = await escrowContract.getGetOrderStatus(oid);
-                console.log(`[TON-Eats] ConfirmDelivery poll #${attempts + 1}: status = ${status}`);
-                if (status === 2n) return;
+                if (status === 2n) {
+                    console.log(`[TON-Eats] ConfirmDelivery completed for order ${oid} on attempt ${attempts + 1}`);
+                    return;
+                }
             } catch (pollErr: any) {
-                console.warn(`[TON-Eats] ConfirmDelivery poll #${attempts + 1} RPC error:`, pollErr.message?.slice(0, 80));
+                lastError = pollErr;
+                console.warn(
+                    `[TON-Eats] ConfirmDelivery poll #${attempts + 1} error:`,
+                    pollErr.message?.slice(0, 100)
+                );
             }
             attempts++;
-            if (attempts < 20) await new Promise(r => setTimeout(r, 3000));
+            
+            if (attempts < maxAttempts) {
+                // Use progressive delays: first check at 5s, then back off
+                const delayIdx = Math.min(attempts - 1, pollDelays.length - 1);
+                const delay = pollDelays[delayIdx];
+                console.log(`[TON-Eats] Next poll in ${delay}ms... (attempt ${attempts + 1}/${maxAttempts})`);
+                await new Promise(r => setTimeout(r, delay));
+            }
         }
-        // Don't throw — TX was broadcast. Proceed optimistically.
-        console.warn("[TON-Eats] ConfirmDelivery polling timed out, TX was broadcast.");
+        
+        // CRITICAL FIX: Do one final check before giving up
+        // This catches cases where the TX succeeded but polling was just unlucky with RPC errors
+        try {
+            console.log("[TON-Eats] Final status check before timeout...");
+            const finalStatus = await escrowContract.getGetOrderStatus(oid);
+            if (finalStatus === 2n) {
+                console.log(`[TON-Eats] ConfirmDelivery confirmed on final check!`);
+                return;
+            }
+        } catch (e: any) {
+            console.warn("[TON-Eats] Final status check failed:", e.message?.slice(0, 80));
+        }
+        
+        // If we get here, the transaction has not confirmed on-chain
+        throw new Error(
+            "Order confirmation timed out after ~75 seconds. " +
+            "The blockchain network may be congested. " +
+            "Please check if the payment was received by the merchant and try again, or contact support if funds are stuck."
+        );
     };
 
     // ── Admin: withdrawAll ───────────────────────────────────────────────────
     const withdrawAll = async () => {
         if (!escrowContract || !sender) return;
-        console.log("[TON-Eats] Admin rescuing safe funds...");
         await escrowContract.send(sender as any, { value: toNano("0.05") }, "withdraw_all");
     };
 

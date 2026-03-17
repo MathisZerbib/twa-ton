@@ -17,23 +17,25 @@ const LoadingAnimation: React.FC<LoadingAnimationProps> = ({
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      padding: "40px 0",
-      gap: 4,
+      minHeight: "100vh",
+      background: "var(--bg-primary)",
+      gap: 16,
     }}
   >
     <Lottie
       animationData={deliveryBikeAnimation}
       loop
       autoplay
-      style={{ width: size, height: size }}
+      style={{ width: size, height: size, filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.1))" }}
     />
     {message && (
       <p
         style={{
           margin: 0,
-          fontSize: "0.95rem",
-          fontWeight: 600,
-          color: "#888",
+          fontSize: "1rem",
+          fontWeight: 800,
+          color: "var(--text-secondary)",
+          letterSpacing: "-0.01em",
         }}
       >
         {message}

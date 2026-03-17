@@ -53,6 +53,12 @@ const ThemeProvider = ({ children }: { children: ReactNode }) => {
     setThemeName(newTheme);
   };
 
+  // Sync theme with DOM
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", themeName);
+    document.body.className = themeName;
+  }, [themeName]);
+
   return (
     <ThemeContext.Provider value={[{ themeName, toggleTheme }]}>
       {children}

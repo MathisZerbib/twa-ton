@@ -94,8 +94,8 @@ const BackButton = styled.button`
   position: absolute;
   top: env(safe-area-inset-top, 16px);
   left: 16px;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.15);
   background: rgba(255, 255, 255, 0.08);
@@ -106,6 +106,12 @@ const BackButton = styled.button`
   cursor: pointer;
   font-size: 0.9rem;
   margin-top: 16px;
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
   &:active {
     transform: scale(0.92);
   }

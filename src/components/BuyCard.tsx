@@ -26,44 +26,57 @@ const lift = keyframes`
 // ─── Styled Components ────────────────────────────────────────────────────────
 
 const Card = styled.div`
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  background: var(--bg-secondary);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all var(--transition-base);
   height: 100%;
-  border: 1px solid rgba(0,0,0,0.03);
+  border: 1px solid var(--bg-tertiary);
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-soft);
   }
 `;
 
 const ImageWrapper = styled.div<{ src: string }>`
   width: 100%;
-  height: 140px;
+  height: 170px;
   background-image: url(${(p) => p.src});
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   position: relative;
+  transition: transform var(--transition-base);
+
+  ${Card}:hover & {
+    transform: scale(1.04);
+  }
 
   &::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.2) 0%, transparent 40%);
+    background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 60%);
   }
 `;
 
+const ImageContainer = styled.div`
+  width: 100%;
+  height: 170px;
+  overflow: hidden;
+  position: relative;
+`;
+
 const Body = styled.div`
-  padding: 14px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   flex: 1;
 `;
 
@@ -71,17 +84,18 @@ const TopRow = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
+  gap: 12px;
 `;
 
 const ItemName = styled.h3`
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #1a1a1a;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--text-primary);
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.2;
   flex: 1;
-  min-height: 2.5rem; /* Space for 2 lines */
+  letter-spacing: -0.02em;
+  min-height: 2.6rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -91,57 +105,67 @@ const ItemName = styled.h3`
 const TagRow = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 2px;
+  gap: 8px;
 `;
 
 const Tag = styled.span`
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: #FF6B35;
-  background: rgba(255,107,53,0.08);
+  font-size: 0.725rem;
+  font-weight: 900;
+  color: var(--accent);
+  background: var(--accent-soft);
   border-radius: 8px;
-  padding: 3px 8px;
+  padding: 5px 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid hsla(var(--hue-brand), var(--sat-brand), var(--light-brand), 0.1);
 `;
 
 const Desc = styled.p`
-  font-size: 0.8rem;
-  color: #666;
-  line-height: 1.5;
-  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 500;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  min-height: 2.4rem; /* Exactly 2 lines of text */
+  min-height: 2.8rem;
 `;
 
 const BottomAction = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: auto; /* Push to bottom */
-  padding-top: 14px;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid var(--bg-tertiary);
 `;
 
 const QtyWrapper = styled.div`
   display: flex;
   align-items: center;
-  background: #f5f5f5;
-  border-radius: 12px;
-  padding: 4px 8px;
-  border: 1px solid #eee;
+  background: var(--bg-tertiary);
+  border-radius: 14px;
+  padding: 8px 14px;
+  transition: background var(--transition-fast);
+  
+  &:focus-within {
+    background: var(--bg-secondary);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+  }
 `;
 
 const QtySelect = styled.select`
   border: none;
   background: transparent;
-  color: #1a1a1a;
-  font-size: 0.85rem;
-  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 900;
   cursor: pointer;
   outline: none;
-  padding-right: 2px;
+  appearance: none;
+  padding-right: 4px;
 `;
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -168,18 +192,21 @@ const BuyCard: React.FC<ProductProps> = ({
   description,
 }) => {
   const [qty, setQty] = useState(1);
-  const displayPrice = parseFloat((qty * price).toFixed(2));
+  // For TON, use .toFixed(3) precision; for other currencies use .toFixed(2)
+  const displayPrice = parseFloat((qty * price).toFixed(price >= 1 ? 2 : 3));
   const safeStrains = Array.isArray(strains) ? strains : [];
   const safeDesc = typeof description === 'string' ? (description.split(".")[0] + ".") : "";
 
   return (
     <Card>
-      <ImageWrapper src={imageUrl || "/assets/photos/burger.png"} />
+      <ImageContainer>
+        <ImageWrapper src={imageUrl || "/assets/photos/burger.png"} />
+      </ImageContainer>
       <Body>
         <TopRow>
           <ItemName>{name}</ItemName>
           <Rating>
-            <span style={{ fontSize: "0.8rem", fontWeight: 800, color: "#1a1a1a" }}>{rating || 5}</span>
+            <span style={{ fontSize: "0.8rem", fontWeight: 800, color: "var(--text-primary)" }}>{rating || 5}</span>
             <Star icon={faStar} />
           </Rating>
         </TopRow>

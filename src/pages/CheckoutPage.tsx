@@ -9,7 +9,7 @@
  * - Shows viral share UI after success
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import styled, { keyframes, css } from "styled-components";
 import { useCart } from "../providers/CartProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -24,7 +24,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { SwipeableDrawer, IconButton } from "@mui/material";
 import CartItem from "../components/CartItem";
-import MapWithGeocoder from "../components/MapWithGeocoder";
 import {
   useTONEatsEscrow,
   DELIVERY_FEE_TON,
@@ -38,7 +37,7 @@ import { useCurrency } from "../providers/useCurrency";
 
 // ─── Default merchant address (fallback) ─────────────────────────────────────
 const DEFAULT_MERCHANT = "EQBPEDbGdwaLv1DKntg9r6SjFIVplSaSJoJ-TVLe_2rqBOmH";
-const BOT_NAME = import.meta.env.VITE_BOT_NAME ?? "YourTONEatsBot";
+const LazyMapWithGeocoder = lazy(() => import("../components/MapWithGeocoder"));
 
 // Simple Haversine distance in km
 function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -56,33 +55,39 @@ function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon
 // ─── Animations ──────────────────────────────────────────────────────────────
 const fadeIn = keyframes`from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); }`;
 const spin = keyframes`to { transform: rotate(360deg); }`;
-const pulse = keyframes`0%,100%{opacity:1} 50%{opacity:0.5}`;
-const shimmer = keyframes`
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-`;
-const floatUp = keyframes`
-  0%,100% { transform: translateY(0px); }
-  50% { transform: translateY(-4px); }
-`;
 const scaleIn = keyframes`from { opacity:0; transform:scale(0.85); } to { opacity:1; transform:scale(1); }`;
 
 // ─── Styled ───────────────────────────────────────────────────────────────────
 
 const DrawerContent = styled.div`
-  background: var(--tg-theme-bg-color, #fff);
-  min-height: 60vh;
+  background: var(--bg-primary);
+  /* Responsive heights: 50vh min on mobile, scale to 95vh max */
+  min-height: 50vh;
   max-height: 95vh;
   overflow-y: auto;
+  overflow-x: hidden;
   border-radius: 28px 28px 0 0;
   display: flex;
   flex-direction: column;
+  transition: background var(--transition-base);
+
+  /* Adjust for very small screens */
+  @media (max-height: 600px) {
+    min-height: 80vh;
+    max-height: 100vh;
+  }
+
+  /* Better spacing on larger screens */
+  @media (min-height: 900px) {
+    min-height: 60vh;
+    max-height: 90vh;
+  }
 `;
 
 const DrawerHandle = styled.div`
-  width: 40px; height: 4px;
-  background: #e0e0e0;
-  border-radius: 2px;
+  width: 44px; height: 5px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
   margin: 12px auto 0;
 `;
 
@@ -90,79 +95,86 @@ const DrawerHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px 8px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--bg-tertiary);
 `;
 
 const DrawerTitle = styled.h2`
-  font-size: 1.2rem;
-  font-weight: 800;
+  font-size: 1.4rem;
+  font-weight: 900;
   margin: 0;
-  color: var(--tg-theme-text-color, #1a1a1a);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
 `;
 
 const Section = styled.div`
-  padding: 16px 20px;
-  animation: ${fadeIn} 0.4s ease both;
+  padding: 20px;
+  animation: ${fadeIn} 0.5s var(--transition-smooth) both;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 320px;
 `;
 
 const SectionLabel = styled.p`
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #999;
-  margin: 0 0 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-hint);
+  margin: 0 0 12px;
 `;
 
 // ── Price Breakdown ──────────────────────────────────────────────────────────
 
 const PriceBox = styled.div`
-  background: linear-gradient(135deg, #fff8f5, #fff3ee);
-  border: 1px solid rgba(255,107,53,0.15);
-  border-radius: 16px;
-  padding: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: 20px;
+  padding: 20px;
   margin: 4px 20px 0;
-  animation: ${fadeIn} 0.4s ease 0.1s both;
+  animation: ${fadeIn} 0.5s var(--transition-smooth) 0.1s both;
+  box-shadow: var(--shadow-sm);
 `;
 
 const PriceLine = styled.div<{ bold?: boolean; accent?: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 0;
-  font-size: ${(p) => (p.bold ? "1rem" : "0.9rem")};
-  font-weight: ${(p) => (p.bold ? "800" : "500")};
+  padding: 6px 0;
+  font-size: ${(p) => (p.bold ? "1.1rem" : "0.95rem")};
+  font-weight: ${(p) => (p.bold ? "900" : "600")};
   color: ${(p) =>
-    p.accent ? "#FF6B35" : "var(--tg-theme-text-color, #1a1a1a)"};
-  border-top: ${(p) => (p.bold ? "1px solid rgba(0,0,0,0.08)" : "none")};
-  margin-top: ${(p) => (p.bold ? "8px" : "0")};
-  padding-top: ${(p) => (p.bold ? "12px" : "5px")};
+    p.accent ? "var(--accent)" : "var(--text-primary)"};
+  border-top: ${(p) => (p.bold ? "1px solid var(--bg-tertiary)" : "none")};
+  margin-top: ${(p) => (p.bold ? "12px" : "0")};
+  padding-top: ${(p) => (p.bold ? "16px" : "6px")};
 `;
 
 const PriceTag = styled.span`
   font-family: 'SF Mono', 'Fira Mono', monospace;
+  letter-spacing: -0.02em;
 `;
 
 const InfoChip = styled.span`
-  font-size: 0.7rem;
-  color: #888;
-  background: rgba(0,0,0,0.05);
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--text-hint);
+  background: var(--bg-tertiary);
   border-radius: 6px;
-  padding: 2px 6px;
-  margin-left: 6px;
+  padding: 2px 8px;
+  margin-left: 8px;
+  text-transform: uppercase;
 `;
 
 // ── Map Section ───────────────────────────────────────────────────────────────
 
 const MapCard = styled.div<{ $selected: boolean }>`
-  margin: 0 20px;
-  border-radius: 16px;
+  margin: 0;
+  border-radius: 20px;
   overflow: hidden;
   border: 2px solid ${(p) =>
-    p.$selected ? "#FF6B35" : "rgba(0,0,0,0.1)"};
-  transition: border-color 0.3s;
-  animation: ${fadeIn} 0.4s ease 0.15s both;
+    p.$selected ? "var(--accent)" : "var(--bg-tertiary)"};
+  transition: all var(--transition-base);
+  box-shadow: ${(p) => (p.$selected ? "var(--shadow-md)" : "none")};
 `;
 
 const MapPlaceholder = styled.button`
@@ -170,51 +182,71 @@ const MapPlaceholder = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 18px;
-  background: #faf7f5;
-  color: #666;
-  font-size: 0.95rem;
-  font-weight: 600;
+  gap: 12px;
+  padding: 24px 20px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
   border: none;
   cursor: pointer;
   transition: background 0.2s;
-  &:hover { background: #f5f0ec; }
+  &:hover { background: var(--bg-tertiary); }
 `;
 
 const MapPinLabel = styled.div`
-  margin: 8px 20px 0;
-  font-size: 0.82rem;
-  color: #555;
+  margin: 12px 0 0;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  font-weight: 600;
+`;
+
+const ValidationError = styled.div`
+  padding: 12px 16px;
+  margin: 12px 20px 0;
+  border-radius: var(--btn-radius);
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border: 1px solid var(--error);
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: ${fadeIn} 0.2s ease-in;
+  
+  svg {
+    flex-shrink: 0;
+  }
 `;
 
 // ── Pay Button ────────────────────────────────────────────────────────────────
 
 const PayBtn = styled.button<{ disabled: boolean }>`
-  margin: 20px 20px 0;
+  margin: 24px 20px 0;
   width: calc(100% - 40px);
-  padding: 18px;
-  border-radius: 18px;
+  padding: 20px;
+  border-radius: 20px;
   border: none;
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 1.1rem;
+  font-weight: 900;
   cursor: ${(p) => (p.disabled ? "not-allowed" : "pointer")};
   background: ${(p) =>
     p.disabled
-      ? "linear-gradient(135deg, #ccc, #ddd)"
-      : "linear-gradient(135deg, #FF6B35, #F7931E)"};
-  color: ${(p) => (p.disabled ? "#999" : "#fff")};
+      ? "var(--bg-tertiary)"
+      : "var(--accent)"};
+  color: ${(p) => (p.disabled ? "var(--text-hint)" : "#fff")};
   box-shadow: ${(p) =>
-    p.disabled ? "none" : "0 8px 20px rgba(255,107,53,0.4)"};
-  transition: all 0.3s;
+    p.disabled ? "none" : "0 10px 24px hsla(var(--hue-brand), var(--sat-brand), var(--light-brand), 0.3)"};
+  transition: all var(--transition-base);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  animation: ${fadeIn} 0.4s ease 0.2s both;
+  gap: 12px;
+  animation: ${fadeIn} 0.5s var(--transition-smooth) 0.2s both;
 
   &:active:not(:disabled) {
     transform: scale(0.97);
@@ -225,58 +257,68 @@ const SpinIcon = styled(FontAwesomeIcon)`
   animation: ${spin} 1s linear infinite;
 `;
 
+const WalletApprovalHint = styled.p`
+  margin: 10px 24px 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-hint);
+  text-align: center;
+`;
+
 // ── Success Panel ─────────────────────────────────────────────────────────────
 
 const SuccessPanel = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32px 24px;
+  padding: 48px 24px;
   text-align: center;
-  animation: ${fadeIn} 0.5s ease;
-  gap: 14px;
+  animation: ${scaleIn} 0.6s var(--transition-smooth) both;
+  gap: 16px;
 `;
 
 const SuccessIcon = styled.div`
-  font-size: 3.5rem;
-  color: #4caf50;
+  font-size: 4.5rem;
+  color: var(--success);
+  filter: drop-shadow(0 10px 20px rgba(16,185,129,0.2));
 `;
 
 const SuccessTitle = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1.8rem;
+  font-weight: 900;
   margin: 0;
-  color: var(--tg-theme-text-color, #1a1a1a);
+  color: var(--text-primary);
+  letter-spacing: -0.04em;
 `;
 
 const SuccessDesc = styled.p`
-  font-size: 0.92rem;
-  color: #666;
-  line-height: 1.5;
-  max-width: 280px;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 300px;
+  font-weight: 500;
 `;
 
-// ──   r (for users who arrived via a referral link) ───────────────
+// ── ReferralBanner (for users who arrived via a referral link) ────────────
 const ReferralBanner = styled.div`
-  margin: 0 20px 4px;
-  background: linear-gradient(135deg, #1b4332, #2d6a4f);
-  border: 1px solid rgba(100, 220, 140, 0.3);
-  border-radius: 14px;
-  padding: 10px 14px;
+  margin: 0 20px 8px;
+  background: hsla(122, 39%, 49%, 0.1);
+  border: 1px solid hsla(122, 39%, 49%, 0.2);
+  border-radius: 16px;
+  padding: 12px 18px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  animation: ${fadeIn} 0.4s ease;
+  gap: 12px;
+  animation: ${fadeIn} 0.5s var(--transition-smooth);
 `;
 const ReferralBannerText = styled.p`
   margin: 0;
-  font-size: 0.8rem;
-  color: #a7f3c0;
-  line-height: 1.4;
-  strong { color: #fff; }
+  font-size: 0.85rem;
+  color: var(--success);
+  line-height: 1.5;
+  font-weight: 600;
+  strong { color: var(--success-dark); font-weight: 800; }
 `;
-
-
 
 // ─── Empty Cart ───────────────────────────────────────────────────────────────
 
@@ -285,39 +327,69 @@ const EmptyState = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
-  color: #aaa;
-  gap: 12px;
-  font-size: 0.95rem;
+  padding: 60px 24px;
+  color: var(--text-hint);
+  gap: 16px;
+  font-size: 1rem;
   text-align: center;
+  font-weight: 600;
 `;
 
 // ─── Map Drawer ───────────────────────────────────────────────────────────────
 
 const MapDrawerContent = styled.div`
-  height: 70vh;
+  /* Responsive map drawer height: 70% of viewport on mobile, 75% on larger screens */
+  height: clamp(60vh, 75vh, 85vh);
   display: flex;
   flex-direction: column;
+  background: var(--bg-primary);
+
+  @media (max-width: 480px) {
+    height: 70vh;
+  }
 `;
 
 const MapDrawerHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  padding: 20px;
+  border-bottom: 1px solid var(--bg-tertiary);
 `;
 
 const ConfirmAddrBtn = styled.button`
-  padding: 10px 20px;
-  border-radius: 12px;
+  padding: 12px 24px;
+  min-height: 44px;
+  border-radius: 14px;
   border: none;
-  background: linear-gradient(135deg, #FF6B35, #F7931E);
+  background: var(--accent);
   color: #fff;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
+  box-shadow: 0 4px 12px hsla(var(--hue-brand), var(--sat-brand), var(--light-brand), 0.3);
+  transition: all var(--transition-fast);
+  font-size: 1rem;
+  
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    &:active:not(:disabled) {
+      transform: none;
+    }
+  }
 `;
-
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -439,16 +511,22 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
         onOpen={() => { }}
         PaperProps={{ style: { borderRadius: "28px 28px 0 0", background: "transparent" } }}
         disableSwipeToOpen
+        aria-labelledby="checkout-title"
       >
-        <DrawerContent>
+        <DrawerContent role="dialog" aria-label="Review order form">
           <DrawerHandle />
 
           {/* Header */}
           <DrawerHeader>
-            <DrawerTitle>
-              {state === "success" ? "🎉 Order Placed!" : "Your Order"}
+            <DrawerTitle id="checkout-title">
+              {state === "success" ? "Order confirmed" : "Review Your Order"}
             </DrawerTitle>
-            <IconButton onClick={onClose} size="small">
+            <IconButton
+              onClick={onClose}
+              size="small"
+              aria-label="Close checkout"
+              title="Close checkout form"
+            >
               <FontAwesomeIcon icon={faClose} />
             </IconButton>
           </DrawerHeader>
@@ -459,10 +537,10 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
               <SuccessIcon>
                 <FontAwesomeIcon icon={faCheckCircle} />
               </SuccessIcon>
-              <SuccessTitle>Payment Locked in Escrow!</SuccessTitle>
+              <SuccessTitle>Payment secured</SuccessTitle>
               <SuccessDesc>
-                Your <strong>{grandTotal.toFixed(2)} {selectedCurrency}</strong> is securely locked in the smart contract.
-                Re-directing to live tracker...
+                Your <strong>{grandTotal.toFixed(selectedCurrency === "TON" ? 3 : 2)} {selectedCurrency}</strong> is secured on-chain.
+                Taking you to live tracking...
               </SuccessDesc>
             </SuccessPanel>
           )}
@@ -476,7 +554,7 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
                 {cartItems.length === 0 ? (
                   <EmptyState>
                     <span style={{ fontSize: "3rem" }}>🛒</span>
-                    <span>Your cart is empty.<br />Add some food first!</span>
+                    <span>Your cart is empty.<br />Add items to review your order.</span>
                   </EmptyState>
                 ) : (
                   cartItems.map((item) => (
@@ -492,33 +570,32 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
                     <ReferralBanner>
                       <FontAwesomeIcon icon={faGift} style={{ color: '#6ee7a0', flexShrink: 0 }} />
                       <ReferralBannerText>
-                        <strong>Friend's link applied!</strong> A portion of the protocol fee
-                        goes back to your friend as a crypto thank-you. 🎁
+                        <strong>Friend referral applied.</strong> Your friend earns cashback after this order is delivered.
                       </ReferralBannerText>
                     </ReferralBanner>
                   )}
 
                   {/* Price Breakdown */}
-                  <SectionLabel style={{ padding: "0 20px" }}>Price Breakdown</SectionLabel>
+                  <SectionLabel style={{ padding: "0 20px" }}>Order Summary</SectionLabel>
                   <PriceBox>
                     <PriceLine>
-                      <span>🍔 Food Subtotal</span>
-                      <PriceTag>{foodTotal.toFixed(2)} {selectedCurrency}</PriceTag>
+                      <span>Food subtotal</span>
+                      <PriceTag>{foodTotal.toFixed(selectedCurrency === "TON" ? 3 : 2)} {selectedCurrency}</PriceTag>
                     </PriceLine>
                     <PriceLine>
                       <span>
-                        🛵 Delivery Fee
+                        Delivery fee
                         <InfoChip>goes to courier</InfoChip>
                       </span>
-                      <PriceTag>{deliveryFee.toFixed(2)} {selectedCurrency}</PriceTag>
+                      <PriceTag>{deliveryFee.toFixed(selectedCurrency === "TON" ? 3 : 2)} {selectedCurrency}</PriceTag>
                     </PriceLine>
                     <PriceLine>
                       <span>
                         <FontAwesomeIcon icon={faShieldHalved} style={{ color: "#FF6B35", marginRight: 4 }} />
-                        Protocol Fee
-                        <InfoChip>MRR treasury</InfoChip>
+                        Blockchain security fee
+                        <InfoChip>smart contract costs</InfoChip>
                       </span>
-                      <PriceTag>{protocolFee.toFixed(2)} {selectedCurrency}</PriceTag>
+                      <PriceTag>{protocolFee.toFixed(selectedCurrency === "TON" ? 3 : 2)} {selectedCurrency}</PriceTag>
                     </PriceLine>
                     {referrerWallet && (
                       <PriceLine accent>
@@ -527,8 +604,8 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
                       </PriceLine>
                     )}
                     <PriceLine bold>
-                      <span>Total (locked in escrow)</span>
-                      <PriceTag>{grandTotal.toFixed(2)} {selectedCurrency}</PriceTag>
+                      <span>Total (secured in escrow)</span>
+                      <PriceTag>{grandTotal.toFixed(selectedCurrency === "TON" ? 3 : 2)} {selectedCurrency}</PriceTag>
                     </PriceLine>
                   </PriceBox>
 
@@ -539,52 +616,92 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
                       <MapPlaceholder
                         id="select-address-btn"
                         onClick={() => setMapDrawerOpen(true)}
+                        aria-invalid={cartItems.length > 0 && !selectedAddress}
+                        aria-describedby="address-validation"
+                        aria-label="Select delivery address on map"
                       >
                         <FontAwesomeIcon
                           icon={faMapMarkerAlt}
                           style={{ color: selectedAddress ? "#FF6B35" : "#aaa" }}
                         />
-                        {selectedAddress || "Tap to pin your delivery location"}
+                        {selectedAddress || "Select your delivery address"}
                       </MapPlaceholder>
                     </MapCard>
                     {selectedAddress && (
                       <MapPinLabel>
                         <FontAwesomeIcon icon={faCheckCircle} style={{ color: "#4caf50" }} />
-                        {selectedAddress} (ETA: {eta})
+                        {selectedAddress} (Estimated arrival: {eta})
                       </MapPinLabel>
                     )}
                   </Section>
+
+                  {/* Validation Errors */}
+                  {cartItems.length > 0 && !selectedAddress && (
+                    <ValidationError role="alert" aria-live="polite">
+                      <FontAwesomeIcon icon={faMapMarkerAlt} />
+                      <span>Please select your delivery address to continue</span>
+                    </ValidationError>
+                  )}
+
+                  {cartItems.length > 0 && !connected && (
+                    <ValidationError role="alert" aria-live="polite">
+                      <FontAwesomeIcon icon={faShieldHalved} />
+                      <span>Connect your wallet to continue</span>
+                    </ValidationError>
+                  )}
 
                   {/* Pay Button */}
                   <PayBtn
                     id="pay-with-ton-btn"
                     disabled={!canPay}
                     onClick={handlePay}
+                    aria-disabled={!canPay}
+                    aria-label={
+                      state === "paying"
+                        ? "Locking funds in escrow"
+                        : !connected
+                          ? "Connect wallet to continue"
+                          : !selectedAddress
+                            ? "Select delivery address to continue"
+                            : `Pay ${grandTotal.toFixed(selectedCurrency === "TON" ? 3 : 2)} ${selectedCurrency} and place order`
+                    }
                   >
                     {state === "paying" ? (
                       <>
                         <SpinIcon icon={faSpinner} />
-                        Locking funds in escrow…
+                        Waiting for TON wallet confirmation…
                       </>
                     ) : !connected ? (
-                      "Connect TON Wallet first"
+                      "Connect wallet to continue"
                     ) : !selectedAddress ? (
                       <>
                         <FontAwesomeIcon icon={faMapMarkerAlt} />
-                        Select delivery address first
+                        Select delivery address to continue
                       </>
                     ) : (
                       <>
                         <FontAwesomeIcon icon={faMotorcycle} />
-                        Pay {grandTotal.toFixed(2)} {selectedCurrency} · Place Order
+                        Pay {grandTotal.toFixed(selectedCurrency === "TON" ? 3 : 2)} {selectedCurrency} · Place Order
                       </>
                     )}
                   </PayBtn>
 
+                  {connected && selectedAddress && state === "cart" && (
+                    <WalletApprovalHint>
+                      After tapping Place Order, approve the transaction in your TON wallet app on mobile.
+                    </WalletApprovalHint>
+                  )}
+
+                  {state === "paying" && (
+                    <WalletApprovalHint aria-live="polite">
+                      Check your phone and validate this transaction in the TON app to complete your order.
+                    </WalletApprovalHint>
+                  )}
+
                   <Section style={{ paddingTop: 12 }}>
-                    <p style={{ fontSize: "0.72rem", color: "#aaa", textAlign: "center", lineHeight: 1.5, margin: 0 }}>
-                      🔒 Funds are locked in a TON smart contract and released only after you confirm delivery.
-                      0% commission to the restaurant.
+                    <p style={{ fontSize: "0.72rem", color: "var(--text-hint)", textAlign: "center", lineHeight: 1.5, margin: 0 }}>
+                      Funds are secured in a TON smart contract and released only after delivery confirmation.
+                      Restaurants keep 100% of each order.
                     </p>
                   </Section>
                 </>
@@ -606,11 +723,14 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
           <MapDrawerHeader>
             <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800 }}>
               <FontAwesomeIcon icon={faMapMarkerAlt} style={{ color: "#FF6B35", marginRight: 8 }} />
-              Pin Your Location
+              Confirm Delivery Address
             </h3>
             <ConfirmAddrBtn
               id="confirm-address-btn"
               onClick={() => {
+                const tg = (window as any).Telegram?.WebApp;
+                if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred("medium");
+                
                 if (pendingAddress) setSelectedAddress(pendingAddress);
                 if (pendingLat && pendingLng && store && store.lat && store.lng) {
                   const dist = getDistanceFromLatLonInKm(pendingLat, pendingLng, store.lat, store.lng);
@@ -621,17 +741,19 @@ function CheckoutPage({ open, onClose, storeId = "1" }: CheckoutPageProps) {
                 setMapDrawerOpen(false);
               }}
             >
-              Confirm
+              Use this address
             </ConfirmAddrBtn>
           </MapDrawerHeader>
           <div style={{ flex: 1, overflow: "hidden" }}>
-            <MapWithGeocoder
-              onSelectedAddress={(addr: string, lat?: number, lng?: number) => {
-                setPendingAddress(addr);
-                setPendingLat(lat);
-                setPendingLng(lng);
-              }}
-            />
+            <Suspense fallback={<div style={{ padding: 16, color: "var(--text-hint)" }}>Loading map...</div>}>
+              <LazyMapWithGeocoder
+                onSelectedAddress={(addr: string, lat?: number, lng?: number) => {
+                  setPendingAddress(addr);
+                  setPendingLat(lat);
+                  setPendingLng(lng);
+                }}
+              />
+            </Suspense>
           </div>
         </MapDrawerContent>
       </SwipeableDrawer>

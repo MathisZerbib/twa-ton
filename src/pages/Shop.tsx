@@ -7,7 +7,7 @@
  * sticky cart bar, and opens the checkout drawer.
  */
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import styled, { keyframes } from "styled-components";
 import LoadingAnimation from "../components/LoadingAnimation";
 import { useParams, useNavigate } from "react-router-dom";
@@ -22,15 +22,16 @@ import {
   faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { AppContainer, FlexBoxCol } from "../components/styled/styled";
+import { AppContainer, FlexBoxCol, Button } from "../components/styled/styled";
 import ProductsList from "../components/ProductsList";
 import Header from "../components/Header";
-import CheckoutPage from "./CheckoutPage";
 import { useCart } from "../providers/CartProvider";
-import { useTONEatsEscrow } from "../hooks/useTONEatsEscrow";
 import { useCurrency } from "../providers/useCurrency";
 
 import { api } from "../services/api";
+
+const CheckoutPage = lazy(() => import("./CheckoutPage"));
+const AdminRescuePanel = lazy(() => import("../components/AdminRescuePanel"));
 
 // ─── Animations ──────────────────────────────────────────────────────────────
 const fadeUp = keyframes`
@@ -41,15 +42,16 @@ const fadeUp = keyframes`
 // ─── Styled ───────────────────────────────────────────────────────────────────
 
 const PageWrapper = styled.div`
-  background: var(--tg-theme-bg-color, #f7f7f7);
+  background: var(--bg-primary);
   min-height: 100vh;
   padding-bottom: 110px;
+  transition: background var(--transition-base);
 `;
 
 const HeroBanner = styled.div<{ $src: string }>`
   position: relative;
   width: 100%;
-  height: 240px;
+  height: 280px;
   background-image: url(${p => p.$src});
   background-size: cover;
   background-position: center;
@@ -61,7 +63,7 @@ const HeroBanner = styled.div<{ $src: string }>`
 const HeroOverlay = styled.div`
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%);
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
 `;
 
 const HeroContent = styled.div`
@@ -73,17 +75,23 @@ const HeroContent = styled.div`
 `;
 
 const RestaurantName = styled.h1`
-  font-size: 2.2rem;
+  /* Responsive font sizing: 2.0rem on mobile, 2.6rem on tablet+ */
+  font-size: clamp(1.8rem, 8vw, 2.6rem);
   font-weight: 900;
-  margin: 0 0 8px;
-  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+  letter-spacing: -0.04em;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+
+  @media (max-width: 320px) {
+    font-size: 1.6rem;
+  }
 `;
 
 const RestaurantMeta = styled.div`
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   font-size: 0.9rem;
   font-weight: 700;
 `;
@@ -92,11 +100,13 @@ const MetaChip = styled.span`
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.12);
   border-radius: 12px;
-  padding: 5px 12px;
+  padding: 6px 14px;
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.2);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
 `;
 
 const BackBtn = styled.button`
@@ -107,86 +117,90 @@ const BackBtn = styled.button`
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: rgba(255,255,255,0.95);
-  border: none;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-  color: #1a1a1a;
-  transition: all 0.2s;
-  &:active { transform: scale(0.9); }
+  color: #fff;
+  transition: all var(--transition-fast);
+  
+  /* Adjust positioning for very small screens */
+  @media (max-width: 320px) {
+    top: 16px;
+    left: 12px;
+  }
+  
+  &:active {
+    transform: scale(0.9);
+  }
 `;
 
 const ContentSection = styled.div`
-  padding: 20px 16px;
+  padding: 24px 16px;
+  max-width: 1360px;
+  margin: 0 auto;
   animation: ${fadeUp} 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.1s both;
+
+  /* Full width on mobile */
+  @media (max-width: 480px) {
+    padding: 16px 12px;
+  }
+
+  /* Better padding on larger screens */
+  @media (min-width: 768px) {
+    padding: 28px 20px;
+  }
 `;
 
 const PromoBadge = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: #fdf2f2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
+  background: var(--accent-soft);
+  border: 1px solid hsla(var(--hue-brand), var(--sat-brand), var(--light-brand), 0.25);
+  color: var(--accent-dark);
   font-weight: 800;
   font-size: 0.75rem;
-  padding: 8px 14px;
-  border-radius: 10px;
+  padding: 10px 16px;
+  border-radius: 12px;
   margin-bottom: 24px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+
+  body.dark &,
+  :root[data-theme='dark'] & {
+    color: var(--accent);
+  }
 `;
 
-// ─── Sticky Cart Bar ──────────────────────────────────────────────────────────
+import { SkeletonCard, SkeletonLine, SkeletonBase } from "../components/Skeleton";
+import StickyBottomBar from "../components/StickyBottomBar/StickyBottomBar";
 
-const StickyCartBar = styled.div<{ visible: boolean }>`
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 999;
-  padding: 12px 16px;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom, 16px));
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(24px);
-  border-top: 1px solid rgba(0,0,0,0.08);
-  transform: translateY(${(p) => (p.visible ? "0" : "100%")});
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 -12px 40px rgba(0,0,0,0.1);
-`;
-
-const CartBtn = styled.button`
+const SkeletonHero = styled(SkeletonBase)`
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 24px 18px 24px;
-  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
-  color: #fff;
-  border: none;
-  border-radius: 18px;
-  font-size: 1.05rem;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  transition: all 0.2s;
+  height: 280px;
+  border-radius: 0;
+`;
 
-  &:hover {
-    background: #FF6B35;
-    box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
+const SkeletonContent = styled.div`
+  padding: 24px 16px;
+  max-width: 1360px;
+  margin: 0 auto;
+  width: 100%;
+
+  /* Full width on mobile */
+  @media (max-width: 480px) {
+    padding: 16px 12px;
   }
 
-  &:active { transform: scale(0.98); }
-`;
-
-const CartBadge = styled.span`
-  background: rgba(255,255,255,0.2);
-  border-radius: 10px;
-  padding: 4px 12px;
-  font-size: 0.9rem;
+  /* Better padding on larger screens */
+  @media (min-width: 768px) {
+    padding: 28px 20px;
+  }
 `;
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -197,10 +211,9 @@ const Shop: React.FC = () => {
   const { totalPrice, cartItems } = useCart();
   const { selectedCurrency } = useCurrency();
   const [openCheckout, setOpenCheckout] = useState(false);
-  const { withdrawAll, contractAddress } = useTONEatsEscrow();
+  const [showAdminTools, setShowAdminTools] = useState(false);
 
   const [store, setStore] = useState<any>(null);
-  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [rate, setRate] = useState(6.0);
 
@@ -209,10 +222,10 @@ const Shop: React.FC = () => {
     async function loadMerchant() {
       try {
         setLoading(true);
+        // Simulate slightly longer load for skeletal effect
         const [merchantData, rateData] = await Promise.all([
           api.getMerchant(storeId),
           api.getTonUsdRate(),
-          new Promise(r => setTimeout(r, 1500)),
         ]);
         setStore(merchantData);
         if (rateData.priceUsd) setRate(rateData.priceUsd);
@@ -231,15 +244,52 @@ const Shop: React.FC = () => {
     return store.products.map((p: any) => ({
       ...p,
       price: selectedCurrency === "TON"
-        ? parseFloat((p.priceUsdt / rate).toFixed(2))
+        ? parseFloat((p.priceUsdt / rate).toFixed(3))
         : p.priceUsdt
     }));
   }, [store, selectedCurrency, rate]);
 
-  const cartCount = cartItems.length;
+  if (loading) {
+    return (
+      <PageWrapper>
+        <Header />
+        <SkeletonHero />
+        <SkeletonContent>
+          <SkeletonLine $width="60%" $height="32px" style={{ marginBottom: 20 }} />
+          <SkeletonLine $width="40%" $height="20px" style={{ marginBottom: 40 }} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        </SkeletonContent>
+      </PageWrapper>
+    );
+  }
 
-  if (loading) return <PageWrapper><LoadingAnimation message="Loading store…" /></PageWrapper>;
-  if (!store) return <PageWrapper><div style={{ padding: 40, textAlign: 'center' }}>Store not found</div></PageWrapper>;
+  if (!store) {
+    return (
+      <PageWrapper>
+        <Header />
+        <div style={{ 
+          padding: "100px 20px", 
+          textAlign: 'center', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          gap: 24 
+        }}>
+          <div style={{ fontSize: "5rem", filter: "grayscale(1) opacity(0.5)" }}>🍱</div>
+          <h2 style={{ fontSize: "1.8rem", fontWeight: 900, letterSpacing: "-0.04em" }}>Store Not Found</h2>
+          <p style={{ color: "var(--text-secondary)", maxWidth: 300, lineHeight: 1.6, fontWeight: 500 }}>
+            Sorry, this restaurant is no longer available. Explore other options nearby.
+          </p>
+          <Button onClick={() => navigate("/")} style={{ padding: "16px 32px" }}>Back to Explore</Button>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   return (
     <PageWrapper>
@@ -248,7 +298,7 @@ const Shop: React.FC = () => {
 
       {/* ── Hero ── */}
       <HeroBanner $src={store.bannerUrl}>
-        <BackBtn onClick={() => navigate("/")}>
+        <BackBtn onClick={() => navigate("/")} aria-label="Go back">
           <FontAwesomeIcon icon={faArrowLeft} />
         </BackBtn>
         <HeroOverlay />
@@ -256,15 +306,15 @@ const Shop: React.FC = () => {
           <RestaurantName>{store.name}</RestaurantName>
           <RestaurantMeta>
             <MetaChip>
-              <FontAwesomeIcon icon={faStar} />
+              <FontAwesomeIcon icon={faStar} style={{ color: "#FFD23F" }} />
               {store.rating}
             </MetaChip>
             <MetaChip>
-              <FontAwesomeIcon icon={faClock} />
+              <FontAwesomeIcon icon={faClock} style={{ opacity: 0.7 }} />
               {store.deliveryTime}
             </MetaChip>
             <MetaChip>
-              <FontAwesomeIcon icon={faMotorcycle} />
+              <FontAwesomeIcon icon={faMotorcycle} style={{ opacity: 0.7 }} />
               {selectedCurrency === "TON" ? "0.2 TON" : "$1.20"} delivery
             </MetaChip>
           </RestaurantMeta>
@@ -281,44 +331,57 @@ const Shop: React.FC = () => {
             <ProductsList products={mappedProducts} />
           </FlexBoxCol>
 
-          {/* Admin rescue button */}
-          <div style={{ marginTop: 60, textAlign: 'center', opacity: 0.5 }}>
-            <p style={{ fontSize: 10, margin: '0 0 10px' }}>Admin Protocol Controls</p>
-            <button
-              onClick={withdrawAll}
-              style={{
-                background: 'transparent',
-                border: '1px solid #ccc',
-                padding: '6px 12px',
-                borderRadius: 8,
-                fontSize: 12,
-                cursor: 'pointer'
-              }}
-            >
-              Withdraw Safe Escrow Funds (Treasury Only)
-            </button>
-            <p style={{ fontSize: 9, marginTop: 4 }}>Contract: {contractAddress}</p>
+          {/* Admin rescue button (Distilled) */}
+          <div style={{ marginTop: 100, padding: "32px 0", borderTop: "1px solid var(--bg-tertiary)", opacity: 0.5, textAlign: 'center' }}>
+            <FlexBoxCol style={{ alignItems: "center", gap: 12 }}>
+              <p style={{ fontSize: 10, fontWeight: 800, color: "var(--text-hint)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Infrastructure Management</p>
+              <button
+                onClick={() => setShowAdminTools((v) => !v)}
+                style={{
+                  background: 'var(--bg-tertiary)',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: 14,
+                  fontSize: 11,
+                  fontWeight: 800,
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                {showAdminTools ? "Hide Admin Tools" : "Show Admin Tools"}
+              </button>
+              {showAdminTools && (
+                <Suspense fallback={<div style={{ color: "var(--text-hint)", fontSize: 12 }}>Loading admin tools...</div>}>
+                  <AdminRescuePanel />
+                </Suspense>
+              )}
+            </FlexBoxCol>
           </div>
         </AppContainer>
       </ContentSection>
 
       {/* ── Checkout Drawer ── */}
-      <CheckoutPage
-        open={openCheckout}
-        onClose={() => setOpenCheckout(false)}
-        storeId={storeId}
-      />
+      {openCheckout && (
+        <Suspense fallback={null}>
+          <CheckoutPage
+            open={openCheckout}
+            onClose={() => setOpenCheckout(false)}
+            storeId={storeId}
+          />
+        </Suspense>
+      )}
 
       {/* ── Sticky Cart Bar ── */}
-      <StickyCartBar visible={cartCount > 0}>
-        <CartBtn id="open-cart-btn" onClick={() => setOpenCheckout(true)}>
-          <span>
-            <FontAwesomeIcon icon={faShoppingBag} style={{ marginRight: 8 }} />
-            View Cart ({cartCount} item{cartCount !== 1 ? "s" : ""})
-          </span>
-          <CartBadge>{totalPrice.toFixed(2)} {selectedCurrency}</CartBadge>
-        </CartBtn>
-      </StickyCartBar>
+      <StickyBottomBar 
+        totalPrice={totalPrice}
+        selectedCurrency={selectedCurrency}
+        showCheckout={() => {
+          const tg = (window as any).Telegram?.WebApp;
+          if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred("light");
+          setOpenCheckout(true);
+        }}
+      />
     </PageWrapper>
   );
 };

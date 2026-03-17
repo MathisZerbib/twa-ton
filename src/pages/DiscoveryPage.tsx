@@ -15,169 +15,225 @@ import { api } from "../services/api";
 const fadeUp = keyframes`from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}`;
 
 const Container = styled.div`
-  background: #f7f7f7;
+  background: var(--bg-primary);
   min-height: 100vh;
-  padding-bottom: 40px;
+  padding-bottom: 60px;
+  transition: background var(--transition-base);
 `;
 
 const Content = styled.div`
-  max-width: 600px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 16px;
+  width: 100%;
+
+  /* Full width on mobile */
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
+
+  /* Better padding on larger screens */
+  @media (min-width: 768px) {
+    padding: 20px;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 24px;
+  }
 `;
 
 const SearchBar = styled.div`
-  background: #fff;
-  border-radius: 16px;
-  padding: 12px 18px;
+  background: var(--bg-secondary);
+  border-radius: 18px;
+  padding: 14px 20px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  border: 1px solid rgba(0,0,0,0.03);
+  gap: 14px;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--bg-tertiary);
+  transition: all var(--transition-fast);
+
+  &:focus-within {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+  }
 `;
 
 const SearchInput = styled.input`
   border: none;
   background: transparent;
   flex: 1;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-weight: 600;
   outline: none;
-  color: #1a1a1a;
-  &::placeholder { color: #aaa; }
+  color: var(--text-primary);
+  &::placeholder { color: var(--text-hint); }
 `;
 
 const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 900;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
 `;
 
-
-
 const RestaurantGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 `;
 
 const RestaurantCard = styled.div<{ $delay: number }>`
-  background: #fff;
-  border-radius: 20px;
+  background: var(--bg-secondary);
+  border-radius: var(--card-radius);
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  animation: ${fadeUp} 0.5s ease ${p => p.$delay * 0.1}s both;
-  transition: transform 0.2s, box-shadow 0.2s;
+  animation: ${fadeUp} 0.6s var(--transition-smooth) ${p => p.$delay * 0.08}s both;
+  transition: all var(--transition-base);
+  border: 1px solid var(--bg-tertiary);
+  height: 100%;
   
   &:active {
-    transform: scale(0.98);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: scale(0.97);
+    box-shadow: var(--shadow-md);
   }
 `;
 
 const Banner = styled.div<{ $src: string }>`
-  height: 160px;
+  height: 180px;
   background-image: url(${p => p.$src});
   background-size: cover;
   background-position: center;
   position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%);
+  }
 `;
 
 const LogoBox = styled.div`
   position: absolute;
-  bottom: -20px;
+  bottom: -24px;
   left: 20px;
-  width: 60px;
-  height: 60px;
-  background: #fff;
-  border-radius: 14px;
-  padding: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  width: 64px;
+  height: 64px;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: var(--shadow-md);
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 4px solid var(--bg-secondary);
   
   img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    border-radius: 8px;
   }
 `;
 
 const CardInfo = styled.div`
-  padding: 28px 20px 20px;
+  padding: 32px 20px 20px;
 `;
 
 const NameRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 `;
 
 const Name = styled.h3`
-  font-size: 1.15rem;
-  font-weight: 800;
+  font-size: 1.3rem;
+  font-weight: 900;
   margin: 0;
-  color: #1a1a1a;
-  min-height: 1.4rem; /* Safe slot for 1 line */
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `;
 
 const Rating = styled.span`
-  background: #fdf2f2;
-  color: #FF6B35;
-  font-size: 0.75rem;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-`;
-
-const Category = styled.p`
+  background: var(--accent-soft);
+  color: var(--accent);
   font-size: 0.85rem;
-  color: #666;
-  margin: 0 0 12px;
-  min-height: 1.2rem; /* Consistent spacing */
-`;
-
-const MetaRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: 0.78rem;
-  color: #888;
-  font-weight: 600;
-`;
-
-const MetaItem = styled.span`
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   gap: 5px;
 `;
 
+const CategoryString = styled.p`
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0 0 16px;
+  font-weight: 600;
+`;
+
+const MetaRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 700;
+  padding-top: 16px;
+  border-top: 1px solid var(--bg-tertiary);
+`;
+
+const MetaItem = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+import { SkeletonCard, SkeletonLine } from "../components/Skeleton";
+
 const DiscoveryPage: React.FC = () => {
   const navigate = useNavigate();
   const [merchants, setMerchants] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.getMerchants().then(setMerchants).catch(console.error);
+    setLoading(true);
+    api.getMerchants()
+      .then(res => {
+        setMerchants(res);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
   }, []);
 
   return (
@@ -185,24 +241,36 @@ const DiscoveryPage: React.FC = () => {
       <Header showConnectButton={true} />
       <Content>
         <SearchBar>
-          <FontAwesomeIcon icon={faMagnifyingGlass} style={{ color: "#aaa" }} />
-          <SearchInput placeholder="Search restaurants or cuisines..." />
+          <FontAwesomeIcon icon={faMagnifyingGlass} style={{ color: "var(--text-hint)", opacity: 0.5 }} />
+          <SearchInput placeholder="Search restaurants, cuisines, or areas..." />
         </SearchBar>
 
         <SectionHeader>
           <SectionTitle>
-            <FontAwesomeIcon icon={faFire} style={{ color: "#FF6B35" }} />
-            Trending on TON
+            <FontAwesomeIcon icon={faFire} style={{ color: "var(--accent)" }} />
+            Popular Restaurants
           </SectionTitle>
         </SectionHeader>
 
         <RestaurantGrid>
-          {merchants.length === 0 && <p style={{ color: '#999', textAlign: 'center' }}>No restaurants found. Be the first to open a store!</p>}
-          {merchants.map((res: any, i: number) => (
+          {loading ? (
+            <>
+              <SkeletonCard style={{ height: 280 }} />
+              <SkeletonCard style={{ height: 280 }} />
+              <SkeletonCard style={{ height: 280 }} />
+            </>
+          ) : merchants.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px', opacity: 0.6 }}>
+              <div style={{ fontSize: '4rem', marginBottom: 16 }}>🏠</div>
+              <p style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--text-primary)' }}>No restaurants available yet</p>
+              <p style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Check back soon or open the first restaurant in your area.</p>
+            </div>
+          ) : merchants.map((res: any, i: number) => (
             <RestaurantCard
               key={res.id}
               $delay={i}
               onClick={() => navigate(`/store/${res.id}`)}
+              style={{ height: 'auto' }}
             >
               <Banner $src={res.bannerUrl || '/gourmet_burger.png'}>
                 <LogoBox>
@@ -213,18 +281,18 @@ const DiscoveryPage: React.FC = () => {
                 <NameRow>
                   <Name>{res.name}</Name>
                   <Rating>
-                    <FontAwesomeIcon icon={faStar} />
+                    <FontAwesomeIcon icon={faStar} style={{ color: "#FFD23F" }} />
                     {res.rating.toFixed(1)}
                   </Rating>
                 </NameRow>
-                <Category>{res.category}</Category>
+                <CategoryString>{res.category}</CategoryString>
                 <MetaRow>
                   <MetaItem>
-                    <FontAwesomeIcon icon={faClock} style={{ color: "#22c55e" }} />
+                    <FontAwesomeIcon icon={faClock} style={{ color: "var(--success)", opacity: 0.8 }} />
                     {res.deliveryTime || '20-30 min'}
                   </MetaItem>
                   <MetaItem>
-                    <FontAwesomeIcon icon={faMotorcycle} />
+                    <FontAwesomeIcon icon={faMotorcycle} style={{ opacity: 0.6 }} />
                     0.2 TON delivery
                   </MetaItem>
                 </MetaRow>

@@ -48,14 +48,15 @@ const fadeUp = keyframes`from{opacity:0;transform:translateY(14px)}to{opacity:1;
 const spin = keyframes`to{transform:rotate(360deg)}`;
 const pulseDot = keyframes`0%,100%{opacity:1}50%{opacity:0.3}`;
 const scaleIn = keyframes`from{opacity:0;transform:scale(0.94)}to{opacity:1;transform:scale(1)}`;
-const pulseRing = keyframes`0%{box-shadow:0 0 0 0 rgba(255,107,53,0.4)}70%{box-shadow:0 0 0 16px rgba(255,107,53,0)}100%{box-shadow:0 0 0 0 rgba(255,107,53,0)}`;
+const pulseRing = keyframes`0%{box-shadow:0 0 0 0 hsla(var(--hue-brand),var(--sat-brand),var(--light-brand),0.4)}70%{box-shadow:0 0 0 16px hsla(var(--hue-brand),var(--sat-brand),var(--light-brand),0)}100%{box-shadow:0 0 0 0 hsla(var(--hue-brand),var(--sat-brand),var(--light-brand),0)}`;
 
 // ─── Styled ───────────────────────────────────────────────────────────────────
 
 const Page = styled.div`
-  background: #f4f4f4;
+  background: var(--tg-theme-secondary-bg-color, #f4f4f4);
   min-height: 100vh;
   padding-bottom: 40px;
+  transition: background 0.3s ease;
 `;
 
 // ── Wallet Gate ───────────────────────────────────────────────────────────────
@@ -85,7 +86,7 @@ const FeatureItem = styled.li`
 `;
 const FeatureIcon = styled.div<{ bg?: string }>`
   width:32px;height:32px;border-radius:10px;
-  background:${p => p.bg ?? 'linear-gradient(135deg,#FF6B35,#F7931E)'};
+  background:${p => p.bg ?? 'linear-gradient(135deg,var(--accent),#F7931E)'};
   display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:0.85rem;
 `;
 
@@ -100,7 +101,7 @@ const Hero = styled.div`
 const HeroTop = styled.div`display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;`;
 const StatusDot = styled.span<{ $on: boolean }>`
   display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;
-  background:${p => p.$on ? '#4caf50' : '#ff5252'};
+  background:${p => p.$on ? 'var(--success)' : '#ff5252'};
   animation:${pulseDot} 1.5s ease infinite;vertical-align:middle;
 `;
 const HeroTitle = styled.h1`font-size:1.4rem;font-weight:900;margin:0 0 2px;`;
@@ -121,49 +122,67 @@ const ELabel = styled.div`font-size:0.65rem;color:rgba(255,255,255,0.6);margin-t
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 
-const TabBar = styled.div`display:flex;background:#fff;border-bottom:1px solid rgba(0,0,0,0.06);position:sticky;top:0;z-index:10;`;
+const TabBar = styled.div`
+  display: flex;
+  background: var(--tg-theme-bg-color, #fff);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+`;
 const Tab = styled.button<{ $active: boolean }>`
-  flex:1;padding:13px;border:none;background:transparent;
-  font-size:0.88rem;font-weight:${p => p.$active ? '800' : '500'};
-  color:${p => p.$active ? '#FF6B35' : '#888'};
-  border-bottom:3px solid ${p => p.$active ? '#FF6B35' : 'transparent'};
-  cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;
+  flex: 1;
+  padding: 13px;
+  border: none;
+  background: transparent;
+  font-size: 0.88rem;
+  font-weight: ${p => p.$active ? '800' : '500'};
+  color: ${p => p.$active ? 'var(--tg-theme-button-color, var(--accent))' : 'var(--tg-theme-hint-color, var(--text-hint))'};
+  border-bottom: 3px solid ${p => p.$active ? 'var(--tg-theme-button-color, var(--accent))' : 'transparent'};
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 `;
 
 // ── Order Card ────────────────────────────────────────────────────────────────
 
 const CardList = styled.div`display:flex;flex-direction:column;gap:12px;padding:14px;`;
 const Card = styled.div<{ $delay?: number; $accepted?: boolean }>`
-  background:#fff;border-radius:20px;padding:18px;
-  box-shadow:0 4px 16px rgba(0,0,0,0.07);
-  animation:${fadeUp} 0.35s ease ${p => (p.$delay ?? 0) * 0.07}s both;
-  border:2px solid ${p => p.$accepted ? '#4caf50' : 'transparent'};
-  transition:border-color 0.3s;
+  background: var(--tg-theme-bg-color, #fff);
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+  animation: ${fadeUp} 0.35s ease ${p => (p.$delay ?? 0) * 0.07}s both;
+  border: 2px solid ${p => p.$accepted ? 'var(--success)' : 'transparent'};
+  transition: all 0.3s;
 `;
 const CardHeader = styled.div`display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;`;
-const OrderId = styled.span`font-weight:800;font-size:0.88rem;color:#1a1a1a;font-family:'SF Mono',monospace;`;
+const OrderId = styled.span`font-weight:800;font-size:0.88rem;color: var(--tg-theme-text-color, #1a1a1a);font-family:'SF Mono',monospace;`;
 const Badge = styled.span<{ $color: string }>`background:${p => p.$color};color:#fff;font-size:0.68rem;font-weight:700;padding:3px 10px;border-radius:20px;`;
 
-const Row = styled.div`display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:0.85rem;color:#555;`;
+const Row = styled.div`display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:0.85rem;color: var(--tg-theme-hint-color, #555);`;
 const Icon = styled.div<{ $bg?: string }>`
   width:26px;height:26px;border-radius:8px;
-  background:${p => p.$bg ?? 'linear-gradient(135deg,#FF6B35,#F7931E)'};
+  background:${p => p.$bg ?? 'linear-gradient(135deg,var(--accent),#F7931E)'};
   color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;
 `;
 const InfoVal = styled.div`flex:1;font-size:0.82rem;`;
 
 const EarnChip = styled.div`
   display:inline-flex;align-items:center;gap:6px;
-  background:linear-gradient(90deg,#e8f5e9,#c8e6c9);color:#2e7d32;
+  background:linear-gradient(90deg,#e8f5e9,#c8e6c9);color:var(--success-dark);
   font-weight:800;font-size:0.9rem;padding:6px 14px;border-radius:12px;margin-top:8px;
 `;
 
 const AcceptBtn = styled.button<{ $disabled?: boolean; $accepted?: boolean }>`
   width:100%;padding:14px;border-radius:14px;border:none;margin-top:14px;
   font-size:0.95rem;font-weight:800;cursor:${p => p.$disabled ? 'not-allowed' : 'pointer'};
-  background:${p => p.$accepted ? 'linear-gradient(135deg,#4caf50,#43a047)' : p.$disabled ? '#e0e0e0' : 'linear-gradient(135deg,#1a1a2e,#0f3460)'};
-  color:${p => p.$disabled && !p.$accepted ? '#aaa' : '#fff'};
-  box-shadow:${p => p.$accepted ? '0 4px 14px rgba(76,175,80,0.4)' : p.$disabled ? 'none' : '0 4px 14px rgba(15,52,96,0.4)'};
+  background:${p => p.$accepted ? 'linear-gradient(135deg,var(--success),var(--success-dark))' : p.$disabled ? 'var(--bg-tertiary)' : 'linear-gradient(135deg,#1a1a2e,#0f3460)'};
+  color:${p => p.$disabled && !p.$accepted ? 'var(--text-hint)' : '#fff'};
+  box-shadow:${p => p.$accepted ? '0 4px 14px hsla(var(--hue-success),var(--sat-success),var(--light-success),0.4)' : p.$disabled ? 'none' : '0 4px 14px rgba(15,52,96,0.4)'};
   transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:8px;
   &:active:not(:disabled){transform:scale(0.97);}
 `;
@@ -173,7 +192,7 @@ const AcceptBtn = styled.button<{ $disabled?: boolean; $accepted?: boolean }>`
 const ActivePanel = styled.div`padding:14px;animation:${fadeUp} 0.4s ease;`;
 
 const ActiveBanner = styled.div`
-  background:linear-gradient(135deg,#e65100,#FF6B35);
+  background:linear-gradient(135deg,var(--accent-dark),var(--accent));
   color:#fff;border-radius:20px;padding:18px;margin-bottom:14px;
   animation:${pulseRing} 2s ease-in-out infinite;
 `;
@@ -181,26 +200,37 @@ const ActiveBanner = styled.div`
 const ActiveTitle = styled.p`font-size:1rem;font-weight:900;margin:0 0 4px;`;
 const ActiveSub = styled.p`font-size:0.8rem;color:rgba(255,255,255,0.75);margin:0;`;
 
-const StepCard = styled.div`background:#fff;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 4px 14px rgba(0,0,0,0.07);`;
-const StepTitle = styled.p`font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#aaa;margin:0 0 6px;`;
-const StepValue = styled.p`font-size:0.9rem;font-weight:600;color:#1a1a1a;margin:0;`;
+const StepCard = styled.div`
+  background: var(--tg-theme-bg-color, #fff);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+`;
+const StepTitle = styled.p`font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color: var(--tg-theme-hint-color, #aaa);margin:0 0 6px;`;
+const StepValue = styled.p`font-size:0.9rem;font-weight:600;color: var(--tg-theme-text-color, #1a1a1a);margin:0;`;
 
-const CodeSection = styled.div`background:#fff;border-radius:18px;padding:18px;box-shadow:0 4px 14px rgba(0,0,0,0.07);`;
+const CodeSection = styled.div`
+  background: var(--tg-theme-bg-color, #fff);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+`;
 const CodeTitle = styled.p`font-size:0.85rem;font-weight:800;color:#1a1a1a;margin:0 0 12px;`;
 const CodeInput = styled.input`
   width:100%;padding:14px 16px;border-radius:12px;
   border:2px solid rgba(0,0,0,0.1);font-size:1.4rem;font-weight:900;
   letter-spacing:0.2em;text-align:center;font-family:'SF Mono',monospace;
   color:#1a1a2e;background:#f9f9f9;transition:border-color 0.2s;margin-bottom:12px;
-  &:focus{outline:none;border-color:#FF6B35;}
+  &:focus{outline:none;border-color:var(--accent);}
 `;
 const ConfirmBtn = styled.button<{ $disabled?: boolean }>`
   width:100%;padding:14px;border-radius:14px;border:none;
-  background:${p => p.$disabled ? '#e0e0e0' : 'linear-gradient(135deg,#4caf50,#2e7d32)'};
-  color:${p => p.$disabled ? '#aaa' : '#fff'};font-size:0.95rem;font-weight:800;
+  background:${p => p.$disabled ? 'var(--bg-tertiary)' : 'linear-gradient(135deg,var(--success),var(--success-dark))'};
+  color:${p => p.$disabled ? 'var(--text-hint)' : '#fff'};font-size:0.95rem;font-weight:800;
   cursor:${p => p.$disabled ? 'not-allowed' : 'pointer'};
   display:flex;align-items:center;justify-content:center;gap:8px;
-  box-shadow:${p => p.$disabled ? 'none' : '0 6px 16px rgba(76,175,80,0.4)'};
+  box-shadow:${p => p.$disabled ? 'none' : '0 6px 16px hsla(var(--hue-success),var(--sat-success),var(--light-success),0.4)'};
   transition:all 0.2s;
 `;
 
@@ -208,13 +238,13 @@ const ConfirmBtn = styled.button<{ $disabled?: boolean }>`
 
 const Center = styled.div`
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:48px 24px;gap:14px;text-align:center;color:#888;
+  padding:48px 24px;gap:14px;text-align:center;color:var(--text-hint);
 `;
 const StateMsg = styled.p`font-size:0.9rem;max-width:260px;line-height:1.5;margin:0;`;
 const Refresh = styled.button`
   padding:10px 22px;border-radius:12px;border:none;
-  background:linear-gradient(135deg,#FF6B35,#F7931E);color:#fff;font-weight:700;font-size:0.88rem;
-  cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(255,107,53,0.35);
+  background:linear-gradient(135deg,var(--accent),#F7931E);color:#fff;font-weight:700;font-size:0.88rem;
+  cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px hsla(var(--hue-brand),var(--sat-brand),var(--light-brand),0.35);
   &:active{transform:scale(0.96);}
 `;
 const SpinIcon = styled(FontAwesomeIcon)`animation:${spin} 1s linear infinite;`;
@@ -321,53 +351,59 @@ const CourierDashboard: React.FC = () => {
     // ── GPS broadcast when actively delivering ──────────────────────────────
     useEffect(() => {
         if (!activeOrder || !socket) {
-            if (gpsIntervalRef.current) clearInterval(gpsIntervalRef.current);
+            if (gpsIntervalRef.current) {
+                // If it was a watchId
+                if (typeof gpsIntervalRef.current === "number") navigator.geolocation.clearWatch(gpsIntervalRef.current);
+                else clearInterval(gpsIntervalRef.current);
+            }
             setGpsStatus("off");
             return;
         }
 
-        const broadcast = () => {
-            if (!navigator.geolocation) {
-                setGpsStatus("error");
-                return;
-            }
-            setGpsStatus("searching");
-            navigator.geolocation.getCurrentPosition(
-                pos => {
-                    setGpsStatus("broadcasting");
-                    socket.emit("courier:location", {
-                        orderId: activeOrder.orderId, // Important: use the timestamp ID that buyer listens to
-                        lat: pos.coords.latitude,
-                        lng: pos.coords.longitude,
-                    });
-                },
-                err => {
-                    console.error("GPS Error:", err);
-                    setGpsStatus("error");
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
-        };
+        if (!navigator.geolocation) {
+            setGpsStatus("error");
+            return;
+        }
 
-        broadcast();
-        gpsIntervalRef.current = setInterval(broadcast, 5_000);
+        setGpsStatus("searching");
+        // Use watchPosition for efficiency instead of manual setInterval
+        const watchId = navigator.geolocation.watchPosition(
+            pos => {
+                setGpsStatus("broadcasting");
+                socket.emit("courier:location", {
+                    orderId: activeOrder.orderId,
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude,
+                });
+            },
+            err => {
+                console.error("GPS Error:", err);
+                setGpsStatus("error");
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
+
+        gpsIntervalRef.current = watchId as any;
         return () => {
-            if (gpsIntervalRef.current) clearInterval(gpsIntervalRef.current);
+            if (gpsIntervalRef.current) navigator.geolocation.clearWatch(watchId);
         };
     }, [activeOrder, socket]);
 
     // ── Accept a delivery ───────────────────────────────────────────────────
     const handleAccept = async (order: BackendOrder) => {
         if (!wallet || !contractReady) return;
+        const tg = (window as any).Telegram?.WebApp;
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred("medium");
+        
         setAcceptingId(order.id);
         try {
-            // 1. Sign on-chain accept_delivery tx
             await acceptDelivery(BigInt(order.orderId));
-            // 2. Register with backend → emits order:accepted to buyer
             const updated = await api.acceptOrder(order.orderId, wallet);
+            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
             setActiveOrder(updated);
             setOrders(prev => prev.filter(o => o.id !== order.id));
         } catch (e: any) {
+            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("error");
             console.error("[Courier] Accept failed:", e);
         } finally {
             setAcceptingId(null);
@@ -389,17 +425,21 @@ const CourierDashboard: React.FC = () => {
         setConfirming(true);
         setConfirmError(null);
         try {
-            // 1. Courier signs on-chain confirmation to release funds (0.05 TON gas)
-            //    IMPORTANT: use orderId (timestamp) not id (UUID) for the on-chain call
             await confirmDelivery(BigInt(activeOrder.orderId));
-
-            // 2. We inform backend that the order is complete with the strict PIN
             await api.confirmDelivery(activeOrder.orderId, wallet, codeInput);
+
+            const tg = (window as any).Telegram?.WebApp;
+            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
 
             setConfirmed(true);
             setActiveOrder(null);
-            if (gpsIntervalRef.current) clearInterval(gpsIntervalRef.current);
+            if (gpsIntervalRef.current) {
+                if (typeof gpsIntervalRef.current === "number") navigator.geolocation.clearWatch(gpsIntervalRef.current);
+                else clearInterval(gpsIntervalRef.current);
+            }
         } catch (e: any) {
+            const tg = (window as any).Telegram?.WebApp;
+            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("error");
             setConfirmError(e.message ?? "Invalid code");
         } finally {
             setConfirming(false);
@@ -419,7 +459,7 @@ const CourierDashboard: React.FC = () => {
                         <span>Live orders from the escrow contract</span>
                     </FeatureItem>
                     <FeatureItem>
-                        <FeatureIcon bg="linear-gradient(135deg,#4caf50,#43a047)">
+                        <FeatureIcon bg="linear-gradient(135deg,var(--success),var(--success-dark))">
                             <FontAwesomeIcon icon={faCoins} />
                         </FeatureIcon>
                         <span>Earn {DELIVERY_FEE_TON} TON per delivery, auto-sent</span>
@@ -499,7 +539,7 @@ const CourierDashboard: React.FC = () => {
                             <StepCard>
                                 <StepTitle>① Pick up from merchant</StepTitle>
                                 <StepValue>Wallet: {shortAddr(activeOrder.merchantWallet)}</StepValue>
-                                <StepValue style={{ marginTop: 8, fontSize: "0.85rem", color: "#666" }}>
+                                <StepValue style={{ marginTop: 8, fontSize: "0.85rem", color: "var(--text-hint)" }}>
                                     <strong>Order Details:</strong>
                                     <ul style={{ margin: "4px 0 0 0", paddingLeft: "20px" }}>
                                         {activeOrder.items.map((i, idx) => (
@@ -545,7 +585,7 @@ const CourierDashboard: React.FC = () => {
                                         }}
                                     />
                                     {confirmError && (
-                                        <p style={{ color: "#f44336", fontSize: "0.82rem", margin: "0 0 10px", textAlign: "center" }}>
+                                        <p style={{ color: "var(--error, #f44336)", fontSize: "0.82rem", margin: "0 0 10px", textAlign: "center" }}>
                                             ❌ {confirmError}
                                         </p>
                                     )}
