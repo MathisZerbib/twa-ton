@@ -760,6 +760,7 @@ export type CreateOrder = {
     $$type: 'CreateOrder';
     orderId: bigint;
     merchant: Address;
+    foodAmount: bigint;
     hasReferrer: boolean;
     referrer: Address;
 }
@@ -770,6 +771,7 @@ export function storeCreateOrder(src: CreateOrder) {
         b_0.storeUint(1, 32);
         b_0.storeUint(src.orderId, 64);
         b_0.storeAddress(src.merchant);
+        b_0.storeCoins(src.foodAmount);
         b_0.storeBit(src.hasReferrer);
         b_0.storeAddress(src.referrer);
     };
@@ -780,31 +782,35 @@ export function loadCreateOrder(slice: Slice) {
     if (sc_0.loadUint(32) !== 1) { throw Error('Invalid prefix'); }
     const _orderId = sc_0.loadUintBig(64);
     const _merchant = sc_0.loadAddress();
+    const _foodAmount = sc_0.loadCoins();
     const _hasReferrer = sc_0.loadBit();
     const _referrer = sc_0.loadAddress();
-    return { $$type: 'CreateOrder' as const, orderId: _orderId, merchant: _merchant, hasReferrer: _hasReferrer, referrer: _referrer };
+    return { $$type: 'CreateOrder' as const, orderId: _orderId, merchant: _merchant, foodAmount: _foodAmount, hasReferrer: _hasReferrer, referrer: _referrer };
 }
 
 export function loadTupleCreateOrder(source: TupleReader) {
     const _orderId = source.readBigNumber();
     const _merchant = source.readAddress();
+    const _foodAmount = source.readBigNumber();
     const _hasReferrer = source.readBoolean();
     const _referrer = source.readAddress();
-    return { $$type: 'CreateOrder' as const, orderId: _orderId, merchant: _merchant, hasReferrer: _hasReferrer, referrer: _referrer };
+    return { $$type: 'CreateOrder' as const, orderId: _orderId, merchant: _merchant, foodAmount: _foodAmount, hasReferrer: _hasReferrer, referrer: _referrer };
 }
 
 export function loadGetterTupleCreateOrder(source: TupleReader) {
     const _orderId = source.readBigNumber();
     const _merchant = source.readAddress();
+    const _foodAmount = source.readBigNumber();
     const _hasReferrer = source.readBoolean();
     const _referrer = source.readAddress();
-    return { $$type: 'CreateOrder' as const, orderId: _orderId, merchant: _merchant, hasReferrer: _hasReferrer, referrer: _referrer };
+    return { $$type: 'CreateOrder' as const, orderId: _orderId, merchant: _merchant, foodAmount: _foodAmount, hasReferrer: _hasReferrer, referrer: _referrer };
 }
 
 export function storeTupleCreateOrder(source: CreateOrder) {
     const builder = new TupleBuilder();
     builder.writeNumber(source.orderId);
     builder.writeAddress(source.merchant);
+    builder.writeNumber(source.foodAmount);
     builder.writeBoolean(source.hasReferrer);
     builder.writeAddress(source.referrer);
     return builder.build();
@@ -1140,7 +1146,7 @@ function initTONEatsEscrow_init_args(src: TONEatsEscrow_init_args) {
 }
 
 async function TONEatsEscrow_init(treasury: Address) {
-    const __code = Cell.fromHex('b5ee9c7241022401000846000228ff008e88f4a413f4bcf2c80bed5320e303ed43d9010f020271020a020120030802012004060163b4aabda89a1a400033df481f401f401e809f400aa80d82b1c27f4800203a3042017d7840104200bebc200dae1c5b678d8a30050008f8276f100167b41a7da89a1a400033df481f401f401e809f400aa80d82b1c27f4800203a3042017d7840104200bebc200dae1c4aa09b678d8a300700ac810101230259f40d6fa192306ddf206e92306d8e31d0fa40fa40d72c01916d93fa4001e201d401d0d72c01916d93fa4001e201fa00fa00fa00d307301058105710566c186f08e2206e92307fe0206ef2d0806f286c710193b8221ed44d0d200019efa40fa00fa00f404fa0055406c158e13fa400101d182100bebc200821005f5e1006d70e25504db3c6c51206e92306d99206ef2d0806f286f08e2206e92306dde809008e810101230259f40d6fa192306ddf206e92306d8e31d0fa40fa40d72c01916d93fa4001e201d401d0d72c01916d93fa4001e201fa00fa00fa00d307301058105710566c186f08e20201200b0d0163bae7fed44d0d200019efa40fa00fa00f404fa0055406c158e13fa400101d182100bebc200821005f5e1006d70e2db3c6c5180c0002230163ba22bed44d0d200019efa40fa00fa00f404fa0055406c158e13fa400101d182100bebc200821005f5e1006d70e2db3c6c5180e00022203f630eda2edfb01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019efa40fa00fa00f404fa0055406c158e13fa400101d182100bebc200821005f5e1006d70e206925f06e024d749c21fe30004f90182f090218655da49a654f5fba12f38d8bef301940dd023d9c38042e840ccd723d640bae302102123049c04d31f21c001e30221c0048e2e6c31fa00fa0030820089caf84224c705f2f44034c87f01ca0055405045ce58fa0201fa02f40001fa02c9ed54db31e021c002e30221c003e302018210946a98b6ba1114172001fe31d33ffa40d200fa4030f8416f24306c1227a126a18209312d00a18200b63721c200f2f48168922a8101012859f40d6fa192306ddf206e92306d8e31d0fa40fa40d72c01916d93fa4001e201d401d0d72c01916d93fa4001e201fa00fa00fa00d307301058105710566c186f08e26ef2f46d049233129132e250038101016d1202d8541048538670c855705078ce15ce5003206e9430cf84809201cee2c858206e9430cf84809201cee258fa0258fa0258fa0212cb07cdc910374170206e953059f45a30944133f415e25152a021a05004a088c88258c000000000000000000000000101cb67ccc970fb00443012131f0022000000006f726465725f6372656174656401e431d33f30248101012259f40d6fa192306ddf206e92306d8e31d0fa40fa40d72c01916d93fa4001e201d401d0d72c01916d93fa4001e201fa00fa00fa00d307301058105710566c186f08e2814856216eb3f2f4206ef2d0806f2881209936c00015f2f4f842105610465520718101015088c81501ec55705078ce15ce5003206e9430cf84809201cee2c858206e9430cf84809201cee258fa0258fa0258fa0212cb07cdc9103612206e953059f45a30944133f415e288c88258c000000000000000000000000101cb67ccc970fb00440302c87f01ca0055405045ce58fa0201fa02f40001fa02c9ed54db3116002a0000000064656c69766572795f616363657074656401fc31d33f30248101012259f40d6fa192306ddf206e92306d8e31d0fa40fa40d72c01916d93fa4001e201d401d0d72c01916d93fa4001e201fa00fa00fa00d307301058105710566c186f08e2814856216eb3f2f4206ef2d0806f28820082e001c001f2f482009d44f84226206ef2d080c705917f95f84228c705e2f2f472071802fe810101c82854483028544830285448301f55705078ce15ce5003206e9430cf84809201cee2c858206e9430cf84809201cee258fa0258fa0258fa0212cb07cdc9103c4780206e953059f45a30944133f415e282089896805360a115726d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf818a191a001a58cf8680cf8480f400f400cf8104dee2f400c901fb0002206ef2d0805393a1726d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00206eb3e30f5066a001a015a188c88258c000000000000000000000000101cb67ccc970fb0044301b1d1e1f01fe23ab0001206ef2d0805313a1726d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb005230a158a15260726d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f4001c0008c901fb00007c305222a15260726d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00002c0000000064656c69766572795f636f6e6669726d65640034c87f01ca0055405045ce58fa0201fa02f40001fa02c9ed54db3100ac8e52d33f30c8018210aff90f5758cb1fcb3fc910354430f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055405045ce58fa0201fa02f40001fa02c9ed54db31e00401ea8200810bf84224c705f2f4f8276f1025a1820afaf080a18200f4ae21c200f2f472882555205a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004034c87f01ca0055405045ce58fa0201fa02f40001fa02c9ed5422001e000000007361666520726573637565000a5f05f2c082ff7a445a');
+    const __code = Cell.fromHex('b5ee9c7241022e01000994000228ff008e88f4a413f4bcf2c80bed5320e303ed43d90112020271020a020120030802012004060163b4aabda89a1a400033df481f401f401e809f400aa80d82b1c27f4800203a3042017d7840104200bebc200dae1c5b678d8a30050008f8276f100167b41a7da89a1a400033df481f401f401e809f400aa80d82b1c27f4800203a3042017d7840104200bebc200dae1c4aa09b678d8a300700ac810101230259f40d6fa192306ddf206e92306d8e31d0fa40fa40d72c01916d93fa4001e201d401d0d72c01916d93fa4001e201fa00fa00fa00d307301058105710566c186f08e2206e92307fe0206ef2d0806f286c710193b8221ed44d0d200019efa40fa00fa00f404fa0055406c158e13fa400101d182100bebc200821005f5e1006d70e25504db3c6c51206e92306d99206ef2d0806f286f08e2206e92306dde809008e810101230259f40d6fa192306ddf206e92306d8e31d0fa40fa40d72c01916d93fa4001e201d401d0d72c01916d93fa4001e201fa00fa00fa00d307301058105710566c186f08e20201200b0d0163bae7fed44d0d200019efa40fa00fa00f404fa0055406c158e13fa400101d182100bebc200821005f5e1006d70e2db3c6c5180c0002230202740e100162aa2bed44d0d200019efa40fa00fa00f404fa0055406c158e13fa400101d182100bebc200821005f5e1006d70e2db3c6c510f0002220162ab12ed44d0d200019efa40fa00fa00f404fa0055406c158e13fa400101d182100bebc200821005f5e1006d70e2db3c6c511100022003f630eda2edfb01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019efa40fa00fa00f404fa0055406c158e13fa400101d182100bebc200821005f5e1006d70e206925f06e024d749c21fe30004f90182f090218655da49a654f5fba12f38d8bef301940dd023d9c38042e840ccd723d640bae302132b2d049c04d31f21c001e30221c0048e2e6c31fa00fa0030820089caf84224c705f2f44034c87f01ca0055405045ce58fa0201fa02f40001fa02c9ed54db31e021c002e30221c003e302018210946a98b6ba141a202a01fe31d33ffa40fa00d200fa4030f8416f2430325348a028a08200da8121820afaf080a014be13f2f48168922b8101012959f40d6fa192306ddf206e92306d8e31d0fa40fa40d72c01916d93fa4001e201d401d0d72c01916d93fa4001e201fa00fa00fa00d307301058105710566c186f08e26ef2f46d049233129132e28101011504fe6d70534a105910341037544b3901c855705078ce15ce5003206e9430cf84809201cee2c858206e9430cf84809201cee258fa0258fa0258fa0212cb07cdc910384140206e953059f45a30944133f415e25065a088c88258c000000000000000000000000101cb67ccc970fb007080428810385a6d6d40037fc8cf8580ca0089161718190022000000006f726465725f637265617465640030000000004f72646572204372656174656420526566756e64000110008acf16ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004034c87f01ca0055405045ce58fa0201fa02f40001fa02c9ed54db3101f231d33f30f8416f2410235f03258101012359f40d6fa192306ddf206e92306d8e31d0fa40fa40d72c01916d93fa4001e201d401d0d72c01916d93fa4001e201fa00fa00fa00d307301058105710566c186f08e2814856216eb3f2f4206ef2d0806f2881209936c00015f2f426105610465520718101015088c81b04fc55705078ce15ce5003206e9430cf84809201cee2c858206e9430cf84809201cee258fa0258fa0258fa0212cb07cdc910374170206e953059f45a30944133f415e288c88258c000000000000000000000000101cb67ccc970fb007080428810375a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb08a1c1d1e1f002a0000000064656c69766572795f616363657074656400220000000041636365707420526566756e6400065bcf8101488ae2f400c901fb004034c87f01ca0055405045ce58fa0201fa02f40001fa02c9ed54db312302fe31d33f30f8416f2410235f03258101012359f40d6fa192306ddf206e92306d8e31d0fa40fa40d72c01916d93fa4001e201d401d0d72c01916d93fa4001e201fa00fa00fa00d307301058105710566c186f08e2814856216eb3f2f4206ef2d0806f28820082e001c001f2f482009d4425206ef2d0805290c705917fe30ef2f4212200085387c70502fe7207810101c82854483028544830285448301f55705078ce15ce5003206e9430cf84809201cee2c858206e9430cf84809201cee258fa0258fa0258fa0212cb07cdc9103d4790206e953059f45a30944133f415e2735434746d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf818ae2f400c92324001a58cf8680cf8480f400f400cf8104d401fb0002206ef2d08053a36d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00206eb3e30f5077a058a016a188c88258c000000000000000000000000101cb67ccc970fb007080422526272800fe23ab0001206ef2d08053136d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb005230a15448136d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb000076305467336d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00002c0000000064656c69766572795f636f6e6669726d656401aa8810385a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004034c87f01ca0055405045ce58fa0201fa02f40001fa02c9ed54db3129002400000000436f6e6669726d20526566756e6400ac8e52d33f30c8018210aff90f5758cb1fcb3fc910354430f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055405045ce58fa0201fa02f40001fa02c9ed54db31e00401ea8200810bf84224c705f2f4f8276f1025a1820afaf080a18200f4ae21c200f2f472882555205a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004034c87f01ca0055405045ce58fa0201fa02f40001fa02c9ed542c001e000000007361666520726573637565000a5f05f2c08225e5fa92');
     const builder = beginCell();
     builder.storeUint(0, 1);
     initTONEatsEscrow_init_args({ $$type: 'TONEatsEscrow_init_args', treasury })(builder);
@@ -1192,7 +1198,7 @@ export const TONEatsEscrow_errors = {
     33504: { message: "Delivery not accepted yet" },
     35274: { message: "Only treasury can update fees" },
     40260: { message: "Only courier or buyer can confirm" },
-    46647: { message: "Insufficient payment" },
+    55937: { message: "Insufficient TON for order and gas" },
     62638: { message: "No safe funds to withdraw" },
 } as const
 
@@ -1240,7 +1246,7 @@ export const TONEatsEscrow_errors_backward = {
     "Delivery not accepted yet": 33504,
     "Only treasury can update fees": 35274,
     "Only courier or buyer can confirm": 40260,
-    "Insufficient payment": 46647,
+    "Insufficient TON for order and gas": 55937,
     "No safe funds to withdraw": 62638,
 } as const
 
@@ -1258,7 +1264,7 @@ const TONEatsEscrow_types: ABIType[] = [
     {"name":"Deploy","header":2490013878,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"DeployOk","header":2952335191,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"FactoryDeploy","header":1829761339,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"cashback","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"CreateOrder","header":1,"fields":[{"name":"orderId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"merchant","type":{"kind":"simple","type":"address","optional":false}},{"name":"hasReferrer","type":{"kind":"simple","type":"bool","optional":false}},{"name":"referrer","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"CreateOrder","header":1,"fields":[{"name":"orderId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"merchant","type":{"kind":"simple","type":"address","optional":false}},{"name":"foodAmount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"hasReferrer","type":{"kind":"simple","type":"bool","optional":false}},{"name":"referrer","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"UpdateFees","header":4,"fields":[{"name":"deliveryFee","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"protocolFee","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
     {"name":"AcceptDelivery","header":2,"fields":[{"name":"orderId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"ConfirmDelivery","header":3,"fields":[{"name":"orderId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
@@ -1282,6 +1288,7 @@ const TONEatsEscrow_getters: ABIGetter[] = [
     {"name":"get_delivery_fee","methodId":110207,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"get_protocol_fee","methodId":123435,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"contract_balance","methodId":66901,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"locked_funds","methodId":124690,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
 ]
 
 export const TONEatsEscrow_getterMapping: { [key: string]: string } = {
@@ -1290,6 +1297,7 @@ export const TONEatsEscrow_getterMapping: { [key: string]: string } = {
     'get_delivery_fee': 'getGetDeliveryFee',
     'get_protocol_fee': 'getGetProtocolFee',
     'contract_balance': 'getContractBalance',
+    'locked_funds': 'getLockedFunds',
 }
 
 const TONEatsEscrow_receivers: ABIReceiver[] = [
@@ -1397,6 +1405,13 @@ export class TONEatsEscrow implements Contract {
     async getContractBalance(provider: ContractProvider) {
         const builder = new TupleBuilder();
         const source = (await provider.get('contract_balance', builder.build())).stack;
+        const result = source.readBigNumber();
+        return result;
+    }
+    
+    async getLockedFunds(provider: ContractProvider) {
+        const builder = new TupleBuilder();
+        const source = (await provider.get('locked_funds', builder.build())).stack;
         const result = source.readBigNumber();
         return result;
     }

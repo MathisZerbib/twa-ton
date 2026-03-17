@@ -1,11 +1,6 @@
 /**
  * TON-Eats Escrow Contract — Tact
- *
- * Escrow flow:
- *   1. Buyer calls create_order() attaching the full payment.
- *   2. Courier calls accept_delivery() to self-assign.
- *   3. Courier calls confirm_delivery() after verifying PIN with buyer.
- *      Contract splits funds.
+ * Production Ready: Exact value locking, gas refunds, and safe routing.
  */
 
 import "@stdlib/deploy";
@@ -13,15 +8,16 @@ import "@stdlib/deploy";
 // ─── Messages ────────────────────────────────────────────────────────────────
 
 message(0x01) CreateOrder {
-    orderId:         Int as uint64;
-    merchant:        Address;
-    hasReferrer:     Bool;
-    referrer:        Address;
+    orderId:     Int as uint64;
+    merchant:    Address;
+    foodAmount:  Int as coins;  // FIX: Explicitly pass the food amount
+    hasReferrer: Bool;
+    referrer:    Address;
 }
 
 message(0x04) UpdateFees {
-    deliveryFee:     Int as coins;
-    protocolFee:     Int as coins;
+    deliveryFee: Int as coins;
+    protocolFee: Int as coins;
 }
 
 message(0x02) AcceptDelivery {
@@ -41,8 +37,8 @@ struct OrderData {
     referrer:    Address?;
     deliveryFee: Int as coins;
     protocolFee: Int as coins;
-    foodAmount:  Int as coins;   // total locked minus fees
-    status:      Int as uint8;   // 0=Open 1=Accepted 2=Delivered
+    foodAmount:  Int as coins;
+    status:      Int as uint8;   // 0=Open, 1=Accepted, 2=Delivered
 }
 
 contract TONEatsEscrow with Deployable {
@@ -51,13 +47,12 @@ contract TONEatsEscrow with Deployable {
     deliveryFee: Int as coins;
     protocolFee: Int as coins;
     
-    // orderId -> OrderData  (Tact map)
+    // orderId -> OrderData 
     orders: map<Int, OrderData>;
     lockedFunds: Int as coins;
 
     init(treasury: Address) {
         self.treasury = treasury;
-        // Default to some values (0.2 TON and 0.1 TON)
         self.deliveryFee = ton("0.2");
         self.protocolFee = ton("0.1");
         self.orders = emptyMap();
@@ -67,16 +62,12 @@ contract TONEatsEscrow with Deployable {
     // ── Create Order ─────────────────────────────────────────────────────────
 
     receive(msg: CreateOrder) {
-        dump("--- CREATE ORDER ---");
         let ctx: Context = context();
-        let buyer: Address = ctx.sender;
         let value: Int = ctx.value;
-        dump(msg.orderId);
-        dump(value);
-
-        // Food amount = total sent − fees − protocol gas
-        let foodAmount: Int = value - self.deliveryFee - self.protocolFee - ton("0.02");
-        require(foodAmount > 0, "Insufficient payment");
+        
+        // FIX: Ensure user sent exactly enough for the food + fees + a gas buffer
+        let requiredTotal: Int = msg.foodAmount + self.deliveryFee + self.protocolFee;
+        require(value >= requiredTotal + ton("0.05"), "Insufficient TON for order and gas");
         require(self.orders.get(msg.orderId) == null, "Order ID already exists");
 
         let referrer: Address? = null;
@@ -85,20 +76,28 @@ contract TONEatsEscrow with Deployable {
         }
 
         self.orders.set(msg.orderId, OrderData{
-            buyer:       buyer,
+            buyer:       ctx.sender,
             merchant:    msg.merchant,
             courier:     null,
             referrer:    referrer,
             deliveryFee: self.deliveryFee,
             protocolFee: self.protocolFee,
-            foodAmount:  foodAmount,
+            foodAmount:  msg.foodAmount,
             status:      0
         });
 
-        // Add to locked funds
-        self.lockedFunds = self.lockedFunds + self.deliveryFee + self.protocolFee + foodAmount;
+        // Add to locked funds strictly based on known amounts
+        self.lockedFunds = self.lockedFunds + requiredTotal;
 
         emit("order_created".asComment());
+
+        // FIX: Refund the unused gas back to the buyer!
+        send(SendParameters{
+            to: ctx.sender,
+            value: 0,
+            mode: SendRemainingValue | SendIgnoreErrors,
+            body: "Order Created Refund".asComment()
+        });
     }
 
     // ── Update Fees ──────────────────────────────────────────────────────────
@@ -112,86 +111,84 @@ contract TONEatsEscrow with Deployable {
     // ── Accept Delivery ───────────────────────────────────────────────────────
 
     receive(msg: AcceptDelivery) {
-        dump("--- ACCEPT DELIVERY ---");
+        let ctx: Context = context();
         let order: OrderData? = self.orders.get(msg.orderId);
         require(order != null, "Order not found");
+        
         let o: OrderData = order!!;
         require(o.status == 0, "Order not open");
 
-        o.courier = context().sender;
+        o.courier = ctx.sender;
         o.status = 1;
         self.orders.set(msg.orderId, o);
 
         emit("delivery_accepted".asComment());
+
+        // FIX: Refund excess gas back to the courier
+        send(SendParameters{
+            to: ctx.sender,
+            value: 0,
+            mode: SendRemainingValue | SendIgnoreErrors,
+            body: "Accept Refund".asComment()
+        });
     }
 
     // ── Confirm Delivery ──────────────────────────────────────────────────────
 
     receive(msg: ConfirmDelivery) {
-        dump("--- CONFIRM DELIVERY ---");
+        let ctx: Context = context();
         let order: OrderData? = self.orders.get(msg.orderId);
         require(order != null, "Order not found");
+        
         let o: OrderData = order!!;
         require(o.status == 1, "Delivery not accepted yet");
-        // FIX: Allow either Courier or Buyer to confirm, but primarily Courier.
-        require(context().sender == o.courier!! || context().sender == o.buyer, "Only courier or buyer can confirm");
+        require(ctx.sender == o.courier!! || ctx.sender == o.buyer, "Only courier or buyer can confirm");
 
-        // Mark delivered first
         o.status = 2;
         self.orders.set(msg.orderId, o);
 
-        let gas: Int = ton("0.01"); // gas per send
+        // FIX: Send EXACT amounts. 
+        // Mode `SendPayGasSeparately` (1) ensures the forward fee is paid from the 
+        // msg_value attached by whoever called ConfirmDelivery, not deducted from the sent amount.
+        
+        let sendMode: Int = SendPayGasSeparately | SendIgnoreErrors;
 
         // 1. Food → merchant
-        send(SendParameters{
-            to:    o.merchant,
-            value: o.foodAmount - gas,
-            mode:  SendIgnoreErrors
-        });
+        send(SendParameters{ to: o.merchant, value: o.foodAmount, mode: sendMode });
 
         // 2. Delivery fee → courier
-        let c: Address = o.courier!!;
-        send(SendParameters{
-            to:    c,
-            value: o.deliveryFee - gas,
-            mode:  SendIgnoreErrors
-        });
+        send(SendParameters{ to: o.courier!!, value: o.deliveryFee, mode: sendMode });
 
         // 3. Protocol fee split
-        let referrer: Address? = o.referrer;
-        if (referrer != null) {
-            // 50% to referrer, 50% to treasury
+        if (o.referrer != null) {
             let half: Int = o.protocolFee / 2;
-            send(SendParameters{
-                to:    referrer!!,
-                value: half - gas,
-                mode:  SendIgnoreErrors
-            });
-            send(SendParameters{
-                to:    self.treasury,
-                value: o.protocolFee - half - gas,
-                mode:  SendIgnoreErrors
-            });
+            send(SendParameters{ to: o.referrer!!, value: half, mode: sendMode });
+            send(SendParameters{ to: self.treasury, value: o.protocolFee - half, mode: sendMode });
         } else {
-            send(SendParameters{
-                to:    self.treasury,
-                value: o.protocolFee - gas,
-                mode:  SendIgnoreErrors
-            });
+            send(SendParameters{ to: self.treasury, value: o.protocolFee, mode: sendMode });
         }
 
         // Subtract from locked funds
         self.lockedFunds = self.lockedFunds - (o.deliveryFee + o.protocolFee + o.foodAmount);
 
         emit("delivery_confirmed".asComment());
+
+        // FIX: Refund the remaining gas back to whoever confirmed the delivery
+        send(SendParameters{
+            to: ctx.sender,
+            value: 0,
+            mode: SendRemainingValue | SendIgnoreErrors,
+            body: "Confirm Refund".asComment()
+        });
     }
 
     // ── Admin Rescue ──────────────────────────────────────────────────────────
+
     receive("withdraw_all") {
-        dump("--- WITHDRAW SAFE ---");
         require(context().sender == self.treasury, "Only treasury can withdraw");
         
-        let availableAmount: Int = myBalance() - self.lockedFunds - ton("0.05"); // reserve 0.05 TON for gas
+        // Keep 0.05 TON alive for contract rent, plus strictly maintain locked funds
+        let availableAmount: Int = myBalance() - self.lockedFunds - ton("0.05"); 
         require(availableAmount > 0, "No safe funds to withdraw");
         
         send(SendParameters{
@@ -201,29 +198,18 @@ contract TONEatsEscrow with Deployable {
             body: "safe rescue".asComment()
         });
     }
-    // ── Getter: order status ─────────────────────────────────────────────────
+
+    // ── Getters ──────────────────────────────────────────────────────────────
 
     get fun get_order_status(orderId: Int): Int {
         let order: OrderData? = self.orders.get(orderId);
-        if (order == null) {
-            return -1; // not found
-        }
+        if (order == null) { return -1; }
         return (order!!).status;
     }
 
-    get fun get_order(orderId: Int): OrderData? {
-        return self.orders.get(orderId);
-    }
-
-    get fun get_delivery_fee(): Int {
-        return self.deliveryFee;
-    }
-
-    get fun get_protocol_fee(): Int {
-        return self.protocolFee;
-    }
-
-    get fun contract_balance(): Int {
-        return myBalance();
-    }
+    get fun get_order(orderId: Int): OrderData? { return self.orders.get(orderId); }
+    get fun get_delivery_fee(): Int { return self.deliveryFee; }
+    get fun get_protocol_fee(): Int { return self.protocolFee; }
+    get fun contract_balance(): Int { return myBalance(); }
+    get fun locked_funds(): Int { return self.lockedFunds; }
 }

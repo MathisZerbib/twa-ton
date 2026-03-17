@@ -101,6 +101,9 @@ tuple $OrderData$_to_opt_external(tuple v) inline;
 ;; $TONEatsEscrow$_fun_contract_balance
 ((slice, int, int, cell, int), int) $TONEatsEscrow$_fun_contract_balance((slice, int, int, cell, int) $self) impure inline_ref;
 
+;; $TONEatsEscrow$_fun_locked_funds
+((slice, int, int, cell, int), int) $TONEatsEscrow$_fun_locked_funds((slice, int, int, cell, int) $self) impure inline_ref;
+
 ;; $MessageParameters$_constructor_bounce_to_value_mode_body
 ((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
 
@@ -110,14 +113,14 @@ tuple $OrderData$_to_opt_external(tuple v) inline;
 ;; $OrderData$_constructor_buyer_merchant_courier_referrer_deliveryFee_protocolFee_foodAmount_status
 ((slice, slice, slice, slice, int, int, int, int)) $OrderData$_constructor_buyer_merchant_courier_referrer_deliveryFee_protocolFee_foodAmount_status(slice $buyer, slice $merchant, slice $courier, slice $referrer, int $deliveryFee, int $protocolFee, int $foodAmount, int $status) inline;
 
+;; $SendParameters$_constructor_to_value_mode_body
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline;
+
 ;; $SendParameters$_constructor_to_value_mode
 ((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline;
 
 ;; $DeployOk$_constructor_queryId
 ((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
-
-;; $SendParameters$_constructor_to_value_mode_body
-((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline;
 
 
 ;; tact_TONEatsEscrow.stdlib.fc
@@ -333,14 +336,29 @@ cell __gen_cell_cell_34f60dcafed46316f336191b4ce3fbddc935e2229daaecfecf3892fdeff
     B{b5ee9c72410101010013000022000000006f726465725f63726561746564bc6f87d3} B>boc PUSHREF
 """;
 
+;; Cell XabzHmDbdavTjCckVtftkzqn6I9/ChZdhr7UGlFXULI=
+cell __gen_cell_cell_5da6f31e60db75abd38c272456d7ed933aa7e88f7f0a165d86bed41a515750b2() asm """
+    B{b5ee9c7241010101001a000030000000004f72646572204372656174656420526566756e6489d82179} B>boc PUSHREF
+""";
+
 ;; Cell UF3jYCsF4UlyykymRRcvE11z32hIvSG0hqBnr/UyoSQ=
 cell __gen_cell_cell_505de3602b05e14972ca4ca645172f135d73df6848bd21b486a067aff532a124() asm """
     B{b5ee9c7241010101001700002a0000000064656c69766572795f6163636570746564e7585426} B>boc PUSHREF
 """;
 
+;; Cell Z3ZJfGhIUSlh1yFgzdR6tYu6lGw/+UFGD3oTN0s0OIQ=
+cell __gen_cell_cell_6776497c6848512961d72160cdd47ab58bba946c3ff941460f7a13374b343884() asm """
+    B{b5ee9c724101010100130000220000000041636365707420526566756e64bb381b1d} B>boc PUSHREF
+""";
+
 ;; Cell LTzRbwjnEGa/5yU/8YA6ejPaLth1YsF69CpdLAv+m3Y=
 cell __gen_cell_cell_2d3cd16f08e71066bfe7253ff1803a7a33da2ed87562c17af42a5d2c0bfe9b76() asm """
     B{b5ee9c7241010101001800002c0000000064656c69766572795f636f6e6669726d656428610ff6} B>boc PUSHREF
+""";
+
+;; Cell DhtZ4+rleNai7C8jLjPcXMZHd68uqm2SR0rOOLQEz7c=
+cell __gen_cell_cell_0e1b59e3eae578d6a2ec2f232e33dc5cc64777af2eaa6d92474ace38b404cfb7() asm """
+    B{b5ee9c7241010101001400002400000000436f6e6669726d20526566756e649af39fe8} B>boc PUSHREF
 """;
 
 ;; Cell q8ywjhrOoTohF/YHuYZ2Zj/GgzmxuSKl5ZSDDcZG7vQ=
@@ -364,12 +382,12 @@ _ $Context$_get_value((int, slice, int, slice) v) inline {
 ;; TLB: _ mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell value:int257 to:address bounce:bool = SendParameters
 ;;
 
-((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline {
-    return ($mode, null(), null(), null(), $value, $to, true);
-}
-
 ((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline {
     return ($mode, $body, null(), null(), $value, $to, true);
+}
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline {
+    return ($mode, null(), null(), null(), $value, $to, true);
 }
 
 ;;
@@ -584,6 +602,12 @@ builder $TONEatsEscrow$_store(builder build_0, (slice, int, int, cell, int) v) i
     return (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds), $fresh$ret_5);
 }
 
+((slice, int, int, cell, int), int) $TONEatsEscrow$_fun_locked_funds((slice, int, int, cell, int) $self) impure inline_ref {
+    var (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds)) = $self;
+    var $fresh$ret_6 = $self'lockedFunds;
+    return (($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds), $fresh$ret_6);
+}
+
 ;;
 ;; Get methods of a Contract TONEatsEscrow
 ;;
@@ -620,6 +644,12 @@ _ %contract_balance() method_id(66901) {
     return res;
 }
 
+_ %locked_funds() method_id(124690) {
+    var self = $TONEatsEscrow$_contract_load();
+    var res = self~$TONEatsEscrow$_fun_locked_funds();
+    return res;
+}
+
 ;;
 ;; Routing of a Contract TONEatsEscrow
 ;;
@@ -652,21 +682,22 @@ _ %contract_balance() method_id(66901) {
         if (op == 0x1) {
             var $msg'orderId = in_msg~load_uint(64);
             var $msg'merchant = in_msg~load_msg_addr();
+            var $msg'foodAmount = in_msg~load_varuint16();
             var $msg'hasReferrer = in_msg~load_int(1);
             var $msg'referrer = in_msg~load_msg_addr();
             var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
-            slice $buyer = $ctx'sender;
             int $value = $ctx'value;
-            int $foodAmount = ((($value - $self'deliveryFee) - $self'protocolFee) - 20000000);
-            throw_unless(46647, ($foodAmount > 0));
+            int $requiredTotal = (($msg'foodAmount + $self'deliveryFee) + $self'protocolFee);
+            throw_unless(55937, ($value >= ($requiredTotal + 50000000)));
             throw_unless(26770, null?($OrderData$_load_opt(__tact_dict_get_int_cell($self'orders, 257, $msg'orderId))));
             slice $referrer = null();
             if ($msg'hasReferrer) {
                 $referrer = $msg'referrer;
             }
-            $self'orders~__tact_dict_set_int_cell(257, $msg'orderId, $OrderData$_store_cell($OrderData$_constructor_buyer_merchant_courier_referrer_deliveryFee_protocolFee_foodAmount_status($buyer, $msg'merchant, null(), $referrer, $self'deliveryFee, $self'protocolFee, $foodAmount, 0), begin_cell()));
-            $self'lockedFunds = ((($self'lockedFunds + $self'deliveryFee) + $self'protocolFee) + $foodAmount);
+            $self'orders~__tact_dict_set_int_cell(257, $msg'orderId, $OrderData$_store_cell($OrderData$_constructor_buyer_merchant_courier_referrer_deliveryFee_protocolFee_foodAmount_status($ctx'sender, $msg'merchant, null(), $referrer, $self'deliveryFee, $self'protocolFee, $msg'foodAmount, 0), begin_cell()));
+            $self'lockedFunds = ($self'lockedFunds + $requiredTotal);
             $global_emit(__gen_cell_cell_34f60dcafed46316f336191b4ce3fbddc935e2229daaecfecf3892fdefff7828());
+            $global_send($SendParameters$_constructor_to_value_mode_body($ctx'sender, 0, 66, __gen_cell_cell_5da6f31e60db75abd38c272456d7ed933aa7e88f7f0a165d86bed41a515750b2()));
             $TONEatsEscrow$_contract_store(($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds));
             return ();
         }
@@ -685,14 +716,16 @@ _ %contract_balance() method_id(66901) {
         ;; Receive AcceptDelivery message
         if (op == 0x2) {
             var $msg'orderId = in_msg~load_uint(64);
+            var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
             tuple $order = $OrderData$_load_opt(__tact_dict_get_int_cell($self'orders, 257, $msg'orderId));
             throw_unless(18518, (~ null?($order)));
             var ($o'buyer, $o'merchant, $o'courier, $o'referrer, $o'deliveryFee, $o'protocolFee, $o'foodAmount, $o'status) = $OrderData$_not_null($order);
             throw_unless(8345, ($o'status == 0));
-            $o'courier = __tact_context_get_sender();
+            $o'courier = $ctx'sender;
             $o'status = 1;
             $self'orders~__tact_dict_set_int_cell(257, $msg'orderId, $OrderData$_store_cell(($o'buyer, $o'merchant, $o'courier, $o'referrer, $o'deliveryFee, $o'protocolFee, $o'foodAmount, $o'status), begin_cell()));
             $global_emit(__gen_cell_cell_505de3602b05e14972ca4ca645172f135d73df6848bd21b486a067aff532a124());
+            $global_send($SendParameters$_constructor_to_value_mode_body($ctx'sender, 0, 66, __gen_cell_cell_6776497c6848512961d72160cdd47ab58bba946c3ff941460f7a13374b343884()));
             $TONEatsEscrow$_contract_store(($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds));
             return ();
         }
@@ -700,27 +733,27 @@ _ %contract_balance() method_id(66901) {
         ;; Receive ConfirmDelivery message
         if (op == 0x3) {
             var $msg'orderId = in_msg~load_uint(64);
+            var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
             tuple $order = $OrderData$_load_opt(__tact_dict_get_int_cell($self'orders, 257, $msg'orderId));
             throw_unless(18518, (~ null?($order)));
             var ($o'buyer, $o'merchant, $o'courier, $o'referrer, $o'deliveryFee, $o'protocolFee, $o'foodAmount, $o'status) = $OrderData$_not_null($order);
             throw_unless(33504, ($o'status == 1));
-            throw_unless(40260, ( (( equal_slices_bits(__tact_context_get_sender(), __tact_not_null($o'courier)) )) ? (true) : (( equal_slices_bits(__tact_context_get_sender(), $o'buyer) )) ));
+            throw_unless(40260, ( (( equal_slices_bits($ctx'sender, __tact_not_null($o'courier)) )) ? (true) : (( equal_slices_bits($ctx'sender, $o'buyer) )) ));
             $o'status = 2;
             $self'orders~__tact_dict_set_int_cell(257, $msg'orderId, $OrderData$_store_cell(($o'buyer, $o'merchant, $o'courier, $o'referrer, $o'deliveryFee, $o'protocolFee, $o'foodAmount, $o'status), begin_cell()));
-            int $gas = 10000000;
-            $global_send($SendParameters$_constructor_to_value_mode($o'merchant, ($o'foodAmount - $gas), 2));
-            slice $c = __tact_not_null($o'courier);
-            $global_send($SendParameters$_constructor_to_value_mode($c, ($o'deliveryFee - $gas), 2));
-            slice $referrer = $o'referrer;
-            if ((~ null?($referrer))) {
+            int $sendMode = 3;
+            $global_send($SendParameters$_constructor_to_value_mode($o'merchant, $o'foodAmount, $sendMode));
+            $global_send($SendParameters$_constructor_to_value_mode(__tact_not_null($o'courier), $o'deliveryFee, $sendMode));
+            if ((~ null?($o'referrer))) {
                 int $half = ($o'protocolFee / 2);
-                $global_send($SendParameters$_constructor_to_value_mode(__tact_not_null($referrer), ($half - $gas), 2));
-                $global_send($SendParameters$_constructor_to_value_mode($self'treasury, (($o'protocolFee - $half) - $gas), 2));
+                $global_send($SendParameters$_constructor_to_value_mode(__tact_not_null($o'referrer), $half, $sendMode));
+                $global_send($SendParameters$_constructor_to_value_mode($self'treasury, ($o'protocolFee - $half), $sendMode));
             } else {
-                $global_send($SendParameters$_constructor_to_value_mode($self'treasury, ($o'protocolFee - $gas), 2));
+                $global_send($SendParameters$_constructor_to_value_mode($self'treasury, $o'protocolFee, $sendMode));
             }
             $self'lockedFunds = ($self'lockedFunds - (($o'deliveryFee + $o'protocolFee) + $o'foodAmount));
             $global_emit(__gen_cell_cell_2d3cd16f08e71066bfe7253ff1803a7a33da2ed87562c17af42a5d2c0bfe9b76());
+            $global_send($SendParameters$_constructor_to_value_mode_body($ctx'sender, 0, 66, __gen_cell_cell_0e1b59e3eae578d6a2ec2f232e33dc5cc64777af2eaa6d92474ace38b404cfb7()));
             $TONEatsEscrow$_contract_store(($self'treasury, $self'deliveryFee, $self'protocolFee, $self'orders, $self'lockedFunds));
             return ();
         }

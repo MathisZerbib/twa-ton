@@ -1,6 +1,6 @@
 # Tact compilation report
 Contract: TONEatsEscrow
-BoC Size: 2130 bytes
+BoC Size: 2464 bytes
 
 ## Structures (Structs and Messages)
 Total structures: 19
@@ -58,8 +58,8 @@ TL-B: `factory_deploy#6d0ff13b queryId:uint64 cashback:address = FactoryDeploy`
 Signature: `FactoryDeploy{queryId:uint64,cashback:address}`
 
 ### CreateOrder
-TL-B: `create_order#00000001 orderId:uint64 merchant:address hasReferrer:bool referrer:address = CreateOrder`
-Signature: `CreateOrder{orderId:uint64,merchant:address,hasReferrer:bool,referrer:address}`
+TL-B: `create_order#00000001 orderId:uint64 merchant:address foodAmount:coins hasReferrer:bool referrer:address = CreateOrder`
+Signature: `CreateOrder{orderId:uint64,merchant:address,foodAmount:coins,hasReferrer:bool,referrer:address}`
 
 ### UpdateFees
 TL-B: `update_fees#00000004 deliveryFee:coins protocolFee:coins = UpdateFees`
@@ -82,7 +82,7 @@ TL-B: `_ treasury:address deliveryFee:coins protocolFee:coins orders:dict<int, ^
 Signature: `TONEatsEscrow{treasury:address,deliveryFee:coins,protocolFee:coins,orders:dict<int, ^OrderData{buyer:address,merchant:address,courier:address,referrer:address,deliveryFee:coins,protocolFee:coins,foodAmount:coins,status:uint8}>,lockedFunds:coins}`
 
 ## Get methods
-Total get methods: 5
+Total get methods: 6
 
 ## get_order_status
 Argument: orderId
@@ -97,6 +97,9 @@ No arguments
 No arguments
 
 ## contract_balance
+No arguments
+
+## locked_funds
 No arguments
 
 ## Exit codes
@@ -143,7 +146,7 @@ No arguments
 * 33504: Delivery not accepted yet
 * 35274: Only treasury can update fees
 * 40260: Only courier or buyer can confirm
-* 46647: Insufficient payment
+* 55937: Insufficient TON for order and gas
 * 62638: No safe funds to withdraw
 
 ## Trait inheritance diagram

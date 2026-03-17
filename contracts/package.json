@@ -4,7 +4,7 @@
   "description": "TON-Eats escrow smart contract (Tact)",
   "scripts": {
     "build": "blueprint build",
-    "test": "jest --testPathPattern=tests/",
+    "test": "jest --testPathPatterns=tests/",
     "deploy:testnet": "blueprint run deployEscrow --testnet",
     "deploy:mainnet": "blueprint run deployEscrow --mainnet"
   },
